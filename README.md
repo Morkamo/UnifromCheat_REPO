@@ -20,3 +20,4 @@
 ![Описание картинки](images/screen2.png)
 ![Описание картинки](images/screen3.png)
 ![Описание картинки](images/screen4.png)
+![Описание картинки](images/loader_screen.png)
