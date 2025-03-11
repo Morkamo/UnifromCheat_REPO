@@ -182,8 +182,8 @@ namespace UnifromCheat_REPO
         {
             #region General
 
-            float maxWidth = 155f * dpiScaling;
-            float maxHeight = 300f * dpiScaling;
+            float maxWidth = 250f * dpiScaling;
+            float maxHeight = 400f * dpiScaling;
 
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(maxWidth - 20), GUILayout.Height(maxHeight - 20));
 
