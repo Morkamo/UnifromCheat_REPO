@@ -13,10 +13,12 @@ namespace UnifromCheat_REPO.Patches
 
         private void Start()
         {
-            if (PlayerController.instance == null) return;
+            if (PlayerController.instance == null) 
+                return;
 
             var player = PlayerController.instance;
-            if (player == null) return;
+            if (player == null) 
+                return;
 
             rb = player.rb;
             noclipText = GameObject.Find("NoclipText")?.GetComponent<TextMeshProUGUI>();
@@ -41,13 +43,17 @@ namespace UnifromCheat_REPO.Patches
         {
             if (isActive)
             {
-                noclipText.SetText("<b>Noclip = ON</b>");
+                if (noclipText != null)
+                    noclipText.SetText("<b>Noclip = ON</b>");
 
-                if (noclipComponent == null)
+                if (noclipComponent == null && PlayerController.instance != null)
                     noclipComponent = PlayerController.instance.gameObject.AddComponent<NoclipComponent>();
 
-                rb.useGravity = false;
-                rb.isKinematic = true;
+                if (rb != null)
+                {
+                    rb.useGravity = false;
+                    rb.isKinematic = true;
+                }
             }
             else
             {
@@ -58,7 +64,9 @@ namespace UnifromCheat_REPO.Patches
         private void ResetNoclip()
         {
             isActive = false;
-            noclipText.SetText("<b>Noclip = OFF</b>");
+
+            if (noclipText != null)
+                noclipText.SetText("<b>Noclip = OFF</b>");
 
             if (noclipComponent != null)
             {
@@ -103,6 +111,17 @@ namespace UnifromCheat_REPO.Patches
             if (Keyboard.current.ctrlKey.isPressed) input -= transform.up;
 
             transform.position += input * (Core.noclipSpeed * Time.deltaTime * 5);
+
+            if (rb != null)
+            {
+                rb.useGravity = false;
+                rb.isKinematic = true;
+            }
+
+            if (PlayerController.instance != null && PlayerController.instance.CollisionController != null)
+            {
+                PlayerController.instance.CollisionController.Grounded = true;
+            }
         }
 
         private void OnDestroy()

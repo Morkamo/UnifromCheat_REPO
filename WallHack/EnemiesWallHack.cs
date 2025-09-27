@@ -9,35 +9,58 @@ namespace UnifromCheat_REPO.WallHack
     public class EnemiesWallHack : MonoBehaviour
     {
         private static Dictionary<Enemy, TextMeshPro> trackedEnemies = new Dictionary<Enemy, TextMeshPro>();
+        private static Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
+
+        public static Material GlowMaterial;
+        private static readonly int ZTest = Shader.PropertyToID("_ZTest");
 
         public static void RenderEnemies()
         {
-            if (!isEnemyWallHackEnabled || !isWallHackEnabled)
-            {
-                ClearEnemyLabels();
-                return;
-            }
-
             var enemyParents = EnemyDirector.instance.enemiesSpawned;
-                
             if (enemyParents.Count == 0) return;
 
             var mainCamera = Camera.main;
+            
+            if (GlowMaterial == null)
+            {
+                GlowMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
+                GlowMaterial.color = new Color(EC_R, EC_G, EC_B, EC_A);
+                GlowMaterial.SetInt(ZTest, 0);
+            }
 
             foreach (var enemyParent in enemyParents)
             {
                 var enemy = enemyParent.GetComponentInChildren<Enemy>();
-                
                 if (enemy == null || enemy.gameObject == null)
                     continue;
 
-                if (trackedEnemies.ContainsKey(enemy))
+                var renderers = enemyParent.GetComponentsInChildren<Renderer>();
+                foreach (var r in renderers)
                 {
-                    UpdateText(enemyParent, enemy, mainCamera);
-                    continue;
+                    if (r.GetComponent<TextMeshPro>() != null)
+                        continue;
+
+                    originalMaterials.TryAdd(r, r.materials);
+
+                    if (isEnemyWallHackEnabled)
+                    {
+                        Material[] mats = new Material[r.materials.Length];
+                        for (int i = 0; i < mats.Length; i++)
+                            mats[i] = GlowMaterial;
+                        r.materials = mats;
+                        r.material.color = new Color(EC_R, EC_G, EC_B, EC_A);
+                    }
+                    else if (originalMaterials.TryGetValue(r, out var material))
+                    {
+                        r.materials = material;
+                        ClearEnemyLabels();
+                    }
                 }
 
-                CreateTextLabel(enemy, mainCamera);
+                if (trackedEnemies.ContainsKey(enemy))
+                    UpdateText(enemyParent, enemy, mainCamera);
+                else
+                    CreateTextLabel(enemy, mainCamera);
             }
         }
 
@@ -52,7 +75,6 @@ namespace UnifromCheat_REPO.WallHack
             textMesh.alignment = TextAlignmentOptions.Center;
             textMesh.enableWordWrapping = false;
             textMesh.isOverlay = true;
-            textMesh.fontSharedMaterial = textMesh.font.material;
 
             textObject.transform.SetParent(enemy.transform, false);
 
@@ -71,8 +93,8 @@ namespace UnifromCheat_REPO.WallHack
                 .Replace("Enemy -", "")
                 .Replace("(Clone)", "")
                 .Trim();
-            
-            string info = "□";
+
+            string info = "";
 
             if (showEnemyName)
                 info += $"\n{enemyName}";
@@ -95,7 +117,7 @@ namespace UnifromCheat_REPO.WallHack
             {
                 float distance = Vector3.Distance(mainCamera.transform.position, enemy.transform.position);
                 float dynamicSize = Mathf.Clamp((0.2f + distance) - 1, 0.2f, enemyTextSize);
-                
+
                 textMesh.text = GetEnemyInfo(enemyParent, enemy);
                 textMesh.fontSize = dynamicSize;
                 textMesh.color = new Color(EC_R, EC_G, EC_B, EC_A);

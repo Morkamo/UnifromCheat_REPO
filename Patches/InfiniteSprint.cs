@@ -6,7 +6,7 @@ namespace UnifromCheat_REPO.Patches
     [HarmonyPatch(typeof(PlayerController), "FixedUpdate")]
     public class InfiniteSprint
     {
-        static void Postfix(PlayerController __instance)
+        protected static void Postfix(PlayerController __instance)
         {
             if (Core.isInfiniteSprint)
                 __instance.EnergyCurrent = __instance.EnergyStart;

@@ -5,9 +5,9 @@ namespace UnifromCheat_REPO.Patches
     [HarmonyPatch(typeof(PhysGrabObject), "FixedUpdate")]
     public class OverridePhysAttributes
     {
-        static bool Prefix(PhysGrabObject __instance)
+        protected static bool Prefix(PhysGrabObject __instance)
         {
-            if (Core.isSuperStrengthEnabled)
+            if (Core.isLiteItemsModeEnabled)
             {
                 __instance.OverrideMass(1);
             }
@@ -17,7 +17,7 @@ namespace UnifromCheat_REPO.Patches
                 __instance.OverrideFragility(0);
             }
             
-            if (Core.isColliderDisabledOnGrab && __instance.grabbed)
+            if (Core.isGhostItemsMode && __instance.grabbed && __instance.rb.GetComponentInParent<ValuableObject>())
             {
                 __instance.rb.detectCollisions = false;
             }

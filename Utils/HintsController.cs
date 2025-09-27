@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnifromCheat_REPO.Utils.FireboxConsole;
 
 namespace UnifromCheat_REPO.Utils
 {
@@ -41,7 +42,7 @@ namespace UnifromCheat_REPO.Utils
 
             RectTransform rectTransform = textMesh.GetComponent<RectTransform>();
             UITextObject.transform.SetParent(globalCanvas.transform, false);
-            Core.UnifromHints.Add(UITextObject);
+            UnifromCheat_REPO.Core.UnifromHints.Add(UITextObject);
             
             rectTransform.sizeDelta = new Vector2(width, fontSize * 2);
             rectTransform.anchoredPosition = new Vector2(xOffset, yOffset);
@@ -50,7 +51,7 @@ namespace UnifromCheat_REPO.Utils
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
             
 
-            Debug.Log($"[TextController] Created text '{text}' at {rectTransform.anchoredPosition}");
+            FireLog($"[TextController] Created text '{text}' at {rectTransform.anchoredPosition}");
             
             return textMesh;
         }
@@ -66,7 +67,7 @@ namespace UnifromCheat_REPO.Utils
                 eventSystem.AddComponent<EventSystem>();
                 eventSystem.AddComponent<StandaloneInputModule>();
                 DontDestroyOnLoad(eventSystem);
-                Debug.Log("[TextController] Created new EventSystem.");
+                FireLog("[TextController] Created new EventSystem.");
             }
         }
     }
