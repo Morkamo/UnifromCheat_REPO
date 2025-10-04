@@ -1,8 +1,6 @@
-﻿using HarmonyLib;
-using UnifromCheat_REPO.Utils;
+﻿using UnifromCheat_REPO.Utils;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnifromCheat_REPO.Utils.FireboxConsole;
 
 namespace UnifromCheat_REPO
 {
@@ -14,7 +12,7 @@ namespace UnifromCheat_REPO
         {
             Instance = this;
         }
-        
+
         private void OnEnable()
         {
             _ = typeof(FullbrightManager);
@@ -22,6 +20,7 @@ namespace UnifromCheat_REPO
             this.AddComponent<ValuableTeleporter>();
             this.AddComponent<EnemiesTeleporter>();
             this.AddComponent<GrabWatcher>();
+            /*this.AddComponent<NicknameAnimator>();*/
 
             Camera.onPreRender += Fullbright;
             Camera.onPreRender += ChangeFOV;

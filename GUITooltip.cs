@@ -33,7 +33,7 @@ namespace UnifromCheat_REPO
 
         private static void MakeBackground()
         {
-            tooltipBg = MakeTex(4, 4, new Color(0f, 0f, 0f, Core.menuOpacity * 0.85f));
+            tooltipBg = MakeTex(4, 4, new Color(0f, 0f, 0f, 0.7f * 0.85f));
             tooltipStyle.normal.background = tooltipBg;
         }
 
@@ -48,19 +48,13 @@ namespace UnifromCheat_REPO
             tex.Apply(false, false);
             return tex;
         }
-
-        /// <summary>
-        /// Добавляет тултип для вывода поверх указанного rect-а.
-        /// </summary>
+        
         public static void Show(string text, Rect rect)
         {
             if (string.IsNullOrEmpty(text) || Core.HideAllTooltips) return;
             tooltips.Add((text, rect));
         }
-
-        /// <summary>
-        /// Вызывается в конце OnGUI для отрисовки всех накопленных тултипов.
-        /// </summary>
+        
         public static void Draw()
         {
             if (tooltips.Count == 0) return;

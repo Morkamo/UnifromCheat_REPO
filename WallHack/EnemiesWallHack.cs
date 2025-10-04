@@ -8,59 +8,182 @@ namespace UnifromCheat_REPO.WallHack
 {
     public class EnemiesWallHack : MonoBehaviour
     {
-        private static Dictionary<Enemy, TextMeshPro> trackedEnemies = new Dictionary<Enemy, TextMeshPro>();
-        private static Dictionary<Renderer, Material[]> originalMaterials = new Dictionary<Renderer, Material[]>();
+        private static readonly Dictionary<Enemy, TextMeshPro> trackedEnemies = new();
+        private static readonly Dictionary<Enemy, GameObject> enemyOutlineRoots = new();
 
         public static Material GlowMaterial;
-        private static readonly int ZTest = Shader.PropertyToID("_ZTest");
+
+        private static readonly int ZTest   = Shader.PropertyToID("_ZTest");
+        private static readonly int Cull    = Shader.PropertyToID("_Cull");
+        private static readonly int ZWrite  = Shader.PropertyToID("_ZWrite");
+        private static readonly int ColorID = Shader.PropertyToID("_Color");
 
         public static void RenderEnemies()
         {
             var enemyParents = EnemyDirector.instance.enemiesSpawned;
-            if (enemyParents.Count == 0) return;
+            if (enemyParents == null || enemyParents.Count == 0)
+            {
+                ClearEnemyLabels();
+                ClearAllOutlines();
+                return;
+            }
 
             var mainCamera = Camera.main;
             
-            if (GlowMaterial == null)
-            {
-                GlowMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
-                GlowMaterial.color = new Color(EC_R, EC_G, EC_B, EC_A);
-                GlowMaterial.SetInt(ZTest, 0);
-            }
+            var glowColor = new Color(EC_R, EC_G, EC_B, EC_A);
+            
+            s_processedThisFrame.Clear();
 
             foreach (var enemyParent in enemyParents)
             {
+                if (enemyParent == null) continue;
+
                 var enemy = enemyParent.GetComponentInChildren<Enemy>();
-                if (enemy == null || enemy.gameObject == null)
-                    continue;
+                if (enemy == null || enemy.gameObject == null) continue;
 
-                var renderers = enemyParent.GetComponentsInChildren<Renderer>();
-                foreach (var r in renderers)
+                s_processedThisFrame.Add(enemy);
+                
+                if (isEnemyWallHackEnabled && showEnemyGlow)
                 {
-                    if (r.GetComponent<TextMeshPro>() != null)
-                        continue;
-
-                    originalMaterials.TryAdd(r, r.materials);
-
-                    if (isEnemyWallHackEnabled)
+                    if (!enemyOutlineRoots.TryGetValue(enemy, out var root) || root == null)
                     {
-                        Material[] mats = new Material[r.materials.Length];
-                        for (int i = 0; i < mats.Length; i++)
-                            mats[i] = GlowMaterial;
-                        r.materials = mats;
-                        r.material.color = new Color(EC_R, EC_G, EC_B, EC_A);
+                        var source = enemyParent.gameObject;
+                        var newRoot = CreateWHCopy(source, glowColor);
+                        enemyOutlineRoots[enemy] = newRoot;
                     }
-                    else if (originalMaterials.TryGetValue(r, out var material))
+                    else
                     {
-                        r.materials = material;
-                        ClearEnemyLabels();
+                        root.SetActive(true);
+                        UpdateWHCopyColor(root, glowColor);
                     }
                 }
-
-                if (trackedEnemies.ContainsKey(enemy))
-                    UpdateText(enemyParent, enemy, mainCamera);
                 else
-                    CreateTextLabel(enemy, mainCamera);
+                {
+                    RemoveOutline(enemy);
+                }
+                
+                if (isEnemyWallHackEnabled)
+                {
+                    if (trackedEnemies.ContainsKey(enemy))
+                        UpdateText(enemyParent, enemy, mainCamera);
+                    else
+                        CreateTextLabel(enemy, mainCamera);
+                }
+            }
+            
+            if (!isEnemyWallHackEnabled)
+                ClearEnemyLabels();
+            
+            SweepMissingOutlines();
+        }
+        
+        private static GameObject CreateWHCopy(GameObject source, Color color)
+        {
+            if (source == null) return null;
+
+            var root = new GameObject(source.name + "_WHRoot_Enemy");
+            root.hideFlags = HideFlags.DontSave;
+
+            // MeshRenderer
+            foreach (var mr in source.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (mr == null || !mr.enabled) continue;
+                if (mr.GetComponent<TextMeshPro>() != null) continue;
+
+                var mf = mr.GetComponent<MeshFilter>();
+                if (mf == null || mf.sharedMesh == null) continue;
+
+                var go = new GameObject(mf.gameObject.name + "_WH");
+                go.transform.SetParent(root.transform, false);
+
+                var follower = go.AddComponent<OutlineFollower>(); 
+                follower.Init(mf.transform);
+
+                var newMf = go.AddComponent<MeshFilter>(); 
+                newMf.sharedMesh = mf.sharedMesh;
+
+                var newMr = go.AddComponent<MeshRenderer>(); 
+                newMr.material = BuildWHMaterial(color);
+            }
+            
+            foreach (var smr in source.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                if (smr == null || !smr.enabled || smr.sharedMesh == null) continue;
+
+                var go = new GameObject(smr.gameObject.name + "_WH_Skinned");
+                go.transform.SetParent(root.transform, false);
+
+                var follower = go.AddComponent<OutlineFollower>(); 
+                follower.Init(smr.transform);
+
+                var newSmr = go.AddComponent<SkinnedMeshRenderer>();
+                newSmr.sharedMesh = smr.sharedMesh;
+                newSmr.rootBone   = smr.rootBone;
+                newSmr.bones      = smr.bones;
+                newSmr.updateWhenOffscreen = true;
+                newSmr.material   = BuildWHMaterial(color);
+            }
+
+            return root;
+        }
+
+        private static Material BuildWHMaterial(Color c)
+        {
+            var mat = new Material(Shader.Find("Hidden/Internal-Colored")) { hideFlags = HideFlags.HideAndDontSave };
+            mat.SetInt(ZTest, (int)UnityEngine.Rendering.CompareFunction.Always);
+            mat.SetInt(Cull, (int)UnityEngine.Rendering.CullMode.Front);
+            mat.SetInt(ZWrite, 0);
+            mat.SetColor(ColorID, c);
+            return mat;
+        }
+
+        private static void UpdateWHCopyColor(GameObject root, Color c)
+        {
+            if (root == null) return;
+            foreach (var r in root.GetComponentsInChildren<Renderer>())
+                if (r != null && r.material != null) r.material.color = c;
+        }
+
+        private static void RemoveOutline(Enemy enemy)
+        {
+            if (enemy == null) return;
+            if (enemyOutlineRoots.TryGetValue(enemy, out var root) && root != null)
+                Object.Destroy(root);
+            enemyOutlineRoots.Remove(enemy);
+        }
+
+        private static void ClearAllOutlines()
+        {
+            foreach (var kv in enemyOutlineRoots)
+                if (kv.Value != null) Object.Destroy(kv.Value);
+            enemyOutlineRoots.Clear();
+        }
+
+        private static readonly HashSet<Enemy> s_processedThisFrame = new();
+        private static void SweepMissingOutlines()
+        {
+            s_tmpToRemove.Clear();
+            foreach (var kv in enemyOutlineRoots)
+                if (kv.Key == null || !s_processedThisFrame.Contains(kv.Key))
+                    s_tmpToRemove.Add(kv.Key);
+
+            foreach (var e in s_tmpToRemove) RemoveOutline(e);
+            s_processedThisFrame.Clear();
+        }
+        private static readonly List<Enemy> s_tmpToRemove = new();
+
+        private class OutlineFollower : MonoBehaviour
+        {
+            private Transform target;
+            public void Init(Transform t) => target = t;
+
+            private void LateUpdate()
+            {
+                if (target == null) { Destroy(gameObject); return; }
+                var trs = transform;
+                trs.position = target.position;
+                trs.rotation = target.rotation;
+                trs.localScale = target.lossyScale + new Vector3(0.01f, 0.01f, 0.01f);
             }
         }
 
@@ -69,9 +192,12 @@ namespace UnifromCheat_REPO.WallHack
             GameObject textObject = new GameObject("Enemy_Label");
             TextMeshPro textMesh = textObject.AddComponent<TextMeshPro>();
 
-            textMesh.text = "<color=red>NULL</color>";
+            textMesh.text = "<color=red></color>";
             textMesh.fontSize = 3;
-            textMesh.color = new Color(EC_R, EC_G, EC_B, EC_A);
+            
+            if (ewh_syncTextColorWithGlow) textMesh.color = new Color(EC_R, EC_G, EC_B, EC_A);
+            else textMesh.color = new Color(TEC_R, TEC_G, TEC_B, TEC_A);
+            
             textMesh.alignment = TextAlignmentOptions.Center;
             textMesh.enableWordWrapping = false;
             textMesh.isOverlay = true;
@@ -120,7 +246,9 @@ namespace UnifromCheat_REPO.WallHack
 
                 textMesh.text = GetEnemyInfo(enemyParent, enemy);
                 textMesh.fontSize = dynamicSize;
-                textMesh.color = new Color(EC_R, EC_G, EC_B, EC_A);
+                
+                if (ewh_syncTextColorWithGlow) textMesh.color = new Color(EC_R, EC_G, EC_B, EC_A);
+                else textMesh.color = new Color(TEC_R, TEC_G, TEC_B, TEC_A);
 
                 textMesh.transform.rotation = Quaternion.LookRotation(mainCamera.transform.forward);
             }
@@ -129,16 +257,26 @@ namespace UnifromCheat_REPO.WallHack
         private static void ClearEnemyLabels()
         {
             foreach (var enemy in trackedEnemies.Values)
-            {
-                if (enemy != null)
-                    Destroy(enemy.gameObject);
-            }
-
+                if (enemy != null) Object.Destroy(enemy.gameObject);
             trackedEnemies.Clear();
+        }
+        
+        public static void ClearAll()
+        {
+            foreach (var label in trackedEnemies.Values)
+                if (label != null) Object.Destroy(label.gameObject);
+            trackedEnemies.Clear();
+            
+            foreach (var root in enemyOutlineRoots.Values)
+                if (root != null) Object.Destroy(root);
+            enemyOutlineRoots.Clear();
         }
 
         private void Update()
         {
+            if (Core.WH_BlockUpdates) 
+                return;
+            
             RenderEnemies();
         }
     }

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using UnifromCheat_REPO.Utils;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace UnifromCheat_REPO.Utils
 {
@@ -15,6 +16,7 @@ namespace UnifromCheat_REPO.Utils
         public float menuOpacity;
         public bool tooltipsLanguage;
         public int lg_state;
+        public bool dragWindow;
 
         // ===== Player =====
         public bool isGodModeEnabled;
@@ -41,8 +43,11 @@ namespace UnifromCheat_REPO.Utils
 
         // ===== Item WallHack =====
         public bool isItemWallHackEnabled;
-        public bool item_color;
+        [FormerlySerializedAs("item_glow_color")] [FormerlySerializedAs("item_color")] public bool items_glow_color;
+        public bool item_text_color;
+        public bool iwh_syncTextColorWithGlow;
         public float IC_R, IC_G, IC_B, IC_A;
+        public float TIC_R, TIC_G, TIC_B, TIC_A;
         public bool showItemName;
         public bool showItemPrice;
         public bool sortByPrice;
@@ -59,8 +64,11 @@ namespace UnifromCheat_REPO.Utils
 
         // ===== Enemy WallHack =====
         public bool isEnemyWallHackEnabled;
-        public bool enemy_color;
+        public bool enemy_glow_color;
+        public bool enemy_text_color;
+        public bool ewh_syncTextColorWithGlow;
         public float EC_R, EC_G, EC_B, EC_A;
+        public float TEC_R, TEC_G, TEC_B, TEC_A;
         public bool showEnemyName;
         public bool showEnemyHealth;
         public float enemyTextSize;
@@ -71,11 +79,40 @@ namespace UnifromCheat_REPO.Utils
         public bool showPlayerHealth;
         public bool isShowPlayerGlow;
         public bool player_glow_color;
+        public bool player_text_color;
+        public bool pwh_syncTextColorWithGlow;
         public float PC_R, PC_G, PC_B, PC_A;
+        public float PTC_R, PTC_G, PTC_B, PTC_A;
         public bool isShowPlayerDeadHead;
         public bool player_deadHead_color;
         public float PCDH_R, PCDH_G, PCDH_B, PCDH_A;
         public float playerTextSize;
+
+        // ===== Snowfall =====
+        public bool proceduralSnowfall;
+        public bool enableProceduralSnowfall;
+        public bool ps_onlyInMenu;
+        public bool pss_spin;
+        public bool pss_dynamicRotateOffset;
+        public bool pss_dynamicSelectSide;
+        public int pss_side;
+        public float pss_spinSpeed;
+        public bool pss_customSource;
+        public string pss_sourcePath;
+        public float ps_fallSpeed;
+        public float ps_scale;
+        public float ps_spawnInterval;
+        public bool ps_dynamicScale;
+        public float ps_scaleRangeA;
+        public float ps_scaleRangeB;
+
+        // ===== Cursor =====
+        public bool customCursor;
+        public bool enableCustomCursor;
+        public float cursorImageOffsetX;
+        public float cursorImageOffsetY;
+        public bool customCursorSource;
+        public string cursorSourcePath;
 
         // ===== Misc =====
         public bool isNoclipEnabled;
@@ -126,9 +163,9 @@ namespace UnifromCheat_REPO
                 HC_R = HC_R, HC_G = HC_G, HC_B = HC_B, HC_A = HC_A,
                 HideAllHints = HideAllHints,
                 HideAllTooltips = HideAllTooltips,
-                menuOpacity = menuOpacity,
                 tooltipsLanguage = tooltipsLanguage,
                 lg_state = lg_state,
+                dragWindow = dragWindow,
 
                 // ===== Player =====
                 isGodModeEnabled = isGodModeEnabled,
@@ -154,9 +191,12 @@ namespace UnifromCheat_REPO
                 FLC_R = FLC_R, FLC_G = FLC_G, FLC_B = FLC_B,
 
                 // ===== Item WH =====
-                isItemWallHackEnabled = isItemWallHackEnabled,
-                item_color = item_color,
+                isItemWallHackEnabled = isItemsWallHackEnabled,
+                items_glow_color = item_glow_color,
+                item_text_color = item_text_color,
+                iwh_syncTextColorWithGlow = iwh_syncTextColorWithGlow,
                 IC_R = IC_R, IC_G = IC_G, IC_B = IC_B, IC_A = IC_A,
+                TIC_R = TIC_R, TIC_G = TIC_G, TIC_B = TIC_B, TIC_A = TIC_A,
                 showItemName = showItemName,
                 showItemPrice = showItemPrice,
                 sortByPrice = sortByPrice,
@@ -173,8 +213,11 @@ namespace UnifromCheat_REPO
 
                 // ===== Enemy WH =====
                 isEnemyWallHackEnabled = isEnemyWallHackEnabled,
-                enemy_color = enemy_color,
+                enemy_glow_color = enemy_glow_color,
+                enemy_text_color = enemy_text_color,
+                ewh_syncTextColorWithGlow = ewh_syncTextColorWithGlow,
                 EC_R = EC_R, EC_G = EC_G, EC_B = EC_B, EC_A = EC_A,
+                TEC_R = TEC_R, TEC_G = TEC_G, TEC_B = TEC_B, TEC_A = TEC_A,
                 showEnemyName = showEnemyName,
                 showEnemyHealth = showEnemyHealth,
                 enemyTextSize = enemyTextSize,
@@ -185,11 +228,40 @@ namespace UnifromCheat_REPO
                 showPlayerHealth = showPlayerHealth,
                 isShowPlayerGlow = isShowPlayerGlow,
                 player_glow_color = player_glow_color,
+                player_text_color = player_text_color,
+                pwh_syncTextColorWithGlow = pwh_syncTextColorWithGlow,
                 PC_R = PC_R, PC_G = PC_G, PC_B = PC_B, PC_A = PC_A,
+                PTC_R = PTC_R, PTC_G = PTC_G, PTC_B = PTC_B, PTC_A = PTC_A,
                 isShowPlayerDeadHead = isShowPlayerDeadHead,
                 player_deadHead_color = player_deadHead_color,
                 PCDH_R = PCDH_R, PCDH_G = PCDH_G, PCDH_B = PCDH_B, PCDH_A = PCDH_A,
                 playerTextSize = playerTextSize,
+
+                // ===== Snowfall =====
+                proceduralSnowfall = proceduralSnowfall,
+                enableProceduralSnowfall = enableProceduralSnowfall,
+                ps_onlyInMenu = ps_onlyInMenu,
+                pss_spin = pss_spin,
+                pss_dynamicRotateOffset = pss_dynamicRotateOffset,
+                pss_dynamicSelectSide = pss_dynamicSelectSide,
+                pss_side = pss_side,
+                pss_spinSpeed = pss_spinSpeed,
+                pss_customSource = pss_customSource,
+                pss_sourcePath = pss_sourcePath,
+                ps_fallSpeed = ps_fallSpeed,
+                ps_scale = ps_scale,
+                ps_spawnInterval = ps_spawnInterval,
+                ps_dynamicScale = ps_dynamicScale,
+                ps_scaleRangeA = ps_scaleRangeA,
+                ps_scaleRangeB = ps_scaleRangeB,
+
+                // ===== Cursor =====
+                customCursor = customCursor,
+                enableCustomCursor = enableCustomCursor,
+                cursorImageOffsetX = cursorImageOffsetX,
+                cursorImageOffsetY = cursorImageOffsetY,
+                customCursorSource = customCursorSource,
+                cursorSourcePath = cursorSourcePath,
 
                 // ===== Misc =====
                 isNoclipEnabled = isNoclipEnabled,
@@ -199,9 +271,9 @@ namespace UnifromCheat_REPO
                 FB_R = FB_R, FB_G = FB_G, FB_B = FB_B,
 
                 isOneShotModeEnabled = isOneShotModeEnabled,
-                isSuperStrengthEnabled = isLiteItemsModeEnabled,      // map legacy -> current
+                isSuperStrengthEnabled = isLiteItemsModeEnabled,
                 isFragilityDisabled = isFragilityDisabled,
-                isColliderDisabledOnGrab = isGhostItemsMode,          // map legacy -> current
+                isColliderDisabledOnGrab = isGhostItemsMode,
                 multiJumps = multiJumps,
 
                 // ===== TP Valuables =====
@@ -245,9 +317,9 @@ namespace UnifromCheat_REPO
             HC_R = cfg.HC_R; HC_G = cfg.HC_G; HC_B = cfg.HC_B; HC_A = cfg.HC_A;
             HideAllHints = cfg.HideAllHints;
             HideAllTooltips = cfg.HideAllTooltips;
-            menuOpacity = cfg.menuOpacity;
             tooltipsLanguage = cfg.tooltipsLanguage;
             lg_state = cfg.lg_state;
+            dragWindow = cfg.dragWindow;
 
             // ===== Player =====
             isGodModeEnabled = cfg.isGodModeEnabled;
@@ -273,9 +345,12 @@ namespace UnifromCheat_REPO
             FLC_R = cfg.FLC_R; FLC_G = cfg.FLC_G; FLC_B = cfg.FLC_B;
 
             // ===== Item WH =====
-            isItemWallHackEnabled = cfg.isItemWallHackEnabled;
-            item_color = cfg.item_color;
+            isItemsWallHackEnabled = cfg.isItemWallHackEnabled;
+            item_glow_color = cfg.items_glow_color;
+            item_text_color = cfg.item_text_color;
+            iwh_syncTextColorWithGlow = cfg.iwh_syncTextColorWithGlow;
             IC_R = cfg.IC_R; IC_G = cfg.IC_G; IC_B = cfg.IC_B; IC_A = cfg.IC_A;
+            TIC_R = cfg.TIC_R; TIC_G = cfg.TIC_G; TIC_B = cfg.TIC_B; TIC_A = cfg.TIC_A;
             showItemName = cfg.showItemName;
             showItemPrice = cfg.showItemPrice;
             sortByPrice = cfg.sortByPrice;
@@ -292,8 +367,11 @@ namespace UnifromCheat_REPO
 
             // ===== Enemy WH =====
             isEnemyWallHackEnabled = cfg.isEnemyWallHackEnabled;
-            enemy_color = cfg.enemy_color;
+            enemy_glow_color = cfg.enemy_glow_color;
+            enemy_text_color = cfg.enemy_text_color;
+            ewh_syncTextColorWithGlow = cfg.ewh_syncTextColorWithGlow;
             EC_R = cfg.EC_R; EC_G = cfg.EC_G; EC_B = cfg.EC_B; EC_A = cfg.EC_A;
+            TEC_R = cfg.TEC_R; TEC_G = cfg.TEC_G; TEC_B = cfg.TEC_B; TEC_A = cfg.TEC_A;
             showEnemyName = cfg.showEnemyName;
             showEnemyHealth = cfg.showEnemyHealth;
             enemyTextSize = cfg.enemyTextSize;
@@ -304,11 +382,40 @@ namespace UnifromCheat_REPO
             showPlayerHealth = cfg.showPlayerHealth;
             isShowPlayerGlow = cfg.isShowPlayerGlow;
             player_glow_color = cfg.player_glow_color;
+            player_text_color = cfg.player_text_color;
+            pwh_syncTextColorWithGlow = cfg.pwh_syncTextColorWithGlow;
             PC_R = cfg.PC_R; PC_G = cfg.PC_G; PC_B = cfg.PC_B; PC_A = cfg.PC_A;
+            PTC_R = cfg.PTC_R; PTC_G = cfg.PTC_G; PTC_B = cfg.PTC_B; PTC_A = cfg.PTC_A;
             isShowPlayerDeadHead = cfg.isShowPlayerDeadHead;
             player_deadHead_color = cfg.player_deadHead_color;
             PCDH_R = cfg.PCDH_R; PCDH_G = cfg.PCDH_G; PCDH_B = cfg.PCDH_B; PCDH_A = cfg.PCDH_A;
             playerTextSize = cfg.playerTextSize;
+
+            // ===== Snowfall =====
+            proceduralSnowfall = cfg.proceduralSnowfall;
+            enableProceduralSnowfall = cfg.enableProceduralSnowfall;
+            ps_onlyInMenu = cfg.ps_onlyInMenu;
+            pss_spin = cfg.pss_spin;
+            pss_dynamicRotateOffset = cfg.pss_dynamicRotateOffset;
+            pss_dynamicSelectSide = cfg.pss_dynamicSelectSide;
+            pss_side = cfg.pss_side;
+            pss_spinSpeed = cfg.pss_spinSpeed;
+            pss_customSource = cfg.pss_customSource;
+            pss_sourcePath = cfg.pss_sourcePath;
+            ps_fallSpeed = cfg.ps_fallSpeed;
+            ps_scale = cfg.ps_scale;
+            ps_spawnInterval = cfg.ps_spawnInterval;
+            ps_dynamicScale = cfg.ps_dynamicScale;
+            ps_scaleRangeA = cfg.ps_scaleRangeA;
+            ps_scaleRangeB = cfg.ps_scaleRangeB;
+
+            // ===== Cursor =====
+            customCursor = cfg.customCursor;
+            enableCustomCursor = cfg.enableCustomCursor;
+            cursorImageOffsetX = cfg.cursorImageOffsetX;
+            cursorImageOffsetY = cfg.cursorImageOffsetY;
+            customCursorSource = cfg.customCursorSource;
+            cursorSourcePath = cfg.cursorSourcePath;
 
             // ===== Misc =====
             isNoclipEnabled = cfg.isNoclipEnabled;
@@ -318,9 +425,9 @@ namespace UnifromCheat_REPO
             FB_R = cfg.FB_R; FB_G = cfg.FB_G; FB_B = cfg.FB_B;
 
             isOneShotModeEnabled = cfg.isOneShotModeEnabled;
-            isLiteItemsModeEnabled = cfg.isSuperStrengthEnabled; // legacy -> current
+            isLiteItemsModeEnabled = cfg.isSuperStrengthEnabled;
             isFragilityDisabled = cfg.isFragilityDisabled;
-            isGhostItemsMode = cfg.isColliderDisabledOnGrab;     // legacy -> current
+            isGhostItemsMode = cfg.isColliderDisabledOnGrab;
             multiJumps = cfg.multiJumps;
 
             // ===== TP Valuables =====
@@ -352,9 +459,9 @@ namespace UnifromCheat_REPO
             HC_R = 1f; HC_G = 1f; HC_B = 1f; HC_A = 0.7f;
             HideAllHints = false;
             HideAllTooltips = false;
-            menuOpacity = 0.7f;
             tooltipsLanguage = true;
             lg_state = 1;
+            dragWindow = false;
 
             // ===== Player =====
             isGodModeEnabled = false;
@@ -368,7 +475,7 @@ namespace UnifromCheat_REPO
             fovValue = 80f;
 
             isRGBPlayerEnabled = false;
-            RGBupdateInterval = 100;
+            RGBupdateInterval = 200;
 
             // ===== Flashlight =====
             isFlashlightSettingsEnabled = false;
@@ -378,9 +485,12 @@ namespace UnifromCheat_REPO
             FLC_R = 1f; FLC_G = 0.674f; FLC_B = 0.382f;
 
             // ===== Item WH =====
-            isItemWallHackEnabled = true;
-            item_color = false;
+            isItemsWallHackEnabled = true;
+            item_glow_color = false;
+            item_text_color = false;
+            iwh_syncTextColorWithGlow = true;
             IC_R = 1f; IC_G = 0.8f; IC_B = 0.3f; IC_A = 1f;
+            TIC_R = 1f; TIC_G = 0.8f; TIC_B = 0.3f; TIC_A = 1f;
             showItemName = true; showItemPrice = true; sortByPrice = false;
             sortFromPrice = 0; sortToPrice = 100000; itemTextSize = 3f;
 
@@ -393,8 +503,11 @@ namespace UnifromCheat_REPO
 
             // ===== Enemy WH =====
             isEnemyWallHackEnabled = true;
-            enemy_color = false;
+            enemy_glow_color = false;
+            enemy_text_color = false;
+            ewh_syncTextColorWithGlow = true;
             EC_R = 1f; EC_G = 0f; EC_B = 0f; EC_A = 0.8f;
+            TEC_R = 1f; TEC_G = 0f; TEC_B = 0f; TEC_A = 0.8f;
             showEnemyName = true; showEnemyHealth = true; enemyTextSize = 3f;
 
             // ===== Player WH =====
@@ -403,11 +516,40 @@ namespace UnifromCheat_REPO
             showPlayerHealth = true;
             isShowPlayerGlow = true;
             player_glow_color = false;
+            player_text_color = false;
+            pwh_syncTextColorWithGlow = true;
             PC_R = 0f; PC_G = 1f; PC_B = 1f; PC_A = 0.8f;
+            PTC_R = 0f; PTC_G = 1f; PTC_B = 1f; PTC_A = 0.8f;
             isShowPlayerDeadHead = true;
             player_deadHead_color = false;
             PCDH_R = 1f; PCDH_G = 0f; PCDH_B = 0.5f; PCDH_A = 0.8f;
             playerTextSize = 3f;
+
+            // ===== Snowfall =====
+            proceduralSnowfall = false;
+            enableProceduralSnowfall = true;
+            ps_onlyInMenu = true;
+            pss_spin = true;
+            pss_dynamicRotateOffset = true;
+            pss_dynamicSelectSide = true;
+            pss_side = 0;
+            pss_spinSpeed = 60f;
+            pss_customSource = false;
+            pss_sourcePath = @"D:\Images\simpleImage.png";
+            ps_fallSpeed = 50f;
+            ps_scale = 3f;
+            ps_spawnInterval = 0.2f;
+            ps_dynamicScale = true;
+            ps_scaleRangeA = 1.5f;
+            ps_scaleRangeB = 5f;
+
+            // ===== Cursor =====
+            customCursor = false;
+            enableCustomCursor = true;
+            cursorImageOffsetX = -5f;
+            cursorImageOffsetY = -15f;
+            customCursorSource = false;
+            cursorSourcePath = @"D:\Images\simpleImage.png";
 
             // ===== Misc =====
             isNoclipEnabled = false; noclipSpeed = 5f;
@@ -440,5 +582,6 @@ namespace UnifromCheat_REPO
 
             FireboxConsole.FireLog("[CFG] Config reset to default!");
         }
+
     }
 }

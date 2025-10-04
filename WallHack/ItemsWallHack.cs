@@ -98,16 +98,16 @@ namespace UnifromCheat_REPO.WallHack
 
         private void Update()
         {
+            if (Core.WH_BlockUpdates) 
+                return;
+            
             itemsTimer += Time.deltaTime;
             if (itemsTimer >= itemsUpdateInterval)
             {
                 itemsTimer = 0f;
-                RenderItems(); 
-                // Surplus теперь обновляется через UpdateSurplusOutlines()
+                RenderItems();
             }
         }
-
-        // ============================= EXTRACTION =============================
 
         public static bool CacheExtractionPointsFull()
         {
@@ -171,11 +171,9 @@ namespace UnifromCheat_REPO.WallHack
             extractionOutlines.Clear();
         }
 
-        // ============================= VALUABLES =============================
-
         public static void RenderItems()
         {
-            if (!isItemWallHackEnabled)
+            if (!isItemsWallHackEnabled)
             {
                 SetActiveAll(false);
                 return;
@@ -208,8 +206,6 @@ namespace UnifromCheat_REPO.WallHack
             }
         }
 
-        // ============================= SURPLUS =============================
-
         private static void UpdateSurplusOutlines()
         {
             Color color = new Color(SPC_R, SPC_G, SPC_B, SPC_A);
@@ -220,9 +216,8 @@ namespace UnifromCheat_REPO.WallHack
             {
                 var root = kvp.Value;
                 if (kvp.Key == null || root == null) { s_tmpSurplusToRemove.Add(kvp.Key); continue; }
-
-                // Активность зависит от WH и showSurplusValuable
-                root.SetActive(isItemWallHackEnabled && showSurplusValuable);
+                
+                root.SetActive(isItemsWallHackEnabled && showSurplusValuable);
 
                 if (!root.activeSelf) continue;
 
@@ -240,8 +235,6 @@ namespace UnifromCheat_REPO.WallHack
         }
 
         private static readonly List<SurplusValuable> s_tmpSurplusToRemove = new();
-
-        // ============================= SHARED =============================
 
         internal static GameObject CreateWHCopy(GameObject source, Color color)
         {
@@ -291,7 +284,10 @@ namespace UnifromCheat_REPO.WallHack
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = false;
             tmp.isOverlay = true;
-            tmp.color = new Color(IC_R, IC_G, IC_B, IC_A);
+            
+            if (iwh_syncTextColorWithGlow) tmp.color = new Color(IC_R, IC_G, IC_B, IC_A);
+            else tmp.color = new Color(TIC_R, TIC_G, TIC_B, TIC_A);
+            
             tmp.fontSharedMaterial = tmp.font.material;
 
             UpdateTextTransform(tmp, item, cam, -1f);
@@ -310,7 +306,9 @@ namespace UnifromCheat_REPO.WallHack
                                 GetDollarValueCurrent(item) <= sortToPrice;
 
             tmp.text = sortByPrice && !inPriceRange ? string.Empty : GetItemInfo(item);
-            tmp.color = new Color(IC_R, IC_G, IC_B, IC_A);
+            
+            if (iwh_syncTextColorWithGlow) tmp.color = new Color(IC_R, IC_G, IC_B, IC_A);
+            else tmp.color = new Color(TIC_R, TIC_G, TIC_B, TIC_A);
 
             UpdateTextTransform(tmp, item, cam, -1f);
         }
@@ -375,6 +373,26 @@ namespace UnifromCheat_REPO.WallHack
             foreach (var ep in extractionOutlines.Values)
                 if (ep != null) ep.SetActive(active);
         }
+        
+        public static void ClearAll()
+        {
+            foreach (var tmp in trackedItems.Values)
+                if (tmp != null) Object.Destroy(tmp.gameObject);
+            trackedItems.Clear();
+            
+            foreach (var go in itemOutlines.Values)
+                if (go != null) Object.Destroy(go);
+            itemOutlines.Clear();
+            
+            foreach (var go in surplusOutlines.Values)
+                if (go != null) Object.Destroy(go);
+            surplusOutlines.Clear();
+            
+            foreach (var go in extractionOutlines.Values)
+                if (go != null) Object.Destroy(go);
+            extractionOutlines.Clear();
+        }
+
 
         public void OnEPVisibilityEnabledFromUI()
         {

@@ -18,7 +18,7 @@
         <DebugSymbols>true</DebugSymbols>
         <DebugType>None</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>C:\Users\oneta\Desktop\Unifrom REPO (Internal)\SharpMonoInjector.Gui</OutputPath>
+        <OutputPath>D:\Platforms\Steam\steamapps\common\REPO\unifrom</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -27,13 +27,15 @@
         <PlatformTarget>x64</PlatformTarget>
         <DebugType>None</DebugType>
         <Optimize>true</Optimize>
-        <OutputPath>D:\Packages\SharpMonoInjector v2.5_[unknowncheats.me]_</OutputPath>
+        <OutputPath>D:\Platforms\Steam\steamapps\common\REPO\BepInEx\plugins</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+        <Compile Include="AssemblyLoader.cs" />
         <Compile Include="Core.cs" />
+        <Compile Include="Funs\SnowfallUI.cs" />
         <Compile Include="GUIMenuSkin.cs" />
         <Compile Include="GUITooltip.cs" />
         <Compile Include="Loader.cs" />
@@ -44,9 +46,12 @@
         <Compile Include="Patches\MultiJumps.cs" />
         <Compile Include="Patches\Noclip.cs" />
         <Compile Include="Patches\OneTapMode.cs" />
+        <Compile Include="Patches\PatchGameCursorVisible.cs" />
+        <Compile Include="Patches\PatchUnityCursorVisible.cs" />
         <Compile Include="Patches\SpawnTaxReturn.cs" />
         <Compile Include="Patches\SpeedHack.cs" />
         <Compile Include="Patches\OverridePhysAttributes.cs" />
+        <Compile Include="Patches\WallHackSceneTransitionPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="TooltipsLanguages.cs" />
         <Compile Include="UnifromGUI.cs" />
@@ -65,6 +70,7 @@
         <Compile Include="Utils\PlayerControllerRefs.cs" />
         <Compile Include="Utils\PlayersTeleporter.cs" />
         <Compile Include="Utils\PlayerTumbleRefs.cs" />
+        <Compile Include="Utils\ResourceLoader.cs" />
         <Compile Include="Utils\RGBPlayer.cs" />
         <Compile Include="Utils\TutorialDirectorRefs.cs" />
         <Compile Include="Utils\ValuableTeleporter.cs" />
@@ -78,11 +84,7 @@
     </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\Mono\0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="0Harmony, Version=2.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\Lib.Harmony.2.4.1\lib\net48\0Harmony.dll</HintPath>
+      <HintPath>EmbeddedLibs\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
@@ -94,7 +96,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="AssetRipper.Primitives">
-      <HintPath>..\Mono\AssetRipper.Primitives.dll</HintPath>
+      <HintPath>EmbeddedLibs\AssetRipper.Primitives.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Autodesk.Fbx">
@@ -103,18 +105,23 @@
     </Reference>
     <Reference Include="BepInEx.Core">
       <HintPath>BepInExLibs\BepInEx.Core.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.Preloader.Core">
       <HintPath>BepInExLibs\BepInEx.Preloader.Core.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.Unity.Common">
       <HintPath>BepInExLibs\BepInEx.Unity.Common.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.Unity.Mono">
       <HintPath>BepInExLibs\BepInEx.Unity.Mono.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx.Unity.Mono.Preloader">
       <HintPath>BepInExLibs\BepInEx.Unity.Mono.Preloader.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Facepunch.Steamworks.Win64">
       <HintPath>D:\Platforms\Steam\steamapps\common\REPO\REPO_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
@@ -129,32 +136,31 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil">
-      <HintPath>..\Mono\Mono.Cecil.dll</HintPath>
+      <HintPath>EmbeddedLibs\Mono.Cecil.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Mdb">
-      <HintPath>..\Mono\Mono.Cecil.Mdb.dll</HintPath>
+      <HintPath>EmbeddedLibs\Mono.Cecil.Mdb.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Pdb">
-      <HintPath>..\Mono\Mono.Cecil.Pdb.dll</HintPath>
+      <HintPath>EmbeddedLibs\Mono.Cecil.Pdb.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Rocks">
-      <HintPath>..\Mono\Mono.Cecil.Rocks.dll</HintPath>
+      <HintPath>EmbeddedLibs\Mono.Cecil.Rocks.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Security">
       <HintPath>D:\Platforms\Steam\steamapps\common\REPO\REPO_Data\Managed\Mono.Security.dll</HintPath>
       <Private>False</Private>
-      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
-      <HintPath>..\Mono\MonoMod.RuntimeDetour.dll</HintPath>
+      <HintPath>EmbeddedLibs\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.Utils">
-      <HintPath>..\Mono\MonoMod.Utils.dll</HintPath>
+      <HintPath>EmbeddedLibs\MonoMod.Utils.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib">
@@ -202,7 +208,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="SemanticVersioning">
-      <HintPath>..\Mono\SemanticVersioning.dll</HintPath>
+      <HintPath>EmbeddedLibs\SemanticVersioning.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SingularityGroup.HotReload.Runtime">
@@ -639,7 +645,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\white-circle-32x32.png" />
+    <EmbeddedResource Include="Assets\snowflake.png" />
+    <EmbeddedResource Include="Assets\unifrom_cursor.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="EmbeddedLibs\0Harmony.dll" />
+    <EmbeddedResource Include="EmbeddedLibs\AssetRipper.Primitives.dll" />
+    <EmbeddedResource Include="EmbeddedLibs\Mono.Cecil.dll" />
+    <EmbeddedResource Include="EmbeddedLibs\Mono.Cecil.Mdb.dll" />
+    <EmbeddedResource Include="EmbeddedLibs\Mono.Cecil.Pdb.dll" />
+    <EmbeddedResource Include="EmbeddedLibs\Mono.Cecil.Rocks.dll" />
+    <EmbeddedResource Include="EmbeddedLibs\MonoMod.RuntimeDetour.dll" />
+    <EmbeddedResource Include="EmbeddedLibs\MonoMod.Utils.dll" />
+    <EmbeddedResource Include="EmbeddedLibs\SemanticVersioning.dll" />
   </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

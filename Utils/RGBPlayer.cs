@@ -1,7 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace UnifromCheat_REPO.Utils;
 
@@ -43,6 +41,7 @@ public class RGBPlayer : MonoBehaviour
 
         while (!stopRequested)
         {
+            DataDirector.instance.ColorSetBody(rainbowOrder[idx]);
             PlayerController.instance.playerAvatarScript.PlayerAvatarSetColor(rainbowOrder[idx]);
 
             idx++;

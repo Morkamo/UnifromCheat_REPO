@@ -35,36 +35,30 @@ namespace UnifromCheat_REPO
         {
             if (_initialized) return;
 
-            // Textures
-            windowTex          = MakeTex(4, 4, new Color(0.18f, 0.18f, 0.18f, Core.menuOpacity), Color.black);
+            windowTex          = MakeTex(4, 4, new Color(0.18f, 0.18f, 0.18f, 0.7f), Color.black);
             buttonTex          = MakeTex(4, 4, new Color(0.25f, 0.25f, 0.25f), Color.black);
             buttonHoverTex     = MakeTex(4, 4, new Color(0.35f, 0.35f, 0.35f), Color.black);
             buttonActiveTex    = MakeTex(4, 4, new Color(0.15f, 0.15f, 0.15f), Color.black);
             sliderBackgroundTex= MakeTex(4, 4, new Color(0.25f, 0.25f, 0.25f), Color.black);
             sliderThumbTex     = MakeTex(4, 4, new Color(0.45f, 0.45f, 0.45f), Color.black);
-            whiteTex           = MakeTex(2, 2, Color.white, Color.white); // for tinted squares (toggles/radios) without allocations
+            whiteTex           = MakeTex(2, 2, Color.white, Color.white);
 
-            // GUISkin
             menuSkin = ScriptableObject.CreateInstance<GUISkin>();
 
-            // Window
             windowStyle = new GUIStyle(GUI.skin.window);
             ApplyStyle(windowStyle, windowTex, 2);
             windowStyle.normal.textColor = Color.white;
 
-            // Buttons
             buttonStyle = new GUIStyle(GUI.skin.button);
             ApplyButtonStyle(buttonStyle, buttonTex, buttonHoverTex, buttonActiveTex, 2);
             buttonStyle.fontSize = 14;
 
-            // Labels
             labelStyle = new GUIStyle(GUI.skin.label) { normal = { textColor = Color.white } };
 
-            // Sliders
             sliderStyle = new GUIStyle(GUI.skin.horizontalSlider)
             {
-                normal  = { background = sliderBackgroundTex },
-                active  = { background = sliderBackgroundTex },
+                normal      = { background = sliderBackgroundTex },
+                active      = { background = sliderBackgroundTex },
                 fixedHeight = 10
             };
 
@@ -80,34 +74,22 @@ namespace UnifromCheat_REPO
                 fixedHeight = 14
             };
 
-            // TextField
             textFieldStyle = new GUIStyle(GUI.skin.textField);
-            var tfNormal  = MakeTex(4, 4, new Color(0.2f, 0.2f, 0.2f), Color.black);
-            var tfFocused = MakeTex(4, 4, new Color(0.25f, 0.25f, 0.25f), Color.black);
-            textFieldStyle.normal.background   = tfNormal;
-            textFieldStyle.focused.background  = tfFocused;
-            textFieldStyle.active.background   = tfFocused;
-            textFieldStyle.onNormal.background = tfNormal;
-            textFieldStyle.onActive.background = tfFocused;
-            textFieldStyle.onFocused.background= tfFocused;
-            textFieldStyle.normal.textColor    = Color.white;
-            textFieldStyle.focused.textColor   = Color.white;
-            textFieldStyle.fontSize            = 14;
-            textFieldStyle.padding             = new RectOffset(4, 4, 4, 4);
+            textFieldStyle.font = GUI.skin.font;
+            textFieldStyle.fontSize = 14;
+            textFieldStyle.padding  = new RectOffset(4, 4, 4, 4);
 
             menuSkin.textField = textFieldStyle;
 
             GUITooltip.Init();
-
             _initialized = true;
         }
 
-        // Call this when Core.menuOpacity changed (e.g., after slider)
         public static void RefreshOpacity()
         {
             if (!_initialized) return;
 
-            windowTex = MakeTex(4, 4, new Color(0.18f, 0.18f, 0.18f, Core.menuOpacity), Color.black);
+            windowTex = MakeTex(4, 4, new Color(0.18f, 0.18f, 0.18f, 0.7f), Color.black);
             ApplyStyle(windowStyle, windowTex, 2);
 
             OnSkinChanged?.Invoke();
@@ -163,7 +145,7 @@ namespace UnifromCheat_REPO
         {
             GUILayout.BeginHorizontal();
             GUI.contentColor = Color.white;
-            GUILayout.Label($"{label}: {value:F1}", labelStyle, GUILayout.Width(110));
+            GUILayout.Label($"{label}: {value:F1}", labelStyle, GUILayout.Width(120));
 
             value = GUILayout.HorizontalSlider(value, min, max, sliderStyle, sliderThumbStyle, GUILayout.Width(120));
             Rect rect = GUILayoutUtility.GetLastRect();
@@ -311,6 +293,34 @@ namespace UnifromCheat_REPO
             {
                 GUITooltip.Show(tooltip, rect);
             }
+        }
+
+        public static void DrawTextField(string label, ref string value, int labelWidth = 50 ,int fieldWidth = 120, string tooltip = null)
+        {
+            GUILayout.BeginHorizontal();
+
+            GUI.contentColor = Color.white;
+            GUILayout.Label(label, labelStyle, GUILayout.Width(labelWidth));
+
+            Rect rect = GUILayoutUtility.GetRect(fieldWidth, 22, GUILayout.ExpandWidth(false));
+            
+            Color bg = new Color(0.2f, 0.2f, 0.2f, 1f);
+            GUI.color = bg;
+            GUI.DrawTexture(rect, whiteTex);
+            
+            GUI.color = Color.black;
+            GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 1), whiteTex);
+            GUI.DrawTexture(new Rect(rect.x, rect.yMax - 1, rect.width, 1), whiteTex);
+            GUI.DrawTexture(new Rect(rect.x, rect.y, 1, rect.height), whiteTex);
+            GUI.DrawTexture(new Rect(rect.xMax - 1, rect.y, 1, rect.height), whiteTex);
+            
+            GUI.color = Color.white;
+            value = GUI.TextField(rect, value, textFieldStyle);
+
+            if (!string.IsNullOrEmpty(tooltip) && !Core.HideAllTooltips)
+                GUITooltip.Show(tooltip, rect);
+
+            GUILayout.EndHorizontal();
         }
 
         private static Color Tint(Color c, float mul)

@@ -10,6 +10,7 @@ namespace UnifromCheat_REPO
 
         public static void Load()
         {
+            AssemblyLoader.Init();
             FireboxConsole.Init();
             
             if (GameObject.Find("UnifromLoader") != null)

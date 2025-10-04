@@ -1,21 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Unity.Mono;
 using HarmonyLib;
+using TMPro;
+using UnifromCheat_REPO.Funs;
 using UnifromCheat_REPO.Patches;
 using UnifromCheat_REPO.Utils;
 using UnifromCheat_REPO.WallHack;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using static UnifromCheat_REPO.GUIMenuSkin;
 using static UnifromCheat_REPO.Utils.FireboxConsole;
+using Object = UnityEngine.Object;
 
 namespace UnifromCheat_REPO
 {
-    /*[BepInPlugin("ru.morkamo.unifrom", "Unifrom", "3.0.0")]*/
+    /*[BepInPlugin("ru.morkamo.unifrom", "Unifrom", "3.1.0")]*/
     public partial class Core : MonoBehaviour
     {
-        public static Core Instance; 
+        public static Core Instance;
         public Harmony harmony;
         public ItemsWallHack ItemsWallHack;
         public EnemiesWallHack EnemiesWallHack;
@@ -23,6 +28,7 @@ namespace UnifromCheat_REPO
         public HintsController HintsController;
         public Noclip Noclip;
         public MiscFunctions MiscFunctions;
+        public static GameObject unifromCanvasObject;
 
         public static List<GameObject> UnifromHints = new List<GameObject>();
 
@@ -48,37 +54,128 @@ namespace UnifromCheat_REPO
             HintsController.CreateHint("Noclip - OFF", "NoclipText", -450, 242, 8,
                 new Color(HC_R, HC_G, HC_B, HC_A));
             
+            HintsController.CreateHint($"Initializing", "initMenuHint", -35, -230, 13,
+                new Color(HC_R, HC_G, HC_B, HC_A));
+            
             UnifromHints.Add(GameObject.Find("NoclipText"));
             
-            FireLog($"--------------------------\n     " +
+            FireLog($"\n--------------------------\n     " +
                     $"[CHEAT-INJECTED]\n Welcome to Unifrom {cheatVersion}" +
                     $"\n--------------------------\n");
+            
+            unifromCanvasObject = new GameObject("UnifromMenuCanvas");
+            var canvas = unifromCanvasObject.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 9999;
+            unifromCanvasObject.AddComponent<CanvasScaler>();
+            unifromCanvasObject.AddComponent<GraphicRaycaster>();
+            Object.DontDestroyOnLoad(unifromCanvasObject);
+            
+            FireLog("[Snow] Canvas created: " + unifromCanvasObject);
+            
+            var snowObj = new GameObject("Snowfall");
+            snowObj.transform.SetParent(unifromCanvasObject.transform);
+            var snow = snowObj.AddComponent<SnowfallUI>();
+            snow.InitSnowAnimation(unifromCanvasObject.GetComponent<RectTransform>());
+            Object.DontDestroyOnLoad(snowObj);
+            
+            ToggleMenuWithDelay();
         }
 
         private void Update()
         {
             if (Camera.main != null) Camera.main.farClipPlane = 10000;
+
+            if (Keyboard.current.insertKey.wasPressedThisFrame)
+                ToggleMenu();
+        }
+        
+        internal void ToggleMenu()
+        {
+            if (!IsUnifromReady)
+                return;
             
-            /*if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.End))
-                Loader.Unload();*/
+            MenuState = !MenuState;
+
+            if (ps_onlyInMenu)
+                unifromCanvasObject.SetActive(MenuState);
+            else
+                unifromCanvasObject.SetActive(enableProceduralSnowfall);
+
+            if (MenuState)
+            {
+                if (CursorTexture == null)
+                {
+                    CursorTexture = ResourceLoader.LoadTexture("UnifromCheat_REPO.Assets.unifrom_cursor.png");
+                    CursorTexture.filterMode = FilterMode.Point; 
+                    CursorTexture.wrapMode = TextureWrapMode.Clamp;
+                }
+
+                if (CursorTexture != null)
+                {
+                    Vector2 hotspot = new Vector2(
+                        CursorTexture.width / 2f + Core.cursorImageOffsetX,
+                        CursorTexture.height / 2f + Core.cursorImageOffsetY
+                    );
+
+                    Cursor.SetCursor(CursorTexture, hotspot, CursorMode.Auto);
+                    enableCustomCursor = true;
+                }
+
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = true;
+            }
+            else
+            {
+                if (enableCustomCursor)
+                {
+                    Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                    enableCustomCursor = false;
+                }
+
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
         }
 
-        public void OnGUI()
+        private async void ToggleMenuWithDelay()
         {
-            if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Insert))
-            {
-                MenuState = !MenuState;
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = true;
+            InitTextAnimation();
+            await Task.Delay(5000);
+            IsUnifromReady = true;
+            await Task.Delay(250);
+            ToggleMenu();
+        }
 
-                return;
+        private async void InitTextAnimation()
+        {
+            GameObject hintGameObject = UnifromHints.Find(o => o.name == "initMenuHint");
+            TextMeshProUGUI hint = hintGameObject.GetComponent<TextMeshProUGUI>();
+            byte dotsQuantity = 0;
+
+            while (!IsUnifromReady)
+            {
+                if (dotsQuantity == 3)
+                {
+                    hint.text = hint.text.Replace("...", "");
+                    dotsQuantity = 0;
+                }
+                
+                hint.text += ".";
+                dotsQuantity++;
+                
+                await Task.Delay(250);
             }
 
-            if (!MenuState) 
+            UnifromHints.Remove(hintGameObject);
+            Object.Destroy(hintGameObject);
+        }
+        
+        public void OnGUI()
+        {
+            if (!MenuState)
                 return;
-
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.Confined;
+            
             PlayerController.instance.OverrideLookSpeed(0, 0, 0.1f);
 
             Matrix4x4 originalMatrix = GUI.matrix;
@@ -95,15 +192,16 @@ namespace UnifromCheat_REPO
             GUI.backgroundColor = new Color(HC_R, HC_G, HC_B, HC_A);
             GUI.color = new Color(HC_R, HC_G, HC_B, HC_A);
 
-            if (GUIMenuSkin.menuSkin == null) 
+            if (GUIMenuSkin.menuSkin == null)
                 InitSkin();
-    
+
             GUI.skin = GUIMenuSkin.menuSkin;
             GUI.contentColor = Color.white;
             GUI.backgroundColor = Color.white;
             GUI.color = Color.white;
 
-            RectMenu = GUILayout.Window(1, RectMenu, GUIMenuInit, String.Empty);
+            RectMenu = GUILayout.Window(1, RectMenu, GUIMenuInit, string.Empty);
+
             GUI.matrix = originalMatrix;
         }
     }
