@@ -40,8 +40,8 @@ namespace UnifromCheat_REPO.Utils
         public static readonly AccessTools.FieldRef<PhysGrabber, float> colorStateOverrideTimer =
             AccessTools.FieldRefAccess<PhysGrabber, float>("colorStateOverrideTimer");
 
-        public static readonly AccessTools.FieldRef<PhysGrabber, bool> overrideGrab =
-            AccessTools.FieldRefAccess<PhysGrabber, bool>("overrideGrab");
+        /*public static readonly AccessTools.FieldRef<PhysGrabber, bool> overrideGrab =
+            AccessTools.FieldRefAccess<PhysGrabber, bool>("overrideGrab");*/
         public static readonly AccessTools.FieldRef<PhysGrabber, bool> overrideGrabRelease =
             AccessTools.FieldRefAccess<PhysGrabber, bool>("overrideGrabRelease");
         public static readonly AccessTools.FieldRef<PhysGrabber, PhysGrabObject> overrideGrabTarget =
@@ -171,8 +171,8 @@ namespace UnifromCheat_REPO.Utils
             AccessTools.FieldRefAccess<PhysGrabber, Material>("physGrabBeamMaterialBatteryCharge");
 
         // === оставшиеся поля ===
-        public static readonly AccessTools.FieldRef<PhysGrabber, bool> physGrabForcesDisabled =
-            AccessTools.FieldRefAccess<PhysGrabber, bool>("physGrabForcesDisabled");
+        /*public static readonly AccessTools.FieldRef<PhysGrabber, bool> physGrabForcesDisabled =
+            AccessTools.FieldRefAccess<PhysGrabber, bool>("physGrabForcesDisabled");*/
         public static readonly AccessTools.FieldRef<PhysGrabber, float> initialPressTimer =
             AccessTools.FieldRefAccess<PhysGrabber, float>("initialPressTimer");
         public static readonly AccessTools.FieldRef<PhysGrabber, bool> debugStickyGrabber =

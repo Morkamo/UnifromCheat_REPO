@@ -17,7 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace UnifromCheat_REPO
 {
-    /*[BepInPlugin("ru.morkamo.unifrom", "Unifrom", "3.1.0")]*/
+    /*[BepInPlugin("ru.morkamo.unifrom", "Unifrom", "3.1.1")]*/
     public partial class Core : MonoBehaviour
     {
         public static Core Instance;

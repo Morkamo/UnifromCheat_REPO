@@ -6,7 +6,7 @@ namespace UnifromCheat_REPO;
 
 public partial class Core
 {
-    internal string cheatVersion = "3.1.0"; 
+    internal string cheatVersion = "3.1.1"; 
     
     private Rect RectMenu;
     private float dpiScaling => Mathf.Min(Screen.width / 1920f, Screen.height / 1080f);
