@@ -17,7 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace UnifromCheat_REPO
 {
-    /*[BepInPlugin("ru.morkamo.unifrom", "Unifrom", "3.1.1")]*/
+    /*[BepInPlugin("ru.morkamo.unifrom", "Unifrom", "3.1.2")]*/
     public partial class Core : MonoBehaviour
     {
         public static Core Instance;
@@ -86,7 +86,8 @@ namespace UnifromCheat_REPO
         {
             if (Camera.main != null) Camera.main.farClipPlane = 10000;
 
-            if (Keyboard.current.insertKey.wasPressedThisFrame)
+            if (Keyboard.current.insertKey.wasPressedThisFrame || Keyboard.current.rightAltKey.wasPressedThisFrame
+                || Keyboard.current.f11Key.wasPressedThisFrame)
                 ToggleMenu();
         }
         

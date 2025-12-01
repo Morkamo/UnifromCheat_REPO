@@ -46,7 +46,7 @@ public partial class Core
         };
 
         GUILayout.Label($"<b>{Get("PressLabelInfo")}\n</b>" +
-                        $"<b>INSERT - {Get("insertInfo")}</b>\n",
+                        $"<b>INSERT/R-ALT/F11 - {Get("insertInfo")}</b>\n",
             centeredLabel);
 
         GUILayout.EndArea();
