@@ -1,4 +1,4 @@
-# Unifrom 3.1.0 (Cheat mod for R.E.P.O)
+# Unifrom 3.1.1 (Cheat mod for R.E.P.O)
 ------------------------------------------
 ```
 Прямое инжектирование (без BeplnEx)
