@@ -21,6 +21,7 @@ namespace UnifromCheat_REPO.Utils
         // ===== Player =====
         public bool isGodModeEnabled;
         public bool isInfiniteSprint;
+        public bool isInfiniteAmmo;
         public bool isSpeedHackEnabled;
         public float walkSpeed;
         public float sprintSpeed;
@@ -43,6 +44,7 @@ namespace UnifromCheat_REPO.Utils
 
         // ===== Item WallHack =====
         public bool isItemWallHackEnabled;
+        public float wallHackCameraFarClipPlane;
         [FormerlySerializedAs("item_glow_color")] [FormerlySerializedAs("item_color")] public bool items_glow_color;
         public bool item_text_color;
         public bool iwh_syncTextColorWithGlow;
@@ -62,8 +64,21 @@ namespace UnifromCheat_REPO.Utils
         public bool moneyBagsColor;
         public float SPC_R, SPC_G, SPC_B, SPC_A;
 
+        // ===== Cosmetic Box WallHack =====
+        public bool isCosmeticBoxesWallHackEnabled = true;
+        public bool cosmetic_box_glow_color;
+        public bool cosmetic_box_text_color;
+        public bool cosmetic_box_rarity_text_color;
+        public bool cosmeticBoxTextSyncWithGlow = true;
+        public bool showCosmeticBoxRarity = true;
+        public float CBC_R = 1f, CBC_G = 0f, CBC_B = 1f, CBC_A = 1f;
+        public float CBTC_R = 1f, CBTC_G = 0f, CBTC_B = 1f, CBTC_A = 1f;
+        public float CBRTC_R = 1f, CBRTC_G = 0f, CBRTC_B = 1f, CBRTC_A = 1f;
+        public float cosmeticBoxTextSize = 3f;
+
         // ===== Enemy WallHack =====
         public bool isEnemyWallHackEnabled;
+        public bool showEnemyGlow;
         public bool enemy_glow_color;
         public bool enemy_text_color;
         public bool ewh_syncTextColorWithGlow;
@@ -146,6 +161,7 @@ namespace UnifromCheat_REPO.Utils
         public bool em_teleportOnTouch;
         public float em_teleportYOffset;
         public bool em_one_any;
+        public bool isProtectedSession;
     }
 }
 
@@ -170,6 +186,7 @@ namespace UnifromCheat_REPO
                 // ===== Player =====
                 isGodModeEnabled = isGodModeEnabled,
                 isInfiniteSprint = isInfiniteSprint,
+                isInfiniteAmmo = isInfiniteAmmo,
                 isSpeedHackEnabled = isSpeedHackEnabled,
                 walkSpeed = walkSpeed,
                 sprintSpeed = sprintSpeed,
@@ -192,6 +209,7 @@ namespace UnifromCheat_REPO
 
                 // ===== Item WH =====
                 isItemWallHackEnabled = isItemsWallHackEnabled,
+                wallHackCameraFarClipPlane = wallHackCameraFarClipPlane,
                 items_glow_color = item_glow_color,
                 item_text_color = item_text_color,
                 iwh_syncTextColorWithGlow = iwh_syncTextColorWithGlow,
@@ -211,6 +229,18 @@ namespace UnifromCheat_REPO
                 moneyBagsColor = moneyBagsColor,
                 SPC_R = SPC_R, SPC_G = SPC_G, SPC_B = SPC_B, SPC_A = SPC_A,
 
+                // ===== Cosmetic Box WH =====
+                isCosmeticBoxesWallHackEnabled = isCosmeticBoxesWallHackEnabled,
+                cosmetic_box_glow_color = cosmetic_box_glow_color,
+                cosmetic_box_text_color = cosmetic_box_text_color,
+                cosmetic_box_rarity_text_color = cosmetic_box_rarity_text_color,
+                cosmeticBoxTextSyncWithGlow = cosmeticBoxTextSyncWithGlow,
+                showCosmeticBoxRarity = showCosmeticBoxRarity,
+                CBC_R = CBC_R, CBC_G = CBC_G, CBC_B = CBC_B, CBC_A = CBC_A,
+                CBTC_R = CBTC_R, CBTC_G = CBTC_G, CBTC_B = CBTC_B, CBTC_A = CBTC_A,
+                CBRTC_R = CBRTC_R, CBRTC_G = CBRTC_G, CBRTC_B = CBRTC_B, CBRTC_A = CBRTC_A,
+                cosmeticBoxTextSize = cosmeticBoxTextSize,
+
                 // ===== Enemy WH =====
                 isEnemyWallHackEnabled = isEnemyWallHackEnabled,
                 enemy_glow_color = enemy_glow_color,
@@ -220,6 +250,7 @@ namespace UnifromCheat_REPO
                 TEC_R = TEC_R, TEC_G = TEC_G, TEC_B = TEC_B, TEC_A = TEC_A,
                 showEnemyName = showEnemyName,
                 showEnemyHealth = showEnemyHealth,
+                showEnemyGlow = showEnemyGlow,
                 enemyTextSize = enemyTextSize,
 
                 // ===== Player WH =====
@@ -294,7 +325,8 @@ namespace UnifromCheat_REPO
                 em_permanentFreeze = em_permanentFreeze,
                 em_teleportOnTouch = em_teleportOnTouch,
                 em_teleportYOffset = em_teleportYOffset,
-                em_one_any = em_one_any
+                em_one_any = em_one_any,
+                isProtectedSession = isProtectedSession,
             };
 
             string json = JsonUtility.ToJson(cfg, true);
@@ -324,6 +356,7 @@ namespace UnifromCheat_REPO
             // ===== Player =====
             isGodModeEnabled = cfg.isGodModeEnabled;
             isInfiniteSprint = cfg.isInfiniteSprint;
+            isInfiniteAmmo = cfg.isInfiniteAmmo;
             isSpeedHackEnabled = cfg.isSpeedHackEnabled;
             walkSpeed = cfg.walkSpeed;
             sprintSpeed = cfg.sprintSpeed;
@@ -346,6 +379,7 @@ namespace UnifromCheat_REPO
 
             // ===== Item WH =====
             isItemsWallHackEnabled = cfg.isItemWallHackEnabled;
+            wallHackCameraFarClipPlane = cfg.wallHackCameraFarClipPlane > 0f ? cfg.wallHackCameraFarClipPlane : 4000f;
             item_glow_color = cfg.items_glow_color;
             item_text_color = cfg.item_text_color;
             iwh_syncTextColorWithGlow = cfg.iwh_syncTextColorWithGlow;
@@ -365,9 +399,34 @@ namespace UnifromCheat_REPO
             moneyBagsColor = cfg.moneyBagsColor;
             SPC_R = cfg.SPC_R; SPC_G = cfg.SPC_G; SPC_B = cfg.SPC_B; SPC_A = cfg.SPC_A;
 
+            // ===== Cosmetic Box WH =====
+            isCosmeticBoxesWallHackEnabled = cfg.isCosmeticBoxesWallHackEnabled;
+            cosmetic_box_glow_color = cfg.cosmetic_box_glow_color;
+            cosmetic_box_text_color = cfg.cosmetic_box_text_color;
+            cosmetic_box_rarity_text_color = cfg.cosmetic_box_rarity_text_color;
+            cosmeticBoxTextSyncWithGlow = cfg.cosmeticBoxTextSyncWithGlow;
+            showCosmeticBoxRarity = cfg.showCosmeticBoxRarity;
+            CBC_R = cfg.CBC_R; CBC_G = cfg.CBC_G; CBC_B = cfg.CBC_B; CBC_A = cfg.CBC_A;
+            CBTC_R = cfg.CBTC_R; CBTC_G = cfg.CBTC_G; CBTC_B = cfg.CBTC_B; CBTC_A = cfg.CBTC_A;
+            CBRTC_R = cfg.CBRTC_R; CBRTC_G = cfg.CBRTC_G; CBRTC_B = cfg.CBRTC_B; CBRTC_A = cfg.CBRTC_A;
+            cosmeticBoxTextSize = cfg.cosmeticBoxTextSize;
+            if (CBC_R == 0f && CBC_G == 0f && CBC_B == 0f && CBC_A == 0f && cosmeticBoxTextSize == 0f)
+            {
+                isCosmeticBoxesWallHackEnabled = true;
+                cosmetic_box_rarity_text_color = false;
+                cosmeticBoxTextSyncWithGlow = true;
+                showCosmeticBoxRarity = true;
+                CBC_R = 1f; CBC_G = 0f; CBC_B = 1f; CBC_A = 1f;
+                CBTC_R = 1f; CBTC_G = 0f; CBTC_B = 1f; CBTC_A = 1f;
+                CBRTC_R = 1f; CBRTC_G = 0f; CBRTC_B = 1f; CBRTC_A = 1f;
+                cosmeticBoxTextSize = 3f;
+            }
+
             // ===== Enemy WH =====
             isEnemyWallHackEnabled = cfg.isEnemyWallHackEnabled;
             enemy_glow_color = cfg.enemy_glow_color;
+            showEnemyGlow = cfg.showEnemyGlow;
+
             enemy_text_color = cfg.enemy_text_color;
             ewh_syncTextColorWithGlow = cfg.ewh_syncTextColorWithGlow;
             EC_R = cfg.EC_R; EC_G = cfg.EC_G; EC_B = cfg.EC_B; EC_A = cfg.EC_A;
@@ -449,6 +508,7 @@ namespace UnifromCheat_REPO
             em_teleportOnTouch = cfg.em_teleportOnTouch;
             em_teleportYOffset = cfg.em_teleportYOffset;
             em_one_any = cfg.em_one_any;
+            isProtectedSession = cfg.isProtectedSession;
 
             FireboxConsole.FireLog("[CFG] Config loaded!");
         }
@@ -466,6 +526,7 @@ namespace UnifromCheat_REPO
             // ===== Player =====
             isGodModeEnabled = false;
             isInfiniteSprint = false;
+            isInfiniteAmmo = false;
             isSpeedHackEnabled = true;
             walkSpeed = 2f; sprintSpeed = 5f; crouchSpeed = 1f;
             isCustomJumpForceEnabled = true;
@@ -486,6 +547,7 @@ namespace UnifromCheat_REPO
 
             // ===== Item WH =====
             isItemsWallHackEnabled = true;
+            wallHackCameraFarClipPlane = 300f;
             item_glow_color = false;
             item_text_color = false;
             iwh_syncTextColorWithGlow = true;
@@ -500,6 +562,18 @@ namespace UnifromCheat_REPO
             showSurplusValuable = true;
             moneyBagsColor = false;
             SPC_R = 1f; SPC_G = 0f; SPC_B = 1f; SPC_A = 0.8f;
+
+            // ===== Cosmetic Box WH =====
+            isCosmeticBoxesWallHackEnabled = true;
+            cosmetic_box_glow_color = false;
+            cosmetic_box_text_color = false;
+            cosmetic_box_rarity_text_color = false;
+            cosmeticBoxTextSyncWithGlow = true;
+            showCosmeticBoxRarity = true;
+            CBC_R = 1f; CBC_G = 0f; CBC_B = 1f; CBC_A = 1f;
+            CBTC_R = 1f; CBTC_G = 0f; CBTC_B = 1f; CBTC_A = 1f;
+            CBRTC_R = 1f; CBRTC_G = 0f; CBRTC_B = 1f; CBRTC_A = 1f;
+            cosmeticBoxTextSize = 3f;
 
             // ===== Enemy WH =====
             isEnemyWallHackEnabled = true;
@@ -579,6 +653,7 @@ namespace UnifromCheat_REPO
             em_teleportOnTouch = false;
             em_teleportYOffset = 1f;
             em_one_any = false;
+            isProtectedSession = false;
 
             FireboxConsole.FireLog("[CFG] Config reset to default!");
         }

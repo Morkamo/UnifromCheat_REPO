@@ -3,6 +3,7 @@ using System.IO;
 using TMPro;
 using UnifromCheat_REPO.Funs;
 using UnifromCheat_REPO.Utils;
+using UnifromCheat_REPO.WallHack;
 using UnityEngine;
 using static UnifromCheat_REPO.GUIMenuSkin;
 using static UnifromCheat_REPO.TooltipsLanguages;
@@ -23,12 +24,12 @@ public partial class Core
 
         GUILayout.BeginHorizontal();
 
-        MenuSettingsTab();
-        PlayerSettingsTab();
-        WallHackSettingsTab();
-        MiscSettingsTab();
-        HostOnlyFunctions();
-        ConfigSettingsTab();
+        DrawAnimatedMenuTile(0, MenuSettingsTab);
+        DrawAnimatedMenuTile(1, PlayerSettingsTab);
+        DrawAnimatedMenuTile(2, WallHackSettingsTab);
+        DrawAnimatedMenuTile(3, MiscSettingsTab);
+        DrawAnimatedMenuTile(4, HostOnlyFunctions);
+        DrawAnimatedMenuTile(5, ConfigSettingsTab);
 
         GUILayout.EndHorizontal();
         GUILayout.EndScrollView();
@@ -52,6 +53,73 @@ public partial class Core
         GUILayout.EndArea();
         GUITooltip.Draw();
     }
+
+    private void DrawAnimatedMenuTile(int index, Action drawTile)
+    {
+        float progress = GetTileAnimationProgress(index);
+        Color previousColor = GUI.color;
+        Matrix4x4 previousMatrix = GUI.matrix;
+
+        float offsetY = -30f * (1f - progress);
+        float scale = Mathf.Lerp(0.985f, 1f, progress);
+        GUI.color = new Color(previousColor.r, previousColor.g, previousColor.b, previousColor.a * progress);
+        GUI.matrix = previousMatrix * Matrix4x4.TRS(new Vector3(0f, offsetY, 0f), Quaternion.identity, new Vector3(1f, scale, 1f));
+
+        drawTile();
+        Rect tileRect = GUILayoutUtility.GetLastRect();
+        DrawAnimatedSectionFrame(tileRect, Time.unscaledTime, progress, index);
+
+        GUI.matrix = previousMatrix;
+        GUI.color = previousColor;
+    }
+
+    private float GetTileAnimationProgress(int index)
+    {
+        float stagger = index * 0.075f;
+        float duration = 1f - (MenuAnimatedTileCount - 1) * 0.075f;
+        float normalized = Mathf.Clamp01((menuAnimationProgress - stagger) / duration);
+        return normalized * normalized * (3f - 2f * normalized);
+    }
+
+    private bool BeginAnimatedFoldout(string key, bool expanded, float slideOffset = -18f)
+    {
+        if (!foldoutAnimations.TryGetValue(key, out float progress))
+            progress = 0f;
+
+        if (Event.current.type == EventType.Layout)
+        {
+            float target = expanded ? 1f : 0f;
+            progress = Mathf.MoveTowards(progress, target, Time.unscaledDeltaTime * 12f);
+            foldoutAnimations[key] = progress;
+        }
+
+        if (!expanded && progress <= 0.001f)
+            return false;
+
+        float eased = progress * progress * (3f - 2f * progress);
+        Matrix4x4 previousMatrix = GUI.matrix;
+        Color previousColor = GUI.color;
+        foldoutMatrices.Push(previousMatrix);
+        foldoutColors.Push(previousColor);
+        foldoutEnabledStates.Push(GUI.enabled);
+
+        float offsetY = slideOffset * (1f - eased);
+        GUI.matrix = previousMatrix * Matrix4x4.TRS(new Vector3(0f, offsetY, 0f), Quaternion.identity, Vector3.one);
+        GUI.color = new Color(previousColor.r, previousColor.g, previousColor.b, previousColor.a * eased);
+        if (!expanded)
+            GUI.enabled = false;
+        return true;
+    }
+
+    private void EndAnimatedFoldout()
+    {
+        if (foldoutMatrices.Count > 0)
+            GUI.matrix = foldoutMatrices.Pop();
+        if (foldoutColors.Count > 0)
+            GUI.color = foldoutColors.Pop();
+        if (foldoutEnabledStates.Count > 0)
+            GUI.enabled = foldoutEnabledStates.Pop();
+    }
     
     private void MenuSettingsTab()
     {
@@ -60,7 +128,7 @@ public partial class Core
         if (GUILayout.Button("<b>MENU SETTINGS</b>", buttonStyle)) 
             advancedMenuSettings = !advancedMenuSettings;
 
-        if (advancedMenuSettings)
+        if (BeginAnimatedFoldout("menu.settings", advancedMenuSettings))
         {
             GUILayout.BeginVertical(windowStyle);
             
@@ -107,7 +175,7 @@ public partial class Core
             GUILayout.Space(5);
             
             if (GUILayout.Button("<b>CUSTOM CURSOR</b>", buttonStyle)) customCursor = !customCursor;
-            if (customCursor)
+            if (BeginAnimatedFoldout("menu.settings.cursor", customCursor))
             {
                 GUILayout.BeginVertical(windowStyle);
                 
@@ -120,7 +188,7 @@ public partial class Core
 
                 DrawToggle("Custom source", ref customCursorSource, Color.yellow, Get("customCursorSource"));
                 
-                if (customCursorSource)
+                if (BeginAnimatedFoldout("menu.settings.cursor.source", customCursorSource, -10f))
                 {
                     GUILayout.Space(5);
                     GUILayout.BeginVertical(windowStyle);
@@ -167,18 +235,18 @@ public partial class Core
                     }
 
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
-                else
-                    GUILayout.Space(5);
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
 
 
             if (GUILayout.Button("<b>PROCEDURAL SNOWFALL</b>", buttonStyle))  proceduralSnowfall = !proceduralSnowfall;
-            if (proceduralSnowfall)
+            if (BeginAnimatedFoldout("menu.settings.snowfall", proceduralSnowfall))
             {
                 DrawToggle("Enable snowfall", ref enableProceduralSnowfall, Color.green, Get("enableProceduralSnowfall"));
-                if (enableProceduralSnowfall)
+                if (BeginAnimatedFoldout("menu.settings.snowfall.enabled", enableProceduralSnowfall, -10f))
                 {
                     GUILayout.Space(5);
                     GUILayout.BeginVertical(windowStyle);
@@ -188,16 +256,17 @@ public partial class Core
                     DrawSlider("Spawn interval", ref ps_spawnInterval, 0, 5, 0.2f, Get("ps_spawnInterval"));
                     DrawSlider("Scale", ref ps_scale, 0, 100, 3f, Get("ps_scale"));
                     DrawToggle("Dynamic scale", ref ps_dynamicScale, Color.green, Get("ps_dynamicScale"));
-                    if (ps_dynamicScale)
+                    if (BeginAnimatedFoldout("menu.settings.snowfall.scaleRange", ps_dynamicScale, -8f))
                     {
                         GUILayout.Space(5);
                         DrawSlider("From", ref ps_scaleRangeA, 0, 100, 1.5f, Get("ps_scaleRangeA"));
                         DrawSlider("To", ref ps_scaleRangeB, 0, 100, 5f, Get("ps_scaleRangeB"));
                         if (ps_scaleRangeB < ps_scaleRangeA) ps_scaleRangeB = ps_scaleRangeA;
+                        EndAnimatedFoldout();
                     }
 
                     DrawToggle("Custom flake source", ref pss_customSource, Color.yellow, Get("pss_customSource"));
-                    if (pss_customSource)
+                    if (BeginAnimatedFoldout("menu.settings.snowfall.source", pss_customSource, -10f))
                     {
                         GUILayout.Space(5);
                         GUILayout.BeginVertical(windowStyle);
@@ -236,10 +305,11 @@ public partial class Core
                         }
                         
                         GUILayout.EndVertical();
+                        EndAnimatedFoldout();
                     }
 
                     DrawToggle("Spin", ref pss_spin, Color.green);
-                    if (pss_spin)
+                    if (BeginAnimatedFoldout("menu.settings.snowfall.spin", pss_spin, -10f))
                     {
                         GUILayout.Space(5);
                         GUILayout.BeginVertical(windowStyle);
@@ -254,19 +324,18 @@ public partial class Core
                         DrawSlider("Spin speed", ref pss_spinSpeed, 0, 1000, 60f);
 
                         GUILayout.EndVertical();
+                        EndAnimatedFoldout();
                     }
-                    else
-                        GUILayout.Space(5);
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
-                else
-                    GUILayout.Space(5);
+                EndAnimatedFoldout();
             }
 
             if (GUILayout.Button("<b>TOOLTIPS LANGUAGE</b>", buttonStyle)) 
                 tooltipsLanguage = !tooltipsLanguage;
 
-            if (tooltipsLanguage)
+            if (BeginAnimatedFoldout("menu.settings.language", tooltipsLanguage))
             {
                 GUILayout.BeginVertical(windowStyle);
                 DrawRadio("English", 0, ref lg_state, Color.white);
@@ -275,8 +344,10 @@ public partial class Core
                 DrawRadio("Chinese", 3, ref lg_state, Color.white);
                 GUILayout.Space(5);
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
             GUILayout.EndVertical();
+            EndAnimatedFoldout();
         }
         GUILayout.EndVertical();
     }
@@ -286,7 +357,7 @@ public partial class Core
         GUILayout.BeginVertical(windowStyle, GUILayout.Width(150));
         if (GUILayout.Button("<b>PLAYER</b>", buttonStyle)) PlayerTab = !PlayerTab;
 
-        if (PlayerTab)
+        if (BeginAnimatedFoldout("menu.player", PlayerTab))
         {
             GUILayout.BeginVertical(windowStyle);
             
@@ -294,7 +365,7 @@ public partial class Core
             DrawToggle("Infinite sprint", ref isInfiniteSprint, Color.green, Get("infSprint"));
             DrawToggle("Speed hack", ref isSpeedHackEnabled, Color.green, Get("speedHack"));
 
-            if (isSpeedHackEnabled)
+            if (BeginAnimatedFoldout("menu.player.speed", isSpeedHackEnabled, -10f))
             {
                 GUILayout.Space(10);
                 GUILayout.BeginVertical(windowStyle);
@@ -302,24 +373,27 @@ public partial class Core
                 DrawSlider("Sprint speed", ref sprintSpeed, 0, 30, 5, Get("sprintSpeedHack"));
                 DrawSlider("Crouch speed", ref crouchSpeed, 0, 30, 1, Get("crouchSpeedHack"));
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
 
             DrawToggle("Jump force", ref isCustomJumpForceEnabled, Color.green, Get("jumpForce"));
-            if (isCustomJumpForceEnabled)
+            if (BeginAnimatedFoldout("menu.player.jump", isCustomJumpForceEnabled, -10f))
             {
                 GUILayout.Space(10);
                 GUILayout.BeginVertical(windowStyle);
                 DrawSlider("Jump force", ref jumpForce, 0, 100, 17);
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
 
             DrawToggle("Custom FOV", ref isCustomFovEnabled, Color.green, Get("customfov"));
-            if (isCustomFovEnabled)
+            if (BeginAnimatedFoldout("menu.player.fov", isCustomFovEnabled, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
                 DrawSlider("FOV", ref fovValue, 1, 360, 80);
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
             
             bool old = isRGBPlayerEnabled;
@@ -332,7 +406,7 @@ public partial class Core
                 else
                     RGBPlayer.StopCycle();
             }
-            if (isRGBPlayerEnabled)
+            if (BeginAnimatedFoldout("menu.player.rgb", isRGBPlayerEnabled, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
@@ -342,6 +416,7 @@ public partial class Core
                 RGBupdateInterval = (ushort)timing;
 
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
             
             /*DrawToggle("Disable camera shake", ref disableCameraShake, Color.green, Get("disableCameraShake"));*/
@@ -350,7 +425,7 @@ public partial class Core
             
             DrawToggle("Flashlight settings", ref isFlashlightSettingsEnabled, Color.green, Get("flashlightSettings"));
             var flashlight = PlayerController.instance.playerAvatarScript.flashlightController.spotlight;
-            if (isFlashlightSettingsEnabled)
+            if (BeginAnimatedFoldout("menu.player.flashlight", isFlashlightSettingsEnabled, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
@@ -375,6 +450,7 @@ public partial class Core
                 GUILayout.EndVertical();
                 
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
             else if (prevFlashlightState)
             {
@@ -388,6 +464,7 @@ public partial class Core
             
             GUILayout.Space(5);
             GUILayout.EndVertical();
+            EndAnimatedFoldout();
         }
         
         GUILayout.EndVertical();
@@ -398,18 +475,29 @@ public partial class Core
         GUILayout.BeginVertical(windowStyle, GUILayout.Width(325));
         if (GUILayout.Button("<b>WALLHACK</b>", buttonStyle)) WallHackTab = !WallHackTab;
 
-        if (WallHackTab)
+        if (BeginAnimatedFoldout("menu.wallhack", WallHackTab))
         {
             GUILayout.BeginVertical(windowStyle);
             
+            if (GUILayout.Button("<b>RENDER SETTINGS</b>", buttonStyle)) isRenderSettingsOpened = !isRenderSettingsOpened;
+            if (BeginAnimatedFoldout("wh.rendersettings.enabled", isRenderSettingsOpened, -10f))
+            {
+                GUILayout.BeginVertical(windowStyle);
+                
+                DrawLabel("Render distance:", Color.white);
+                DrawSlider("Distance", ref wallHackCameraFarClipPlane, 1f, 600f, 300f, Get("renderDistance"));
+                
+                GUILayout.EndVertical();
+            }
+            
             DrawToggle("Show items", ref isItemsWallHackEnabled, Color.green, Get("showItemsWH"));
-            if (isItemsWallHackEnabled)
+            if (BeginAnimatedFoldout("wh.items.enabled", isItemsWallHackEnabled, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
                 
                 if (GUILayout.Button("<b>ITEM GLOW COLOR</b>", buttonStyle)) item_glow_color = !item_glow_color;
-                if (item_glow_color)
+                if (BeginAnimatedFoldout("wh.item.glow", item_glow_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     
@@ -420,14 +508,15 @@ public partial class Core
                     DrawSlider("A", ref IC_A, 0f, 1f, 1f);
                     
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
                 
                 if (GUILayout.Button("<b>ITEM TEXT COLOR</b>", buttonStyle)) item_text_color = !item_text_color;
-                if (item_text_color)
+                if (BeginAnimatedFoldout("wh.item.text", item_text_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     
-                    DrawToggle("Sync with glow", ref iwh_syncTextColorWithGlow, Color.yellow, Get("syncTextColorWithGlow"));
+                    DrawToggle("Sync with glow", ref iwh_syncTextColorWithGlow, Color.yellow, Get("syncTextColorWithGlow"), "wh.item.text.syncGlow");
                     
                     DrawLabel("Text color:", Color.white);
                     DrawSlider("R", ref TIC_R, 0f, 1f, 1f);
@@ -438,6 +527,7 @@ public partial class Core
                     DrawSlider("Text size", ref itemTextSize, 0, 10, 3);
                     
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
                 
                 GUILayout.EndVertical();
@@ -448,7 +538,7 @@ public partial class Core
                 GUILayout.Space(5);
                 
                 if (GUILayout.Button("<b>MONEY BAGS COLOR</b>", buttonStyle)) moneyBagsColor = !moneyBagsColor;
-                if (moneyBagsColor)
+                if (BeginAnimatedFoldout("wh.money.color", moneyBagsColor))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     
@@ -458,6 +548,7 @@ public partial class Core
                     DrawSlider("A", ref SPC_A, 0f, 1f, 0.8f);
                     
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
                 
                 bool newValue = showExtractionPoints;
@@ -471,7 +562,7 @@ public partial class Core
                 
                 if (GUILayout.Button("<b>EXTRACTION POINTS COLOR</b>", buttonStyle)) extractionPointsColor = !extractionPointsColor;
                 
-                if (extractionPointsColor)
+                if (BeginAnimatedFoldout("wh.extraction.color", extractionPointsColor))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     
@@ -481,39 +572,119 @@ public partial class Core
                     DrawSlider("A", ref EPC_A, 0f, 1f, 0.1f);
                     
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
 
-                DrawToggle("Show name", ref showItemName, Color.green, Get("showItemNameWH"));
-                DrawToggle("Show price", ref showItemPrice, Color.green, Get("showItemPriceWH"));
-                DrawToggle("Sort by price", ref sortByPrice, Color.green, Get("sortByPriceWH"));
+                DrawToggle("Show name", ref showItemName, Color.green, Get("showItemNameWH"), "wh.item.showName");
+                DrawToggle("Show price", ref showItemPrice, Color.green, Get("showItemPriceWH"), "wh.item.showPrice");
+                DrawToggle("Sort by price", ref sortByPrice, Color.green, Get("sortByPriceWH"), "wh.item.sortByPrice");
                 
                 GUILayout.Space(5);
 
-                if (sortByPrice)
+                if (BeginAnimatedFoldout("wh.item.sortPrice", sortByPrice, -8f))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     DrawSlider("Sort from", ref sortFromPrice, 0, 100000, 0);
                     DrawSlider("Sort to", ref sortToPrice, 0, 100000, 100000);
                     if (sortToPrice < sortFromPrice) sortToPrice = sortFromPrice;
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
+            }
+
+            DrawToggle("Show cosmetic boxes", ref isCosmeticBoxesWallHackEnabled, Color.green, Get("showCosmeticBoxesWH"));
+            if (BeginAnimatedFoldout("wh.cosmetic.enabled", isCosmeticBoxesWallHackEnabled, -10f))
+            {
+                GUILayout.Space(5);
+                GUILayout.BeginVertical(windowStyle);
+
+                if (GUILayout.Button("<b>COSMETIC BOX GLOW COLOR</b>", buttonStyle))
+                    cosmetic_box_glow_color = !cosmetic_box_glow_color;
+                if (BeginAnimatedFoldout("wh.cosmetic.glow", cosmetic_box_glow_color))
+                {
+                    GUILayout.BeginVertical(windowStyle);
+
+                    DrawLabel("Glow color:", Color.white);
+                    DrawSlider("R", ref CBC_R, 0f, 1f, 1f);
+                    DrawSlider("G", ref CBC_G, 0f, 1f, 0f);
+                    DrawSlider("B", ref CBC_B, 0f, 1f, 1f);
+                    DrawSlider("A", ref CBC_A, 0f, 1f, 1f);
+
+                    GUILayout.EndVertical();
+                    EndAnimatedFoldout();
+                }
+
+                if (GUILayout.Button("<b>COSMETIC BOX TEXT COLOR</b>", buttonStyle))
+                    cosmetic_box_text_color = !cosmetic_box_text_color;
+                if (BeginAnimatedFoldout("wh.cosmetic.text", cosmetic_box_text_color))
+                {
+                    GUILayout.BeginVertical(windowStyle);
+
+                    DrawToggle("Show rarity text", ref showCosmeticBoxRarity, Color.green, Get("showCosmeticBoxRarity"), "wh.cosmetic.showRarityText");
+                    DrawToggle("Sync with glow", ref cosmeticBoxTextSyncWithGlow, Color.yellow,
+                        Get("syncTextColorWithGlow"), "wh.cosmetic.text.syncGlow");
+
+                    if (BeginAnimatedFoldout("wh.cosmetic.text.manual", !cosmeticBoxTextSyncWithGlow, -8f))
+                    {
+                        GUILayout.Space(5);
+                        DrawLabel("Text color:", Color.white);
+                        DrawSlider("R", ref CBTC_R, 0f, 1f, 1f);
+                        DrawSlider("G", ref CBTC_G, 0f, 1f, 0f);
+                        DrawSlider("B", ref CBTC_B, 0f, 1f, 1f);
+                        DrawSlider("A", ref CBTC_A, 0f, 1f, 1f);
+                        EndAnimatedFoldout();
+                    }
+                    if (cosmeticBoxTextSyncWithGlow)
+                    {
+                        DrawSlider("Text alpha", ref CBTC_A, 0f, 1f, 1f);
+                    }
+
+                    DrawSlider("Text size", ref cosmeticBoxTextSize, 0, 10, 3);
+
+                    if (BeginAnimatedFoldout("wh.cosmetic.rarity.enabled", showCosmeticBoxRarity, -8f))
+                    {
+                        GUILayout.Space(5);
+                        if (GUILayout.Button("<b>RARITY TEXT COLOR</b>", buttonStyle))
+                            cosmetic_box_rarity_text_color = !cosmetic_box_rarity_text_color;
+
+                        if (BeginAnimatedFoldout("wh.cosmetic.rarity", cosmetic_box_rarity_text_color))
+                        {
+                            GUILayout.BeginVertical(windowStyle);
+                            DrawLabel("Rarity text color:", Color.white);
+                            DrawSlider("R", ref CBRTC_R, 0f, 1f, 1f);
+                            DrawSlider("G", ref CBRTC_G, 0f, 1f, 0f);
+                            DrawSlider("B", ref CBRTC_B, 0f, 1f, 1f);
+                            DrawSlider("A", ref CBRTC_A, 0f, 1f, 1f);
+                            GUILayout.EndVertical();
+                            EndAnimatedFoldout();
+                        }
+                        EndAnimatedFoldout();
+                    }
+
+                    GUILayout.EndVertical();
+                    EndAnimatedFoldout();
+                }
+
+                GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
 
             DrawToggle("Show enemies", ref isEnemyWallHackEnabled, Color.green, Get("showEnemiesWH"));
-            if (isEnemyWallHackEnabled)
+            if (BeginAnimatedFoldout("wh.enemy.enabled", isEnemyWallHackEnabled, -10f))
             {
-                DrawToggle("Show name", ref showEnemyName, Color.green, Get("showEnemyNameWH"));
-                DrawToggle("Show health", ref showEnemyHealth, Color.green, Get("showEnemyHealthWH"));
+                DrawToggle("Show name", ref showEnemyName, Color.green, Get("showEnemyNameWH"), "wh.enemy.showName");
+                DrawToggle("Show health", ref showEnemyHealth, Color.green, Get("showEnemyHealthWH"), "wh.enemy.showHealth");
                 
-                DrawToggle("Show glow", ref showEnemyGlow, Color.green, Get("showEnemyGlowWH"));
+                DrawToggle("Show glow", ref showEnemyGlow, Color.green, Get("showEnemyGlowWH"), "wh.enemy.showGlow");
                 
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
 
                 if (GUILayout.Button("<b>ENEMY GLOW COLOR</b>", buttonStyle))
                     enemy_glow_color = !enemy_glow_color;
-                if (enemy_glow_color)
+                if (BeginAnimatedFoldout("wh.enemy.glow", enemy_glow_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     DrawLabel("Glow color:", Color.white);
@@ -522,15 +693,16 @@ public partial class Core
                     DrawSlider("B", ref EC_B, 0f, 1f, 0f);
                     DrawSlider("A", ref EC_A, 0f, 1f, 0.8f);
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
 
                 if (GUILayout.Button("<b>ENEMY TEXT COLOR</b>", buttonStyle))
                     enemy_text_color = !enemy_text_color;
-                if (enemy_text_color)
+                if (BeginAnimatedFoldout("wh.enemy.text", enemy_text_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     DrawToggle("Sync with glow", ref ewh_syncTextColorWithGlow, Color.yellow,
-                        Get("syncTextColorWithGlow"));
+                        Get("syncTextColorWithGlow"), "wh.enemy.text.syncGlow");
 
                     GUILayout.Space(5);
 
@@ -542,23 +714,25 @@ public partial class Core
 
                     DrawSlider("Text size", ref enemyTextSize, 0, 10, 3);
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
             
             DrawToggle("Show player", ref isPlayerWallHackEnabled, Color.green, Get("showPlayersWH"));
-            if (isPlayerWallHackEnabled)
+            if (BeginAnimatedFoldout("wh.player.enabled", isPlayerWallHackEnabled, -10f))
             {
-                DrawToggle("Show name", ref showPlayerName, Color.green, Get("showPlayerNameWH"));
-                DrawToggle("Show health", ref showPlayerHealth, Color.green, Get("showPlayerHealthWH"));
-                DrawToggle("Show glow", ref isShowPlayerGlow, Color.green, Get("showPlayerGlowWH"));
+                DrawToggle("Show name", ref showPlayerName, Color.green, Get("showPlayerNameWH"), "wh.player.showName");
+                DrawToggle("Show health", ref showPlayerHealth, Color.green, Get("showPlayerHealthWH"), "wh.player.showHealth");
+                DrawToggle("Show glow", ref isShowPlayerGlow, Color.green, Get("showPlayerGlowWH"), "wh.player.showGlow");
 
                 GUILayout.Space(5);
 
                 GUILayout.BeginVertical(windowStyle);
                 
                 if (GUILayout.Button("<b>PLAYER GLOW COLOR</b>", buttonStyle)) player_glow_color = !player_glow_color;
-                if (player_glow_color)
+                if (BeginAnimatedFoldout("wh.player.glow", player_glow_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     
@@ -569,15 +743,16 @@ public partial class Core
                     DrawSlider("B", ref PC_B, 0f, 1f, 1f);
                     DrawSlider("A", ref PC_A, 0f, 1f, 0.8f);
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
                 
                 if (GUILayout.Button("<b>PLAYER TEXT COLOR</b>", buttonStyle)) player_text_color = !player_text_color;
-                if (player_text_color)
+                if (BeginAnimatedFoldout("wh.player.text", player_text_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     
                     DrawToggle("Sync with glow", ref pwh_syncTextColorWithGlow, Color.yellow,
-                        Get("syncTextColorWithGlow"));
+                        Get("syncTextColorWithGlow"), "wh.player.text.syncGlow");
                     
                     GUILayout.Space(5);
                     
@@ -591,17 +766,18 @@ public partial class Core
                     DrawSlider("Text size", ref playerTextSize, 0, 10, 3);
                     
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
                 
                 GUILayout.EndVertical();
 
-                DrawToggle("Show dead heads", ref isShowPlayerDeadHead, Color.green, Get("showDeadHeadsWH"));
+                DrawToggle("Show dead heads", ref isShowPlayerDeadHead, Color.green, Get("showDeadHeadsWH"), "wh.player.showDeadHeads");
                 
                 GUILayout.Space(5);
                 
                 if (GUILayout.Button("<b>DEAD HEADS COLOR</b>", buttonStyle)) player_deadHead_color = !player_deadHead_color;
 
-                if (player_deadHead_color)
+                if (BeginAnimatedFoldout("wh.player.deadhead", player_deadHead_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
                     GUILayout.Space(5);
@@ -612,9 +788,12 @@ public partial class Core
                     DrawSlider("A", ref PCDH_A, 0f, 1f, 0.8f);
                     
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
+                EndAnimatedFoldout();
             }
             GUILayout.EndVertical();
+            EndAnimatedFoldout();
         }
         GUILayout.EndVertical();
     }
@@ -624,18 +803,19 @@ public partial class Core
         GUILayout.BeginVertical(windowStyle, GUILayout.Width(300));
         if (GUILayout.Button("<b>MISC</b>", buttonStyle)) MiscTab = !MiscTab;
         
-        if (MiscTab)
+        if (BeginAnimatedFoldout("menu.misc", MiscTab))
         {
             GUILayout.BeginVertical(windowStyle);
             
             DrawToggle("Noclip", ref isNoclipEnabled, Color.green, Get("noclip"));
-            if (isNoclipEnabled)
+            if (BeginAnimatedFoldout("menu.misc.noclip", isNoclipEnabled, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
                 GUILayout.Label("Bind: [<b>ALT</b>]", labelStyle);
                 DrawSlider("Noclip speed", ref noclipSpeed, 1, 20, 5, Get("noclipSpeed"));
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
 
             /*DrawToggle("Damage multiplier <color=yellow>(Not work)</color>", ref DamageMultiplier, Color.green);
@@ -649,8 +829,8 @@ public partial class Core
 
             DrawToggle("Anti tumble <color=yellow>(Not work)</color>", ref isAntiTumbleEnabled, Color.green);*/
             
-            DrawToggle("Fullbright \b <color=yellow>\n[Test! Sometimes need crouch for disable]</color>", ref _isFullbrightEnabled, Color.green, Get("fullbright"));
-            if (isFullbrightEnabled)
+            DrawToggle("Fullbright", ref _isFullbrightEnabled, Color.green, Get("fullbright"));
+            if (BeginAnimatedFoldout("menu.misc.fullbright", isFullbrightEnabled, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
@@ -658,12 +838,14 @@ public partial class Core
                 DrawSlider("G", ref FB_G, 0f, 1f, 1f);
                 DrawSlider("B", ref FB_B, 0f, 1f, 1f);
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
             
             DrawToggle("Multi-jumps", ref multiJumps, Color.green, Get("multiJumps"));
 
             GUILayout.Space(5);
             GUILayout.EndVertical();
+            EndAnimatedFoldout();
         }
         GUILayout.EndVertical();
     }
@@ -675,12 +857,15 @@ public partial class Core
         if (GUILayout.Button("<b>HOST ONLY FUNCTIONS</b>", buttonStyle)) 
             HostFunctsTab = !HostFunctsTab;
         
-        if (HostFunctsTab)
+        if (BeginAnimatedFoldout("menu.host", HostFunctsTab))
         {
             GUILayout.BeginVertical(windowStyle);
             
+            DrawToggle("Protected session", ref isProtectedSession, Color.green, Get("protectedSession"));
+            DrawToggle("Infinity ammo", ref isInfiniteAmmo, Color.green, Get("infAmmo"));
+            
             DrawToggle("Valuables teleporter", ref valuablesTeleporter, Color.green, Get("valuablesTp"));
-            if (valuablesTeleporter)
+            if (BeginAnimatedFoldout("menu.host.valuables", valuablesTeleporter, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
@@ -695,24 +880,26 @@ public partial class Core
                 DrawLabel("Modes: ", Color.white);
                 
                 DrawToggle("Kinematic", ref vtm_kinematic, Color.yellow, Get("valuablesKinematic"));
-                if (vtm_kinematic)
+                if (BeginAnimatedFoldout("menu.host.valuables.kinematic", vtm_kinematic, -8f))
                 {
                     GUILayout.Space(5);
                     GUILayout.BeginVertical(windowStyle);
                     DrawToggle("Permanent freeze", ref vtm_permanentFreeze, Color.green, Get("valuablesFreeze"));
                     GUILayout.Space(5);
-                    if (!vtm_permanentFreeze)
+                    if (BeginAnimatedFoldout("menu.host.valuables.freeze.timer", !vtm_permanentFreeze, -6f))
                     {
                         DrawSlider("Disable interval", ref vtm_kinematicDisableInterval, 0f, 20f, 3f);
                         GUILayout.Space(5);
+                        EndAnimatedFoldout();
                     }
-                    else
+                    if (vtm_permanentFreeze)
                     {
                         DrawToggle("Disable on touch", ref vtm_disableKinematicOnTouch, Color.green, Get("valuablesDisableTouch"));
                         GUILayout.Space(5);
                     }
                     
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
                 
                 DrawToggle("One any", ref vtm_one_any, Color.yellow, Get("valuablesOneAny"));
@@ -727,10 +914,11 @@ public partial class Core
                 DrawRadio("Into nearest cart", 2, ref vt_state, Color.cyan);
                 GUILayout.Space(5);
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
             
             DrawToggle("Enemies teleporter", ref enemiesTeleporter, Color.green, Get("enemiesTp"));
-            if (enemiesTeleporter)
+            if (BeginAnimatedFoldout("menu.host.enemies", enemiesTeleporter, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
@@ -744,13 +932,14 @@ public partial class Core
                 DrawLabel("Modes: ", Color.white);
 
                 DrawToggle("Kinematic", ref em_kinematic, Color.yellow, Get("enemiesKinematic"));
-                if (em_kinematic)
+                if (BeginAnimatedFoldout("menu.host.enemies.kinematic", em_kinematic, -8f))
                 {
                     GUILayout.Space(5);
                     GUILayout.BeginVertical(windowStyle);
                     DrawToggle("Permanent freeze movement", ref em_permanentFreeze, Color.green, Get("enemiesFreeze"));
                     GUILayout.Space(5);
                     GUILayout.EndVertical();
+                    EndAnimatedFoldout();
                 }
 
                 DrawToggle("One any", ref em_one_any, Color.yellow, Get("enemiesOneAny"));
@@ -764,6 +953,7 @@ public partial class Core
                 DrawRadio("Into void", 2, ref em_state, Color.cyan);
                 GUILayout.Space(5);
                 GUILayout.EndVertical();
+                EndAnimatedFoldout();
             }
             
             /*DrawToggle("Players teleporter", ref playersTeleporter, Color.green);
@@ -817,6 +1007,7 @@ public partial class Core
             }*/
 
             GUILayout.EndVertical();
+            EndAnimatedFoldout();
         }
         
         GUILayout.EndVertical();
@@ -829,7 +1020,7 @@ public partial class Core
         if (GUILayout.Button("Configs", buttonStyle)) 
             ConfigTab = !ConfigTab;
         
-        if (ConfigTab)
+        if (BeginAnimatedFoldout("menu.config", ConfigTab))
         {
             GUILayout.BeginVertical(windowStyle);
             
@@ -843,6 +1034,7 @@ public partial class Core
                 ResetConfig();
             
             GUILayout.EndVertical();
+            EndAnimatedFoldout();
         }
         GUILayout.EndVertical();
     }

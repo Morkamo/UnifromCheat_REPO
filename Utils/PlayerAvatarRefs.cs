@@ -119,6 +119,8 @@ internal static class PlayerAvatarRefs
         AccessTools.FieldRefAccess<PlayerAvatar, bool>("isGrounded");
     public static readonly AccessTools.FieldRef<PlayerAvatar, bool> isTumbling =
         AccessTools.FieldRefAccess<PlayerAvatar, bool>("isTumbling");
+    public static readonly AccessTools.FieldRef<PlayerAvatar, PlayerTumble> tumble =
+        AccessTools.FieldRefAccess<PlayerAvatar, PlayerTumble>("tumble");
     public static readonly AccessTools.FieldRef<PlayerAvatar, Vector3> InputDirection =
         AccessTools.FieldRefAccess<PlayerAvatar, Vector3>("InputDirection");
     public static readonly AccessTools.FieldRef<PlayerAvatar, Vector3> LastNavmeshPosition =

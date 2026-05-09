@@ -16,6 +16,7 @@ public class WallHackSceneTransitionPatch
         {
             PlayersWallHack.ClearAll();
             ItemsWallHack.ClearAll();
+            CosmeticBoxesWallHack.ClearAll();
             EnemiesWallHack.ClearAll();
 
 

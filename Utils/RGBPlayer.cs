@@ -1,13 +1,13 @@
-﻿using System.Threading.Tasks;
+using System.Reflection;
 using UnityEngine;
 
 namespace UnifromCheat_REPO.Utils;
 
 public class RGBPlayer : MonoBehaviour
 {
-    private static readonly int[] rainbowOrder =
+    private static readonly int[] RainbowOrder =
     {
-        4,  3,  7,  8,
+        4, 3, 7, 8,
         10, 11, 12, 13, 15,
         16, 17,
         18, 19,
@@ -17,39 +17,97 @@ public class RGBPlayer : MonoBehaviour
         5, 6, 20, 24, 25, 32, 33, 34, 35, 1, 2, 0
     };
 
-    private static bool isCycling;
-    private static Task cycleTask;
-    private static bool stopRequested;
+    public static RGBPlayer Instance { get; private set; }
+
+    private static readonly FieldInfo ColorsEquippedField = typeof(MetaManager).GetField(
+        "colorsEquipped",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    );
+
+    private static readonly FieldInfo ColorsPreviewEnabledField = typeof(MetaManager).GetField(
+        "colorsPreviewEnabled",
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+    );
+
+    private int currentIndex;
+    private float nextUpdateTime;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void OnEnable()
+    {
+        if (Instance == null)
+            Instance = this;
+
+        ResetTimer();
+    }
+
+    private void OnDisable()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
+    private void Update()
+    {
+        if (!Core.isRGBPlayerEnabled)
+            return;
+
+        if (Time.unscaledTime < nextUpdateTime)
+            return;
+
+        ApplyCurrentColor();
+        currentIndex = (currentIndex + 1) % RainbowOrder.Length;
+        nextUpdateTime = Time.unscaledTime + Mathf.Max(Core.RGBupdateInterval, (ushort)1) / 1000f;
+    }
 
     public static void StartCycle()
     {
-        if (isCycling) return;
-        stopRequested = false;
-        cycleTask = CycleColors();
+        if (Instance == null)
+            return;
+
+        Instance.currentIndex = 0;
+        Instance.ResetTimer();
+        Instance.ApplyCurrentColor();
     }
 
     public static void StopCycle()
     {
-        stopRequested = true;
-        isCycling = false;
+        Instance?.ResetTimer();
     }
 
-    private static async Task CycleColors()
+    private void ResetTimer()
     {
-        isCycling = true;
-        int idx = 0;
+        nextUpdateTime = Time.unscaledTime;
+    }
 
-        while (!stopRequested)
-        {
-            DataDirector.instance.ColorSetBody(rainbowOrder[idx]);
-            PlayerController.instance.playerAvatarScript.PlayerAvatarSetColor(rainbowOrder[idx]);
+    private void ApplyCurrentColor()
+    {
+        int colorIndex = RainbowOrder[currentIndex];
+        ApplyCosmeticColor(colorIndex);
+    }
 
-            idx++;
-            if (idx >= rainbowOrder.Length) idx = 0;
+    private static void ApplyCosmeticColor(int colorIndex)
+    {
+        var metaManager = MetaManager.instance;
+        if (metaManager == null)
+            return;
 
-            await Task.Delay(Core.RGBupdateInterval);
-        }
+        var colorsEquipped = ColorsEquippedField?.GetValue(metaManager) as int[];
+        if (colorsEquipped == null || colorsEquipped.Length == 0)
+            return;
 
-        isCycling = false;
+        int colorCount = metaManager.colors != null ? metaManager.colors.Count : 0;
+        if (colorCount > 0 && colorIndex >= colorCount)
+            colorIndex = 0;
+
+        for (int i = 0; i < colorsEquipped.Length; i++)
+            metaManager.CosmeticColorSet(i, colorIndex, false);
+
+        ColorsPreviewEnabledField?.SetValue(metaManager, false);
+        metaManager.CosmeticPlayerUpdateLocal(true, false);
     }
 }

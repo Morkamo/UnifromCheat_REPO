@@ -6,7 +6,7 @@ using HarmonyLib;
 using TMPro;
 using UnifromCheat_REPO.Funs;
 using UnifromCheat_REPO.Patches;
-using UnifromCheat_REPO.Utils;
+using UnifromCheat_REPO.Utils; 
 using UnifromCheat_REPO.WallHack;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -17,12 +17,13 @@ using Object = UnityEngine.Object;
 
 namespace UnifromCheat_REPO
 {
-    /*[BepInPlugin("ru.morkamo.unifrom", "Unifrom", "3.1.2")]*/
-    public partial class Core : MonoBehaviour
+    [BepInPlugin("ru.morkamo.unifrom", "Unifrom", "4.0.0")]
+    public partial class Core : BaseUnityPlugin
     {
         public static Core Instance;
         public Harmony harmony;
         public ItemsWallHack ItemsWallHack;
+        public CosmeticBoxesWallHack CosmeticBoxesWallHack;
         public EnemiesWallHack EnemiesWallHack;
         public PlayersWallHack PlayersWallHack;
         public HintsController HintsController;
@@ -37,6 +38,7 @@ namespace UnifromCheat_REPO
             Instance = this;
             
             ItemsWallHack = gameObject.AddComponent<ItemsWallHack>();
+            CosmeticBoxesWallHack = gameObject.AddComponent<CosmeticBoxesWallHack>();
             EnemiesWallHack = gameObject.AddComponent<EnemiesWallHack>();
             PlayersWallHack = gameObject.AddComponent<PlayersWallHack>();
             HintsController = gameObject.AddComponent<HintsController>();
@@ -84,11 +86,50 @@ namespace UnifromCheat_REPO
 
         private void Update()
         {
-            if (Camera.main != null) Camera.main.farClipPlane = 10000;
+            UpdateMenuAnimation();
 
             if (Keyboard.current.insertKey.wasPressedThisFrame || Keyboard.current.rightAltKey.wasPressedThisFrame
                 || Keyboard.current.f11Key.wasPressedThisFrame)
                 ToggleMenu();
+        }
+
+        private void LateUpdate()
+        {
+            ApplyRenderDistance();
+        }
+
+        private static void ApplyRenderDistance()
+        {
+            Camera[] cameras = Camera.allCameras;
+            if (cameras == null || cameras.Length == 0)
+            {
+                ApplyRenderDistance(Camera.main);
+                return;
+            }
+
+            foreach (Camera camera in cameras)
+                ApplyRenderDistance(camera);
+        }
+
+        internal static void ApplyRenderDistance(Camera camera)
+        {
+            if (camera == null)
+                return;
+
+            float farClip = Mathf.Clamp(wallHackCameraFarClipPlane, 1f, 10000f);
+            camera.farClipPlane = farClip;
+            camera.layerCullSpherical = false;
+            camera.useOcclusionCulling = false;
+        }
+
+        private void UpdateMenuAnimation()
+        {
+            float target = MenuState ? 1f : 0f;
+            menuAnimationProgress = Mathf.MoveTowards(
+                menuAnimationProgress,
+                target,
+                Time.unscaledDeltaTime * MenuAnimationSpeed
+            );
         }
         
         internal void ToggleMenu()
@@ -174,10 +215,11 @@ namespace UnifromCheat_REPO
         
         public void OnGUI()
         {
-            if (!MenuState)
+            if (!MenuState && menuAnimationProgress <= 0.001f)
                 return;
             
-            PlayerController.instance.OverrideLookSpeed(0, 0, 0.1f);
+            if (PlayerController.instance != null)
+                PlayerController.instance.OverrideLookSpeed(0, 0, 0.1f);
 
             Matrix4x4 originalMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(dpiScaling, dpiScaling, 1f));
@@ -201,9 +243,34 @@ namespace UnifromCheat_REPO
             GUI.backgroundColor = Color.white;
             GUI.color = Color.white;
 
+            DrawMenuBackdrop();
+            Color menuColor = GUI.color;
+            Matrix4x4 menuMatrix = GUI.matrix;
+            float menuEased = Mathf.SmoothStep(0f, 1f, menuAnimationProgress);
+            float menuOffsetY = -14f * (1f - menuEased);
+            GUI.color = new Color(menuColor.r, menuColor.g, menuColor.b, menuColor.a * menuEased);
+            GUI.matrix = menuMatrix * Matrix4x4.TRS(
+                new Vector3(0f, menuOffsetY, 0f),
+                Quaternion.identity,
+                new Vector3(1f, Mathf.Lerp(0.99f, 1f, menuEased), 1f)
+            );
             RectMenu = GUILayout.Window(1, RectMenu, GUIMenuInit, string.Empty);
+            GUI.matrix = menuMatrix;
+            GUI.color = menuColor;
 
             GUI.matrix = originalMatrix;
+        }
+
+        private void DrawMenuBackdrop()
+        {
+            if (menuAnimationProgress <= 0f)
+                return;
+
+            Color previousColor = GUI.color;
+            float alpha = Mathf.SmoothStep(0f, 1f, menuAnimationProgress) * 0.18f;
+            GUI.color = new Color(0.02f, 0.025f, 0.03f, alpha);
+            GUI.DrawTexture(new Rect(0f, 0f, Screen.width / dpiScaling, Screen.height / dpiScaling), Texture2D.whiteTexture);
+            GUI.color = previousColor;
         }
     }
 }

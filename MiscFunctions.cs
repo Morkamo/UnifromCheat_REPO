@@ -1,5 +1,6 @@
 ﻿using UnifromCheat_REPO.Utils;
 using Unity.VisualScripting;
+using UnifromCheat_REPO.WallHack;
 using UnityEngine;
 
 namespace UnifromCheat_REPO
@@ -24,6 +25,7 @@ namespace UnifromCheat_REPO
 
             Camera.onPreRender += Fullbright;
             Camera.onPreRender += ChangeFOV;
+            Camera.onPreCull += WallHackRenderUtils.ApplyCameraOverrides;
             GrabWatcher.OnGrabbedObject += OnGrabbedObject;
         }
 
@@ -31,6 +33,7 @@ namespace UnifromCheat_REPO
         {
             Camera.onPreRender -= Fullbright;
             Camera.onPreRender -= ChangeFOV;
+            Camera.onPreCull -= WallHackRenderUtils.ApplyCameraOverrides;
             GrabWatcher.OnGrabbedObject -= OnGrabbedObject;
         }
 
@@ -42,6 +45,8 @@ namespace UnifromCheat_REPO
 
         private void ChangeFOV(Camera cam)
         {
+            Core.ApplyRenderDistance(cam);
+
             if (Core.isCustomFovEnabled)
             {
                 cam.fieldOfView = Core.fovValue;
@@ -55,6 +60,10 @@ namespace UnifromCheat_REPO
                 );
 
                 cam.cullingMatrix = proj * cam.worldToCameraMatrix;
+            }
+            else
+            {
+                cam.ResetCullingMatrix();
             }
         }
         

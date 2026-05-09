@@ -28,11 +28,6 @@ namespace UnifromCheat_REPO.WallHack
         private Coroutine epColorUpdaterCo;
         private Coroutine epWarmupCo;
 
-        private static readonly int ColorID = Shader.PropertyToID("_Color");
-        private static readonly int ZTest = Shader.PropertyToID("_ZTest");
-        private static readonly int Cull = Shader.PropertyToID("_Cull");
-        private static readonly int ZWrite = Shader.PropertyToID("_ZWrite");
-
         private void OnEnable()
         {
             Instance = this;
@@ -51,8 +46,9 @@ namespace UnifromCheat_REPO.WallHack
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            ClearAll();
             ClearExtractionCache();
-            FireLog($"[WH] Scene loaded: {scene.name}, EP cache cleared");
+            FireLog($"[WH] Scene loaded: {scene.name}, WH cache cleared");
 
             if (showExtractionPoints)
             {
@@ -149,9 +145,11 @@ namespace UnifromCheat_REPO.WallHack
                 var root = kvp.Value;
                 if (kvp.Key == null || root == null) { s_tmpEPToRemove.Add(kvp.Key); continue; }
 
+                root.SetActive(isItemsWallHackEnabled && showExtractionPoints);
+                if (!root.activeSelf) continue;
+
                 foreach (var r in root.GetComponentsInChildren<MeshRenderer>())
-                    if (r != null && r.material != null)
-                        r.material.color = color;
+                    WallHackRenderUtils.SetRendererColor(r, color);
             }
 
             foreach (var dead in s_tmpEPToRemove)
@@ -173,6 +171,12 @@ namespace UnifromCheat_REPO.WallHack
 
         public static void RenderItems()
         {
+            if (ValuableDirector.instance == null || ValuableDirector.instance.valuableList == null)
+            {
+                ClearAll();
+                return;
+            }
+
             if (!isItemsWallHackEnabled)
             {
                 SetActiveAll(false);
@@ -180,8 +184,6 @@ namespace UnifromCheat_REPO.WallHack
             }
 
             var list = ValuableDirector.instance.valuableList;
-            if (list == null) return;
-
             Camera cam = Camera.main;
             if (cam == null) return;
 
@@ -222,8 +224,7 @@ namespace UnifromCheat_REPO.WallHack
                 if (!root.activeSelf) continue;
 
                 foreach (var r in root.GetComponentsInChildren<MeshRenderer>())
-                    if (r != null && r.material != null)
-                        r.material.color = color;
+                    WallHackRenderUtils.SetRendererColor(r, color);
             }
 
             foreach (var dead in s_tmpSurplusToRemove)
@@ -242,7 +243,7 @@ namespace UnifromCheat_REPO.WallHack
 
             foreach (var mr in source.GetComponentsInChildren<MeshRenderer>(true))
             {
-                if (mr == null || !mr.enabled) continue;
+                if (mr == null) continue;
 
                 var mf = mr.GetComponent<MeshFilter>();
                 if (mf == null || mf.sharedMesh == null) continue;
@@ -260,15 +261,8 @@ namespace UnifromCheat_REPO.WallHack
                 newMf.sharedMesh = mf.sharedMesh;
 
                 var newMr = go.AddComponent<MeshRenderer>();
-                var mat = new Material(Shader.Find("Hidden/Internal-Colored"))
-                {
-                    hideFlags = HideFlags.HideAndDontSave
-                };
-                mat.SetInt(ZTest, (int)UnityEngine.Rendering.CompareFunction.Always);
-                mat.SetInt(Cull, (int)UnityEngine.Rendering.CullMode.Front);
-                mat.SetInt(ZWrite, 0);
-                mat.SetColor(ColorID, color);
-                newMr.material = mat;
+                newMr.material = WallHackRenderUtils.CreateOverlayMaterial(color);
+                WallHackRenderUtils.ConfigureOverlayRenderer(newMr);
             }
 
             return root;
@@ -277,7 +271,7 @@ namespace UnifromCheat_REPO.WallHack
         private static TextMeshPro Create3DText(ValuableObject item, Camera cam)
         {
             var go = new GameObject($"ItemText_{item.name}");
-            go.transform.SetParent(item.transform, false);
+            go.hideFlags = HideFlags.DontSave;
 
             var tmp = go.AddComponent<TextMeshPro>();
             tmp.fontSize = 3;
@@ -289,6 +283,9 @@ namespace UnifromCheat_REPO.WallHack
             else tmp.color = new Color(TIC_R, TIC_G, TIC_B, TIC_A);
             
             tmp.fontSharedMaterial = tmp.font.material;
+            WallHackRenderUtils.ConfigureOverlayText(tmp);
+            var follower = go.AddComponent<ItemTextFollower>();
+            follower.Init(tmp, item, -1f);
 
             UpdateTextTransform(tmp, item, cam, -1f);
             tmp.text = GetItemInfo(item);
@@ -307,8 +304,10 @@ namespace UnifromCheat_REPO.WallHack
 
             tmp.text = sortByPrice && !inPriceRange ? string.Empty : GetItemInfo(item);
             
-            if (iwh_syncTextColorWithGlow) tmp.color = new Color(IC_R, IC_G, IC_B, IC_A);
-            else tmp.color = new Color(TIC_R, TIC_G, TIC_B, TIC_A);
+            Color textColor = iwh_syncTextColorWithGlow
+                ? new Color(IC_R, IC_G, IC_B, IC_A)
+                : new Color(TIC_R, TIC_G, TIC_B, TIC_A);
+            WallHackRenderUtils.SetTextColor(tmp, textColor);
 
             UpdateTextTransform(tmp, item, cam, -1f);
         }
@@ -320,8 +319,7 @@ namespace UnifromCheat_REPO.WallHack
             float yOffset = rend != null ? rend.bounds.size.y : 1f;
 
             tmp.transform.position = center + new Vector3(0f, yOffset + offsetY, 0f);
-            tmp.transform.rotation = Quaternion.LookRotation(cam.transform.position - tmp.transform.position) *
-                                     Quaternion.Euler(0, 180f, 0);
+            WallHackRenderUtils.FaceTextToCamera(tmp, cam);
         }
 
         private static void UpdateItemOutline(ValuableObject item)
@@ -334,8 +332,7 @@ namespace UnifromCheat_REPO.WallHack
 
             Color color = new Color(IC_R, IC_G, IC_B, IC_A);
             foreach (var r in outlineObj.GetComponentsInChildren<MeshRenderer>())
-                if (r != null && r.material != null)
-                    r.material.color = color;
+                WallHackRenderUtils.SetRendererColor(r, color);
         }
 
         private static string GetItemInfo(ValuableObject item)
@@ -412,6 +409,40 @@ namespace UnifromCheat_REPO.WallHack
                 trs.position = target.position;
                 trs.rotation = target.rotation;
                 trs.localScale = target.lossyScale + new Vector3(0.01f, 0.01f, 0.01f);
+            }
+        }
+
+        private class ItemTextFollower : MonoBehaviour
+        {
+            private TextMeshPro textMesh;
+            private ValuableObject target;
+            private float offsetY;
+
+            public void Init(TextMeshPro text, ValuableObject item, float yOffset)
+            {
+                textMesh = text;
+                target = item;
+                offsetY = yOffset;
+            }
+
+            private void LateUpdate()
+            {
+                if (textMesh == null)
+                {
+                    Destroy(this);
+                    return;
+                }
+
+                if (target == null || target.gameObject == null)
+                {
+                    Destroy(textMesh.gameObject);
+                    return;
+                }
+
+                Camera cam = Camera.main;
+                if (cam == null) return;
+
+                UpdateTextTransform(textMesh, target, cam, offsetY);
             }
         }
     }

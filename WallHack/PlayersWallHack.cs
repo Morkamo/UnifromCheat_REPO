@@ -13,12 +13,15 @@ namespace UnifromCheat_REPO.WallHack
         private static readonly Dictionary<PlayerAvatar, TextMeshPro> trackedPlayers = new();
         private static readonly Dictionary<PlayerAvatar, GameObject> bodyOutlineRoots = new();
         private static readonly Dictionary<PlayerAvatar, GameObject> headOutlineRoots = new();
+        private static readonly FieldInfo PlayerDeathHeadField = typeof(PlayerAvatar).GetField(
+            "playerDeathHead",
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+        );
+        private static readonly FieldInfo DeathHeadTriggeredField = typeof(PlayerDeathHead).GetField(
+            "triggered",
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+        );
         
-        private static readonly int ZTest   = Shader.PropertyToID("_ZTest");
-        private static readonly int Cull    = Shader.PropertyToID("_Cull");
-        private static readonly int ZWrite  = Shader.PropertyToID("_ZWrite");
-        private static readonly int ColorID = Shader.PropertyToID("_Color");
-
         public static void RenderPlayers()
         {
             var avatars = GameDirector.instance.PlayerList;
@@ -48,10 +51,13 @@ namespace UnifromCheat_REPO.WallHack
                 if (player == null || player.gameObject == null) continue;
                 var pv = player.GetComponent<PhotonView>();
                 if (pv == null) { RemoveBodyOutline(player); RemoveHeadOutline(player); RemoveLabel(player); continue; }
-                
-                if (isPlayerWallHackEnabled && isShowPlayerDeadHead && player.playerDeathHead != null)
+
+                PlayerDeathHead deathHead = GetPlayerDeathHead(player);
+                bool deathHeadTriggered = IsTriggeredDeathHead(deathHead);
+
+                if (isPlayerWallHackEnabled && isShowPlayerDeadHead && deathHeadTriggered)
                 {
-                    var headHost = player.playerDeathHead.gameObject;
+                    var headHost = deathHead.gameObject;
                     var headColor = new Color(PCDH_R, PCDH_G, PCDH_B, PCDH_A);
 
                     if (!headOutlineRoots.TryGetValue(player, out var hroot) || hroot == null)
@@ -92,9 +98,15 @@ namespace UnifromCheat_REPO.WallHack
                 }
                 
                 if (trackedPlayers.ContainsKey(player))
+                {
+                    if (trackedPlayers[player] != null)
+                        trackedPlayers[player].gameObject.SetActive(true);
                     UpdateText(player, mainCamera);
+                }
                 else
+                {
                     CreateTextLabel(player, mainCamera);
+                }
             }
             
             SweepMissing(others);
@@ -196,6 +208,31 @@ namespace UnifromCheat_REPO.WallHack
             
             return av.gameObject;
         }
+
+        private static PlayerDeathHead GetPlayerDeathHead(PlayerAvatar player)
+        {
+            if (player == null) return null;
+
+            var deathHead = PlayerDeathHeadField?.GetValue(player) as PlayerDeathHead;
+            if (deathHead != null) return deathHead;
+
+            if (player.playerCosmetics != null && player.playerCosmetics.deathHead != null)
+                return player.playerCosmetics.deathHead;
+
+            var cosmetics = player.GetComponentInChildren<PlayerCosmetics>(true);
+            return cosmetics != null ? cosmetics.deathHead : null;
+        }
+
+        private static bool IsTriggeredDeathHead(PlayerDeathHead deathHead)
+        {
+            if (deathHead == null || deathHead.gameObject == null) return false;
+
+            var triggeredValue = DeathHeadTriggeredField?.GetValue(deathHead);
+            if (triggeredValue is bool triggered)
+                return triggered;
+
+            return deathHead.gameObject.activeInHierarchy;
+        }
         
         private static GameObject CreateWHCopy(GameObject source, Color color)
         {
@@ -206,7 +243,7 @@ namespace UnifromCheat_REPO.WallHack
 
             foreach (var mr in source.GetComponentsInChildren<MeshRenderer>(true))
             {
-                if (mr == null || !mr.enabled) continue;
+                if (mr == null) continue;
                 var mf = mr.GetComponent<MeshFilter>();
                 if (mf == null || mf.sharedMesh == null) continue;
 
@@ -216,11 +253,12 @@ namespace UnifromCheat_REPO.WallHack
 
                 var newMf = go.AddComponent<MeshFilter>(); newMf.sharedMesh = mf.sharedMesh;
                 var newMr = go.AddComponent<MeshRenderer>(); newMr.material = BuildWHMaterial(color);
+                WallHackRenderUtils.ConfigureOverlayRenderer(newMr);
             }
 
             foreach (var smr in source.GetComponentsInChildren<SkinnedMeshRenderer>(true))
             {
-                if (smr == null || !smr.enabled || smr.sharedMesh == null) continue;
+                if (smr == null || smr.sharedMesh == null) continue;
 
                 var go = new GameObject(smr.gameObject.name + "_WH_Skinned");
                 go.transform.SetParent(root.transform, false);
@@ -232,6 +270,7 @@ namespace UnifromCheat_REPO.WallHack
                 newSmr.bones = smr.bones;
                 newSmr.updateWhenOffscreen = true;
                 newSmr.material = BuildWHMaterial(color);
+                WallHackRenderUtils.ConfigureOverlayRenderer(newSmr);
             }
 
             return root;
@@ -239,19 +278,14 @@ namespace UnifromCheat_REPO.WallHack
 
         private static Material BuildWHMaterial(Color c)
         {
-            var mat = new Material(Shader.Find("Hidden/Internal-Colored")) { hideFlags = HideFlags.HideAndDontSave };
-            mat.SetInt(ZTest, (int)UnityEngine.Rendering.CompareFunction.Always);
-            mat.SetInt(Cull, (int)UnityEngine.Rendering.CullMode.Front);
-            mat.SetInt(ZWrite, 0);
-            mat.SetColor(ColorID, c);
-            return mat;
+            return WallHackRenderUtils.CreateOverlayMaterial(c);
         }
 
         private static void UpdateWHCopyColor(GameObject root, Color c)
         {
             if (root == null) return;
             foreach (var r in root.GetComponentsInChildren<Renderer>())
-                if (r != null && r.material != null) r.material.color = c;
+                WallHackRenderUtils.SetRendererColor(r, c);
         }
 
         private class OutlineFollower : MonoBehaviour
@@ -272,6 +306,7 @@ namespace UnifromCheat_REPO.WallHack
         private static void CreateTextLabel(PlayerAvatar player, Camera mainCamera)
         {
             GameObject textObject = new GameObject("Player_Label");
+            textObject.hideFlags = HideFlags.DontSave;
             TextMeshPro textMesh = textObject.AddComponent<TextMeshPro>();
 
             textMesh.text = "<color=red></color>";
@@ -283,13 +318,11 @@ namespace UnifromCheat_REPO.WallHack
             textMesh.alignment = TextAlignmentOptions.Center;
             textMesh.enableWordWrapping = false;
             textMesh.isOverlay = true;
-
-            textObject.transform.SetParent(player.transform, false);
+            WallHackRenderUtils.ConfigureOverlayText(textMesh);
 
             if (mainCamera != null)
             {
-                textObject.transform.LookAt(mainCamera.transform);
-                textObject.transform.Rotate(0, 180, 0);
+                UpdateTextTransform(textMesh, player, mainCamera);
             }
 
             trackedPlayers[player] = textMesh;
@@ -329,11 +362,23 @@ namespace UnifromCheat_REPO.WallHack
                 textMesh.text = GetPlayerInfo(player);
                 textMesh.fontSize = dynamicSize;
                 
-                if (pwh_syncTextColorWithGlow) textMesh.color = new Color(PC_R, PC_G, PC_B, PC_A);
-                else textMesh.color = new Color(PTC_R, PTC_G, PTC_B, PTC_A);
+                Color textColor = pwh_syncTextColorWithGlow
+                    ? new Color(PC_R, PC_G, PC_B, PC_A)
+                    : new Color(PTC_R, PTC_G, PTC_B, PTC_A);
+                WallHackRenderUtils.SetTextColor(textMesh, textColor);
 
-                textMesh.transform.rotation = Quaternion.LookRotation(mainCamera.transform.forward);
+                UpdateTextTransform(textMesh, player, mainCamera);
             }
+        }
+
+        private static void UpdateTextTransform(TextMeshPro textMesh, PlayerAvatar player, Camera mainCamera)
+        {
+            Renderer renderer = player.GetComponentInChildren<Renderer>(true);
+            Vector3 center = renderer != null ? renderer.bounds.center : player.transform.position;
+            float yOffset = renderer != null ? Mathf.Max(renderer.bounds.size.y, 1f) : 2f;
+
+            textMesh.transform.position = center + Vector3.up * (yOffset + 0.5f);
+            WallHackRenderUtils.FaceTextToCamera(textMesh, mainCamera);
         }
 
         private static void ClearPlayerLabels()
@@ -353,6 +398,10 @@ namespace UnifromCheat_REPO.WallHack
             foreach (var kv in bodyOutlineRoots)
                 if (kv.Value != null) Object.Destroy(kv.Value);
             bodyOutlineRoots.Clear();
+
+            foreach (var kv in headOutlineRoots)
+                if (kv.Value != null) Object.Destroy(kv.Value);
+            headOutlineRoots.Clear();
         }
 
         private void Update()

@@ -1,4 +1,5 @@
 ﻿using UnifromCheat_REPO.Utils;
+using System.Collections.Generic;
 using UnityEngine;
 using static UnifromCheat_REPO.Utils.FireboxConsole;
 
@@ -6,17 +7,25 @@ namespace UnifromCheat_REPO;
 
 public partial class Core
 {
-    internal string cheatVersion = "3.1.2"; 
-    
+    internal string cheatVersion = "4.0.0";
+
     private Rect RectMenu;
     private float dpiScaling => Mathf.Min(Screen.width / 1920f, Screen.height / 1080f);
     private Vector2 scrollPosition = Vector2.zero;
     private bool isMenuInitialized;
+    private float menuAnimationProgress;
+    private const float MenuAnimationSpeed = 8.5f;
+    private const int MenuAnimatedTileCount = 6;
+    private readonly Dictionary<string, float> foldoutAnimations = new();
+    private readonly Stack<Matrix4x4> foldoutMatrices = new();
+    private readonly Stack<Color> foldoutColors = new();
+    private readonly Stack<bool> foldoutEnabledStates = new();
     
     public byte MenuID = 1;
     internal static bool MenuState = false;
     internal static bool dragWindow = false;
     internal static bool IsUnifromReady = false;
+    internal static bool isProtectedSession;
 
     internal static bool customCursor = false;
     internal static bool enableCustomCursor = true;
@@ -51,6 +60,7 @@ public partial class Core
 
     internal static bool isGodModeEnabled;
     internal static bool isInfiniteSprint;
+    internal static bool isInfiniteAmmo;
     /*internal static bool isInfiniteEnergy;*/
 
     internal static bool _isFullbrightEnabled;
@@ -90,6 +100,9 @@ public partial class Core
 
     internal static bool isCustomJumpForceEnabled = true;
     internal static float jumpForce = 17;
+    
+    internal static bool isRenderSettingsOpened = false;
+    internal static float wallHackCameraFarClipPlane = 300f;
     
     internal static bool isItemsWallHackEnabled = true;
     internal static bool item_glow_color = false;
@@ -141,6 +154,29 @@ public partial class Core
     internal static float sortFromPrice;
     internal static float sortToPrice = 50000;
     internal static float itemTextSize = 3;
+
+    internal static bool isCosmeticBoxesWallHackEnabled = true;
+    internal static bool cosmetic_box_glow_color = false;
+    internal static bool cosmetic_box_text_color = false;
+    internal static bool cosmetic_box_rarity_text_color = false;
+    internal static bool cosmeticBoxTextSyncWithGlow = true;
+    internal static bool showCosmeticBoxRarity = true;
+
+    internal static float CBC_R = 1f;
+    internal static float CBC_G = 0f;
+    internal static float CBC_B = 1f;
+    internal static float CBC_A = 1f;
+
+    internal static float CBTC_R = 1f;
+    internal static float CBTC_G = 0f;
+    internal static float CBTC_B = 1f;
+    internal static float CBTC_A = 1f;
+
+    internal static float CBRTC_R = 1f;
+    internal static float CBRTC_G = 0f;
+    internal static float CBRTC_B = 1f;
+    internal static float CBRTC_A = 1f;
+    internal static float cosmeticBoxTextSize = 3;
 
     internal static bool isEnemyWallHackEnabled = true;
     internal static bool enemy_glow_color = false;
