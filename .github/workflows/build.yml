@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore UnifromCheat_REPO.sln
+
+    - name: Prepare dependency directories
+      shell: pwsh
+      run: |
+        $repoRoot = Resolve-Path "."
+
+        # --- Game DLLs (resolve relative HintPath: ..\..\..\..\..\SteamLibrary\...) ---
+        $hintBase = $repoRoot
+        for ($i = 0; $i -lt 5; $i++) {
+            $parent = Split-Path $hintBase -Parent
+            if ($parent -eq $hintBase -or $parent -eq "") { break }
+            $hintBase = $parent
+        }
+        $gameTarget = Join-Path $hintBase "SteamLibrary\steamapps\common\REPO\REPO_Data\Managed"
+        New-Item -ItemType Directory -Path $gameTarget -Force | Out-Null
+        Copy-Item -Path (Join-Path $repoRoot "libs\*.dll") -Destination $gameTarget -Force
+        Write-Host "Game DLLs copied to $gameTarget"
+
+        # --- BepInEx DLLs (resolve absolute HintPath: D:\Packages\...) ---
+        $bepInExTarget = "D:\Packages\BepInEx-Unity.Mono-win-x64-6.0.0-pre.2\BepInEx\core"
+        New-Item -ItemType Directory -Path $bepInExTarget -Force | Out-Null
+        Copy-Item -Path (Join-Path $repoRoot "BepInExLibs\*.dll") -Destination $bepInExTarget -Force
+        Write-Host "BepInEx DLLs copied to $bepInExTarget"
+
+    - name: Build
+      run: msbuild UnifromCheat_REPO.sln /p:Configuration=Release /p:Platform=AnyCPU
