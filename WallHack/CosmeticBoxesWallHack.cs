@@ -38,6 +38,12 @@ namespace UnifromCheat_REPO.WallHack
             if (Core.WH_BlockUpdates)
                 return;
 
+            if (!Core.visualsMasterSwitch)
+            {
+                SetActiveAll(false);
+                return;
+            }
+
             boxesTimer += Time.deltaTime;
             if (boxesTimer >= BoxesUpdateInterval)
             {

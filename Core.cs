@@ -91,6 +91,9 @@ namespace UnifromCheat_REPO
             if (Keyboard.current.insertKey.wasPressedThisFrame || Keyboard.current.rightAltKey.wasPressedThisFrame
                 || Keyboard.current.f11Key.wasPressedThisFrame)
                 ToggleMenu();
+
+            if (Keyboard.current.f12Key.wasPressedThisFrame)
+                visualsMasterSwitch = !visualsMasterSwitch;
         }
 
         private void LateUpdate()

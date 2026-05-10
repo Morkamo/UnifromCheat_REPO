@@ -51,10 +51,10 @@ public class RGBPlayer : MonoBehaviour
             Instance = null;
     }
 
-    private void Update()
-    {
-        if (!Core.isRGBPlayerEnabled)
-            return;
+        private void Update()
+        {
+            if (!Core.isRGBPlayerEnabled || !Core.visualsMasterSwitch)
+                return;
 
         if (Time.unscaledTime < nextUpdateTime)
             return;

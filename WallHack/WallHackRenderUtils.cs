@@ -139,10 +139,11 @@ namespace UnifromCheat_REPO.WallHack
 
         private static bool IsAnyWallHackEnabled()
         {
-            return Core.isItemsWallHackEnabled
-                   || Core.isEnemyWallHackEnabled
-                   || Core.isPlayerWallHackEnabled
-                   || Core.isCosmeticBoxesWallHackEnabled;
+            return Core.visualsMasterSwitch
+                   && (Core.isItemsWallHackEnabled
+                       || Core.isEnemyWallHackEnabled
+                       || Core.isPlayerWallHackEnabled
+                       || Core.isCosmeticBoxesWallHackEnabled);
         }
 
         public static void FaceTextToCamera(TextMeshPro text, Camera camera)

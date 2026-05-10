@@ -101,6 +101,7 @@ public partial class Core
     internal static bool isCustomJumpForceEnabled = true;
     internal static float jumpForce = 17;
     
+    internal static bool visualsMasterSwitch = true;
     internal static bool isRenderSettingsOpened = false;
     internal static float wallHackCameraFarClipPlane = 300f;
     

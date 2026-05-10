@@ -408,6 +408,12 @@ namespace UnifromCheat_REPO.WallHack
         {
             if (Core.WH_BlockUpdates) 
                 return;
+
+            if (!Core.visualsMasterSwitch)
+            {
+                ClearAll();
+                return;
+            }
             RenderPlayers();
         }
     }

@@ -478,6 +478,12 @@ public partial class Core
         if (BeginAnimatedFoldout("menu.wallhack", WallHackTab))
         {
             GUILayout.BeginVertical(windowStyle);
+
+            DrawToggle("<b>ALL VISUALS</b>", ref visualsMasterSwitch,
+                visualsMasterSwitch ? Color.green : Color.red,
+                "Master switch - disables all visual features (WH, Fullbright, RGB, FOV)");
+
+            GUILayout.Space(5);
             
             if (GUILayout.Button("<b>RENDER SETTINGS</b>", buttonStyle)) isRenderSettingsOpened = !isRenderSettingsOpened;
             if (BeginAnimatedFoldout("wh.rendersettings.enabled", isRenderSettingsOpened, -10f))

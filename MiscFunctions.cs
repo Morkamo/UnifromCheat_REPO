@@ -39,7 +39,7 @@ namespace UnifromCheat_REPO
 
         private void Fullbright(Camera cam)
         {
-            if (Core.isFullbrightEnabled)
+            if (Core.isFullbrightEnabled && Core.visualsMasterSwitch)
                 FullbrightManager.ApplyFullbright();
         }
 
@@ -47,7 +47,7 @@ namespace UnifromCheat_REPO
         {
             Core.ApplyRenderDistance(cam);
 
-            if (Core.isCustomFovEnabled)
+            if (Core.isCustomFovEnabled && Core.visualsMasterSwitch)
             {
                 cam.fieldOfView = Core.fovValue;
                 

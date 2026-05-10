@@ -96,6 +96,12 @@ namespace UnifromCheat_REPO.WallHack
         {
             if (Core.WH_BlockUpdates) 
                 return;
+
+            if (!Core.visualsMasterSwitch)
+            {
+                SetActiveAll(false);
+                return;
+            }
             
             itemsTimer += Time.deltaTime;
             if (itemsTimer >= itemsUpdateInterval)
