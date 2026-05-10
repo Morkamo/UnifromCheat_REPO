@@ -39,6 +39,8 @@
         <Compile Include="Funs\SnowfallUI.cs" />
         <Compile Include="GUIMenuSkin.cs" />
         <Compile Include="GUITooltip.cs" />
+        <Compile Include="HideMe.cs" />
+        <Compile Include="Keybinds.cs" />
         <Compile Include="Loader.cs" />
         <Compile Include="MiscFunctions.cs" />
         <Compile Include="Notifications.cs" />
@@ -65,6 +67,7 @@
         <Compile Include="Patches\WallHackSceneTransitionPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="TooltipsLanguages.cs" />
+        <Compile Include="UnloadCheat.cs" />
         <Compile Include="UnifromGUI.cs" />
         <Compile Include="Utils\ConfigSystem.cs" />
         <Compile Include="Utils\EnemiesTeleporter.cs" />

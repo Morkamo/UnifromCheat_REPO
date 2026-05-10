@@ -1,5 +1,6 @@
 ﻿using UnifromCheat_REPO.Utils;
 using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnifromCheat_REPO.WallHack;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ namespace UnifromCheat_REPO
     public class MiscFunctions : MonoBehaviour
     {
         public static MiscFunctions Instance;
+        private static readonly Dictionary<Camera, float> defaultCameraFovs = new();
 
         private void Awake()
         {
@@ -47,6 +49,15 @@ namespace UnifromCheat_REPO
         {
             Core.ApplyRenderDistance(cam);
 
+            if (Core.isHideMeActive || !Core.isCustomFovEnabled)
+            {
+                RestoreCameraFov(cam);
+                return;
+            }
+
+            if (!defaultCameraFovs.ContainsKey(cam))
+                defaultCameraFovs[cam] = cam.fieldOfView;
+
             if (Core.isCustomFovEnabled)
             {
                 cam.fieldOfView = Core.fovValue;
@@ -63,7 +74,74 @@ namespace UnifromCheat_REPO
             }
             else
             {
-                cam.ResetCullingMatrix();
+                RestoreCameraFov(cam);
+            }
+        }
+
+        public static void RestoreAllCameraFov()
+        {
+            int cameraCount = Camera.allCamerasCount;
+            if (cameraCount <= 0)
+            {
+                RestoreCameraFov(Camera.main);
+                return;
+            }
+
+            var cameras = new Camera[cameraCount];
+            int count = Camera.GetAllCameras(cameras);
+            for (int i = 0; i < count; i++)
+                RestoreCameraFov(cameras[i]);
+        }
+
+        private static void RestoreCameraFov(Camera cam)
+        {
+            if (cam == null)
+                return;
+
+            if (defaultCameraFovs.TryGetValue(cam, out float defaultFov))
+                cam.fieldOfView = defaultFov;
+
+            cam.ResetCullingMatrix();
+        }
+
+        public static void ApplyConfiguredFlashlightSettings()
+        {
+            var flashlight = GetPlayerFlashlight();
+            if (flashlight == null)
+                return;
+
+            flashlight.shadows = Core.isFlashlightShadowsEnabled ? LightShadows.Hard : LightShadows.None;
+            flashlight.spotAngle = Core.flashlightSpotAngle;
+            flashlight.range = Core.flashlightRange;
+            flashlight.color = new Color(Core.FLC_R, Core.FLC_G, Core.FLC_B);
+        }
+
+        public static void RestoreDefaultFlashlightSettings()
+        {
+            var flashlight = GetPlayerFlashlight();
+            if (flashlight == null)
+                return;
+
+            flashlight.shadows = LightShadows.Hard;
+            flashlight.spotAngle = 60f;
+            flashlight.range = 25f;
+            flashlight.color = new Color(1f, 0.674f, 0.382f, 1f);
+        }
+
+        private static Light GetPlayerFlashlight()
+        {
+            try
+            {
+                if (PlayerController.instance == null ||
+                    PlayerController.instance.playerAvatarScript == null ||
+                    PlayerController.instance.playerAvatarScript.flashlightController == null)
+                    return null;
+
+                return PlayerController.instance.playerAvatarScript.flashlightController.spotlight;
+            }
+            catch
+            {
+                return null;
             }
         }
         

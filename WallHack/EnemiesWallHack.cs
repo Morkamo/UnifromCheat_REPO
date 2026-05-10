@@ -426,6 +426,17 @@ namespace UnifromCheat_REPO.WallHack
                 if (enemy != null) Object.Destroy(enemy.gameObject);
             trackedEnemies.Clear();
         }
+
+        public static void SetTemporaryVisible(bool visible)
+        {
+            bool active = visible && isEnemyWallHackEnabled;
+
+            foreach (var label in trackedEnemies.Values)
+                if (label != null) label.gameObject.SetActive(active);
+
+            foreach (var root in enemyOutlineRoots.Values)
+                if (root != null) root.SetActive(active && showEnemyGlow);
+        }
         
         public static void ClearAll()
         {
@@ -440,7 +451,7 @@ namespace UnifromCheat_REPO.WallHack
 
         private void Update()
         {
-            if (Core.WH_BlockUpdates) 
+            if (Core.WH_BlockUpdates || Core.isHideMeActive) 
                 return;
             
             RenderEnemies();

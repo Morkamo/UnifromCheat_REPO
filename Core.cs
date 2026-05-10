@@ -87,11 +87,17 @@ namespace UnifromCheat_REPO
 
         private void Update()
         {
+            UpdateKeybindCapture();
+            UpdateHideMe();
             UpdateMenuAnimation();
             GameController.UpdateGameplay();
+            
+            if (isHideMeActive)
+                return;
 
-            if (Keyboard.current.insertKey.wasPressedThisFrame || Keyboard.current.rightAltKey.wasPressedThisFrame
-                || Keyboard.current.f11Key.wasPressedThisFrame)
+            var keyboard = Keyboard.current;
+            if (keyboard != null && (keyboard.insertKey.wasPressedThisFrame || keyboard.rightAltKey.wasPressedThisFrame
+                || keyboard.f11Key.wasPressedThisFrame))
                 ToggleMenu();
         }
 
@@ -126,10 +132,22 @@ namespace UnifromCheat_REPO
             if (camera == null)
                 return;
 
-            float farClip = Mathf.Clamp(wallHackCameraFarClipPlane, 1f, 10000f);
+            wallHackCameraFarClipPlane = ValidateRenderDistance(wallHackCameraFarClipPlane);
+            float farClip = wallHackCameraFarClipPlane;
             camera.farClipPlane = farClip;
             camera.layerCullSpherical = false;
             camera.useOcclusionCulling = false;
+        }
+
+        internal static float ValidateRenderDistance(float value)
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value))
+                return DefaultRenderDistance;
+
+            if (value < MinRenderDistance || value > MaxRenderDistance)
+                return DefaultRenderDistance;
+
+            return value;
         }
 
         private void UpdateMenuAnimation()
@@ -144,7 +162,7 @@ namespace UnifromCheat_REPO
         
         internal void ToggleMenu()
         {
-            if (!IsUnifromReady)
+            if (!IsUnifromReady || isHideMeActive)
                 return;
             
             MenuState = !MenuState;
@@ -227,6 +245,9 @@ namespace UnifromCheat_REPO
         
         public void OnGUI()
         {
+            if (isHideMeActive)
+                return;
+
             bool shouldDrawMenu = MenuState || menuAnimationProgress > 0.001f;
             bool shouldDrawMessages = activeMessages.Count > 0;
             if (!shouldDrawMenu && !shouldDrawMessages)
@@ -281,6 +302,7 @@ namespace UnifromCheat_REPO
 
             DrawObjectSpawnerWindow();
             DrawGameControllerWindow();
+            DrawUnloadConfirmationWindow(Mathf.SmoothStep(0f, 1f, menuAnimationProgress));
             DrawMessages();
 
             GUI.matrix = originalMatrix;

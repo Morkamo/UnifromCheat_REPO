@@ -497,7 +497,9 @@ public partial class Core
                 GUILayout.BeginVertical(windowStyle);
                 
                 DrawLabel("Render distance:", Color.white);
-                DrawSlider("Distance", ref wallHackCameraFarClipPlane, 1f, 600f, 300f, Get("renderDistance"));
+                wallHackCameraFarClipPlane = ValidateRenderDistance(wallHackCameraFarClipPlane);
+                DrawSlider("Distance", ref wallHackCameraFarClipPlane, MinRenderDistance, MaxRenderDistance, DefaultRenderDistance, Get("renderDistance"));
+                wallHackCameraFarClipPlane = ValidateRenderDistance(wallHackCameraFarClipPlane);
                 
                 GUILayout.EndVertical();
             }
@@ -824,8 +826,18 @@ public partial class Core
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
-                GUILayout.Label("Bind: [<b>ALT</b>]", labelStyle);
+                DrawKeybindField("Bind", ref noclipBind, "LeftAlt", "noclip");
                 DrawSlider("Noclip speed", ref noclipSpeed, 1, 20, 5, Get("noclipSpeed"));
+                GUILayout.EndVertical();
+                EndAnimatedFoldout();
+            }
+
+            DrawToggle("Hide Me", ref isHideMeEnabled, Color.green, Get("hideMe"));
+            if (BeginAnimatedFoldout("menu.misc.hideMe", isHideMeEnabled, -10f))
+            {
+                GUILayout.Space(5);
+                GUILayout.BeginVertical(windowStyle);
+                DrawKeybindField("Bind", ref hideMeBind, "F9", "hideMe");
                 GUILayout.EndVertical();
                 EndAnimatedFoldout();
             }
@@ -854,6 +866,14 @@ public partial class Core
             }
             
             DrawToggle("Multi-jumps", ref multiJumps, Color.green, Get("multiJumps"));
+
+            GUILayout.Space(8);
+            if (GUILayout.Button("<b>UNLOAD CHEAT</b>", buttonStyle, GUILayout.Height(32)))
+                OpenUnloadConfirmation();
+
+            Rect unloadRect = GUILayoutUtility.GetLastRect();
+            if (!string.IsNullOrWhiteSpace(Get("unloadCheat")) && !HideAllTooltips)
+                GUITooltip.Show(Get("unloadCheat"), unloadRect);
 
             GUILayout.Space(5);
             GUILayout.EndVertical();

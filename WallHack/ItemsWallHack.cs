@@ -96,7 +96,7 @@ namespace UnifromCheat_REPO.WallHack
 
         private void Update()
         {
-            if (Core.WH_BlockUpdates) 
+            if (Core.WH_BlockUpdates || Core.isHideMeActive) 
                 return;
             
             itemsTimer += Time.deltaTime;
@@ -380,6 +380,11 @@ namespace UnifromCheat_REPO.WallHack
 
             foreach (var ep in extractionOutlines.Values)
                 if (ep != null) ep.SetActive(active);
+        }
+
+        public static void SetTemporaryVisible(bool visible)
+        {
+            SetActiveAll(visible && isItemsWallHackEnabled);
         }
 
         private static void ClearMissingItems(List<ValuableObject> currentItems)

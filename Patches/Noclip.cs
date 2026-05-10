@@ -32,11 +32,16 @@ namespace UnifromCheat_REPO.Patches
                 return;
             }
 
-            if (Keyboard.current.leftAltKey.wasPressedThisFrame)
+            if (Core.WasNoclipHotkeyPressed())
             {
                 isActive = !isActive;
                 UpdateNoclipState();
             }
+        }
+
+        public void ForceDisable()
+        {
+            ResetNoclip();
         }
 
         private void UpdateNoclipState()

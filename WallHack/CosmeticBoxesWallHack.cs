@@ -35,7 +35,7 @@ namespace UnifromCheat_REPO.WallHack
 
         private void Update()
         {
-            if (Core.WH_BlockUpdates)
+            if (Core.WH_BlockUpdates || Core.isHideMeActive)
                 return;
 
             boxesTimer += Time.deltaTime;
@@ -218,6 +218,11 @@ namespace UnifromCheat_REPO.WallHack
 
             foreach (var outline in boxOutlines.Values)
                 if (outline != null) outline.SetActive(active);
+        }
+
+        public static void SetTemporaryVisible(bool visible)
+        {
+            SetActiveAll(visible && isCosmeticBoxesWallHackEnabled);
         }
 
         private static void ClearMissing(List<CosmeticWorldObject> currentBoxes)

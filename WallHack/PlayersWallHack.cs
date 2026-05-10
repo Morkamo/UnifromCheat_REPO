@@ -450,6 +450,20 @@ namespace UnifromCheat_REPO.WallHack
                 if (player != null) Object.Destroy(player.gameObject);
             trackedPlayers.Clear();
         }
+
+        public static void SetTemporaryVisible(bool visible)
+        {
+            bool active = visible && isPlayerWallHackEnabled;
+
+            foreach (var kv in trackedPlayers)
+                if (kv.Value != null) kv.Value.gameObject.SetActive(active);
+
+            foreach (var kv in bodyOutlineRoots)
+                if (kv.Value != null) kv.Value.SetActive(active && isShowPlayerGlow);
+
+            foreach (var kv in headOutlineRoots)
+                if (kv.Value != null) kv.Value.SetActive(active && isShowPlayerDeadHead);
+        }
         
         public static void ClearAll()
         {
@@ -469,7 +483,7 @@ namespace UnifromCheat_REPO.WallHack
 
         private void Update()
         {
-            if (Core.WH_BlockUpdates) 
+            if (Core.WH_BlockUpdates || Core.isHideMeActive) 
                 return;
             RenderPlayers();
         }

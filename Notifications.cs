@@ -38,6 +38,11 @@ public partial class Core
         });
     }
 
+    private static void ClearMessages()
+    {
+        activeMessages.Clear();
+    }
+
     private void DrawMessages()
     {
         if (activeMessages.Count == 0)

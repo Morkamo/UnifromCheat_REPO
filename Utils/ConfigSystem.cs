@@ -132,6 +132,9 @@ namespace UnifromCheat_REPO.Utils
         // ===== Misc =====
         public bool isNoclipEnabled;
         public float noclipSpeed;
+        public string noclipBind;
+        public bool isHideMeEnabled;
+        public string hideMeBind;
 
         public bool isFullbrightEnabled;
         public float FB_R, FB_G, FB_B;
@@ -216,7 +219,7 @@ namespace UnifromCheat_REPO
 
                 // ===== Item WH =====
                 isItemWallHackEnabled = isItemsWallHackEnabled,
-                wallHackCameraFarClipPlane = wallHackCameraFarClipPlane,
+                wallHackCameraFarClipPlane = ValidateRenderDistance(wallHackCameraFarClipPlane),
                 items_glow_color = item_glow_color,
                 item_text_color = item_text_color,
                 iwh_syncTextColorWithGlow = iwh_syncTextColorWithGlow,
@@ -304,6 +307,9 @@ namespace UnifromCheat_REPO
                 // ===== Misc =====
                 isNoclipEnabled = isNoclipEnabled,
                 noclipSpeed = noclipSpeed,
+                noclipBind = noclipBind,
+                isHideMeEnabled = isHideMeEnabled,
+                hideMeBind = hideMeBind,
 
                 isFullbrightEnabled = isFullbrightEnabled,
                 FB_R = FB_R, FB_G = FB_G, FB_B = FB_B,
@@ -393,7 +399,7 @@ namespace UnifromCheat_REPO
 
             // ===== Item WH =====
             isItemsWallHackEnabled = cfg.isItemWallHackEnabled;
-            wallHackCameraFarClipPlane = cfg.wallHackCameraFarClipPlane > 0f ? cfg.wallHackCameraFarClipPlane : 300f;
+            wallHackCameraFarClipPlane = ValidateRenderDistance(cfg.wallHackCameraFarClipPlane);
             item_glow_color = cfg.items_glow_color;
             item_text_color = cfg.item_text_color;
             iwh_syncTextColorWithGlow = cfg.iwh_syncTextColorWithGlow;
@@ -493,6 +499,10 @@ namespace UnifromCheat_REPO
             // ===== Misc =====
             isNoclipEnabled = cfg.isNoclipEnabled;
             noclipSpeed = cfg.noclipSpeed;
+            noclipBind = string.IsNullOrWhiteSpace(cfg.noclipBind) ? "LeftAlt" : cfg.noclipBind;
+            isHideMeEnabled = cfg.isHideMeEnabled;
+            hideMeBind = string.IsNullOrWhiteSpace(cfg.hideMeBind) ? "F9" : cfg.hideMeBind;
+            isHideMeActive = false;
 
             isFullbrightEnabled = cfg.isFullbrightEnabled;
             FB_R = cfg.FB_R; FB_G = cfg.FB_G; FB_B = cfg.FB_B;
@@ -568,7 +578,7 @@ namespace UnifromCheat_REPO
 
             // ===== Item WH =====
             isItemsWallHackEnabled = true;
-            wallHackCameraFarClipPlane = 300f;
+            wallHackCameraFarClipPlane = DefaultRenderDistance;
             item_glow_color = false;
             item_text_color = false;
             iwh_syncTextColorWithGlow = true;
@@ -648,6 +658,10 @@ namespace UnifromCheat_REPO
 
             // ===== Misc =====
             isNoclipEnabled = false; noclipSpeed = 5f;
+            noclipBind = "LeftAlt";
+            isHideMeEnabled = false;
+            hideMeBind = "F9";
+            isHideMeActive = false;
             isFullbrightEnabled = false; FB_R = 1f; FB_G = 1f; FB_B = 1f;
             isOneShotModeEnabled = false;
             isPeacefulEnemiesEnabled = false;

@@ -24,17 +24,5 @@ namespace UnifromCheat_REPO
 
             Object.DontDestroyOnLoad(LoaderObject);
         }
-
-        /*public static async void Unload()
-        {
-            if (LoaderObject != null)
-                UnityEngine.Object.DestroyImmediate(LoaderObject);
-
-            FireboxConsole.FireLog("Good bye!");
-            
-            await Task.Delay(2000);
-            
-            FireboxConsole.Close();
-        }*/
     }
 }

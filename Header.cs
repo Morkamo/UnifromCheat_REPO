@@ -108,6 +108,9 @@ public partial class Core
     internal static float jumpForce = 17;
     
     internal static bool isRenderSettingsOpened = false;
+    internal const float DefaultRenderDistance = 300f;
+    internal const float MinRenderDistance = 1f;
+    internal const float MaxRenderDistance = 600f;
     internal static float wallHackCameraFarClipPlane = 300f;
     
     internal static bool isItemsWallHackEnabled = true;
@@ -234,6 +237,8 @@ public partial class Core
 
     internal static bool isNoclipEnabled;
     internal static float noclipSpeed = 5f;
+    internal static bool isHideMeEnabled;
+    internal static bool isHideMeActive;
     
     internal static bool isOneShotModeEnabled;
     internal static bool isPeacefulEnemiesEnabled;
