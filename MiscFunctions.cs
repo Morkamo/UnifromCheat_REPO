@@ -79,6 +79,12 @@ namespace UnifromCheat_REPO
 
         public void OnGrabbedObject(Rigidbody rb)
         {
+            if (rb == null)
+                return;
+
+            if (!HostOnlyGuard.IsHostOnlyActive())
+                return;
+            
             if (Core.valuablesTeleporter)
             {
                 if (rb.isKinematic && Core.vtm_disableKinematicOnTouch)

@@ -13,6 +13,8 @@ namespace UnifromCheat_REPO.WallHack
         private static readonly Dictionary<PlayerAvatar, TextMeshPro> trackedPlayers = new();
         private static readonly Dictionary<PlayerAvatar, GameObject> bodyOutlineRoots = new();
         private static readonly Dictionary<PlayerAvatar, GameObject> headOutlineRoots = new();
+        private static readonly HashSet<PlayerAvatar> s_processedThisFrame = new();
+        private static readonly List<PlayerAvatar> s_tmpToRemove = new();
         private static readonly FieldInfo PlayerDeathHeadField = typeof(PlayerAvatar).GetField(
             "playerDeathHead",
             BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
@@ -46,11 +48,22 @@ namespace UnifromCheat_REPO.WallHack
             var mainCamera = Camera.main;
             if (mainCamera == null) return;
 
+            s_processedThisFrame.Clear();
+
             foreach (var player in others)
             {
                 if (player == null || player.gameObject == null) continue;
                 var pv = player.GetComponent<PhotonView>();
                 if (pv == null) { RemoveBodyOutline(player); RemoveHeadOutline(player); RemoveLabel(player); continue; }
+
+                if (!TryGetPlayerVisualBounds(player, out var visualBounds))
+                {
+                    RemoveBodyOutline(player);
+                    RemoveLabel(player);
+                    continue;
+                }
+
+                s_processedThisFrame.Add(player);
 
                 PlayerDeathHead deathHead = GetPlayerDeathHead(player);
                 bool deathHeadTriggered = IsTriggeredDeathHead(deathHead);
@@ -97,20 +110,25 @@ namespace UnifromCheat_REPO.WallHack
                     RemoveBodyOutline(player);
                 }
                 
-                if (trackedPlayers.ContainsKey(player))
+                if (isPlayerWallHackEnabled)
                 {
-                    if (trackedPlayers[player] != null)
-                        trackedPlayers[player].gameObject.SetActive(true);
-                    UpdateText(player, mainCamera);
-                }
-                else
-                {
-                    CreateTextLabel(player, mainCamera);
+                    if (trackedPlayers.ContainsKey(player))
+                    {
+                        if (trackedPlayers[player] != null)
+                            trackedPlayers[player].gameObject.SetActive(true);
+                        UpdateText(player, mainCamera, visualBounds);
+                    }
+                    else
+                    {
+                        CreateTextLabel(player, mainCamera, visualBounds);
+                    }
                 }
             }
             
-            SweepMissing(others);
-            if (!isPlayerWallHackEnabled) ClearPlayerLabels();
+            if (!isPlayerWallHackEnabled)
+                ClearPlayerLabels();
+
+            SweepMissing();
         }
 
         private static bool IsDeadOrGone(PlayerAvatar av)
@@ -132,24 +150,27 @@ namespace UnifromCheat_REPO.WallHack
             return false;
         }
 
-        private static void SweepMissing(List<PlayerAvatar> currentAvatars)
+        private static void SweepMissing()
         {
-            var aliveOrDead = new HashSet<PlayerAvatar>(currentAvatars.Where(av => av != null));
-            
-            var deadBodies = bodyOutlineRoots.Keys
-                .Where(av => av == null || !aliveOrDead.Contains(av) || IsDeadOrGone(av))
-                .ToList();
-            foreach (var av in deadBodies) RemoveBodyOutline(av);
-            
-            var missingHeads = headOutlineRoots.Keys
-                .Where(av => av == null || !aliveOrDead.Contains(av))
-                .ToList();
-            foreach (var av in missingHeads) RemoveHeadOutline(av);
-            
-            var deadLabels = trackedPlayers.Keys
-                .Where(av => av == null || !aliveOrDead.Contains(av))
-                .ToList();
-            foreach (var av in deadLabels) RemoveLabel(av);
+            s_tmpToRemove.Clear();
+            foreach (var kv in bodyOutlineRoots)
+                if (kv.Key == null || !s_processedThisFrame.Contains(kv.Key) || IsDeadOrGone(kv.Key))
+                    s_tmpToRemove.Add(kv.Key);
+            foreach (var av in s_tmpToRemove) RemoveBodyOutline(av);
+
+            s_tmpToRemove.Clear();
+            foreach (var kv in headOutlineRoots)
+                if (kv.Key == null || !s_processedThisFrame.Contains(kv.Key))
+                    s_tmpToRemove.Add(kv.Key);
+            foreach (var av in s_tmpToRemove) RemoveHeadOutline(av);
+
+            s_tmpToRemove.Clear();
+            foreach (var kv in trackedPlayers)
+                if (kv.Key == null || !s_processedThisFrame.Contains(kv.Key))
+                    s_tmpToRemove.Add(kv.Key);
+            foreach (var av in s_tmpToRemove) RemoveLabel(av);
+
+            s_processedThisFrame.Clear();
         }
 
         private static void RemoveBodyOutline(PlayerAvatar av)
@@ -209,6 +230,48 @@ namespace UnifromCheat_REPO.WallHack
             return av.gameObject;
         }
 
+        private static bool TryGetPlayerVisualBounds(PlayerAvatar player, out Bounds bounds)
+        {
+            bounds = default;
+
+            GameObject visualRoot = GetMeshRoot(player);
+            if (visualRoot == null || !visualRoot.activeInHierarchy)
+                return false;
+
+            bool found = false;
+            foreach (var renderer in visualRoot.GetComponentsInChildren<Renderer>(true))
+            {
+                if (!ShouldUsePlayerRenderer(renderer))
+                    continue;
+
+                if (!renderer.gameObject.activeInHierarchy || renderer.bounds.size.sqrMagnitude <= 0.0001f)
+                    continue;
+
+                if (!found)
+                {
+                    bounds = renderer.bounds;
+                    found = true;
+                }
+                else
+                {
+                    bounds.Encapsulate(renderer.bounds);
+                }
+            }
+
+            return found && bounds.size.sqrMagnitude > 0.0001f;
+        }
+
+        private static bool ShouldUsePlayerRenderer(Renderer renderer)
+        {
+            if (renderer == null || !renderer.enabled)
+                return false;
+
+            if (renderer.GetComponent<TextMeshPro>() != null)
+                return false;
+
+            return true;
+        }
+
         private static PlayerDeathHead GetPlayerDeathHead(PlayerAvatar player)
         {
             if (player == null) return null;
@@ -252,7 +315,8 @@ namespace UnifromCheat_REPO.WallHack
                 var follower = go.AddComponent<OutlineFollower>(); follower.Init(mf.transform);
 
                 var newMf = go.AddComponent<MeshFilter>(); newMf.sharedMesh = mf.sharedMesh;
-                var newMr = go.AddComponent<MeshRenderer>(); newMr.material = BuildWHMaterial(color);
+                var newMr = go.AddComponent<MeshRenderer>();
+                WallHackRenderUtils.AssignOverlayMaterial(newMr, BuildWHMaterial(color));
                 WallHackRenderUtils.ConfigureOverlayRenderer(newMr);
             }
 
@@ -269,7 +333,7 @@ namespace UnifromCheat_REPO.WallHack
                 newSmr.rootBone = smr.rootBone;
                 newSmr.bones = smr.bones;
                 newSmr.updateWhenOffscreen = true;
-                newSmr.material = BuildWHMaterial(color);
+                WallHackRenderUtils.AssignOverlayMaterial(newSmr, BuildWHMaterial(color));
                 WallHackRenderUtils.ConfigureOverlayRenderer(newSmr);
             }
 
@@ -303,7 +367,7 @@ namespace UnifromCheat_REPO.WallHack
             }
         }
         
-        private static void CreateTextLabel(PlayerAvatar player, Camera mainCamera)
+        private static void CreateTextLabel(PlayerAvatar player, Camera mainCamera, Bounds visualBounds)
         {
             GameObject textObject = new GameObject("Player_Label");
             textObject.hideFlags = HideFlags.DontSave;
@@ -322,7 +386,7 @@ namespace UnifromCheat_REPO.WallHack
 
             if (mainCamera != null)
             {
-                UpdateTextTransform(textMesh, player, mainCamera);
+                UpdateTextTransform(textMesh, visualBounds, mainCamera);
             }
 
             trackedPlayers[player] = textMesh;
@@ -352,11 +416,11 @@ namespace UnifromCheat_REPO.WallHack
             return "NULL DATA";
         }
 
-        private static void UpdateText(PlayerAvatar player, Camera mainCamera)
+        private static void UpdateText(PlayerAvatar player, Camera mainCamera, Bounds visualBounds)
         {
             if (trackedPlayers.TryGetValue(player, out var textMesh) && mainCamera != null)
             {
-                float distance = Vector3.Distance(mainCamera.transform.position, player.transform.position);
+                float distance = Vector3.Distance(mainCamera.transform.position, visualBounds.center);
                 float dynamicSize = Mathf.Clamp((0.2f + distance) - 1, 0.2f, playerTextSize);
 
                 textMesh.text = GetPlayerInfo(player);
@@ -367,15 +431,14 @@ namespace UnifromCheat_REPO.WallHack
                     : new Color(PTC_R, PTC_G, PTC_B, PTC_A);
                 WallHackRenderUtils.SetTextColor(textMesh, textColor);
 
-                UpdateTextTransform(textMesh, player, mainCamera);
+                UpdateTextTransform(textMesh, visualBounds, mainCamera);
             }
         }
 
-        private static void UpdateTextTransform(TextMeshPro textMesh, PlayerAvatar player, Camera mainCamera)
+        private static void UpdateTextTransform(TextMeshPro textMesh, Bounds visualBounds, Camera mainCamera)
         {
-            Renderer renderer = player.GetComponentInChildren<Renderer>(true);
-            Vector3 center = renderer != null ? renderer.bounds.center : player.transform.position;
-            float yOffset = renderer != null ? Mathf.Max(renderer.bounds.size.y, 1f) : 2f;
+            Vector3 center = visualBounds.center;
+            float yOffset = Mathf.Max(visualBounds.size.y, 1f);
 
             textMesh.transform.position = center + Vector3.up * (yOffset + 0.5f);
             WallHackRenderUtils.FaceTextToCamera(textMesh, mainCamera);

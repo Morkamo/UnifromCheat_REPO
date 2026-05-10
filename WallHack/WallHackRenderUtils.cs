@@ -1,4 +1,3 @@
-using System.Runtime.Remoting.Messaging;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -61,6 +60,17 @@ namespace UnifromCheat_REPO.WallHack
             renderer.sortingOrder = short.MaxValue;
         }
 
+        public static void AssignOverlayMaterial(Renderer renderer, Material material)
+        {
+            if (renderer == null || material == null) return;
+
+            renderer.sharedMaterial = material;
+            var owner = renderer.GetComponent<WallHackOwnedMaterial>();
+            if (owner == null)
+                owner = renderer.gameObject.AddComponent<WallHackOwnedMaterial>();
+            owner.Init(material);
+        }
+
         public static void ConfigureOverlayText(TextMeshPro text)
         {
             if (text == null) return;
@@ -77,6 +87,11 @@ namespace UnifromCheat_REPO.WallHack
                     hideFlags = HideFlags.HideAndDontSave
                 };
                 text.fontSharedMaterial = material;
+
+                var owner = text.GetComponent<WallHackOwnedMaterial>();
+                if (owner == null)
+                    owner = text.gameObject.AddComponent<WallHackOwnedMaterial>();
+                owner.Init(material);
             }
 
             if (material != null)
@@ -109,12 +124,14 @@ namespace UnifromCheat_REPO.WallHack
 
         public static void SetRendererColor(Renderer renderer, Color color)
         {
-            if (renderer == null || renderer.material == null) return;
+            if (renderer == null || renderer.sharedMaterial == null) return;
 
-            Material material = renderer.material;
+            Material material = renderer.sharedMaterial;
             material.renderQueue = GetRenderQueue();
             if (material.HasProperty(ColorID))
                 material.SetColor(ColorID, color);
+            if (material.HasProperty(FaceColorID))
+                material.SetColor(FaceColorID, color);
         }
 
         private static int GetRenderQueue()
@@ -154,6 +171,23 @@ namespace UnifromCheat_REPO.WallHack
                 direction = camera.transform.forward;
 
             text.transform.rotation = Quaternion.LookRotation(direction.normalized, camera.transform.up);
+        }
+    }
+
+    internal class WallHackOwnedMaterial : MonoBehaviour
+    {
+        private Material material;
+
+        public void Init(Material ownedMaterial)
+        {
+            material = ownedMaterial;
+        }
+
+        private void OnDestroy()
+        {
+            if (material != null)
+                Destroy(material);
+            material = null;
         }
     }
 

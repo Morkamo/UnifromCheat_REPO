@@ -7,7 +7,7 @@ namespace UnifromCheat_REPO;
 
 public partial class Core
 {
-    internal string cheatVersion = "4.0.0";
+    internal string cheatVersion = "4.1.0";
 
     private Rect RectMenu;
     private float dpiScaling => Mathf.Min(Screen.width / 1920f, Screen.height / 1080f);
@@ -50,6 +50,12 @@ public partial class Core
     private bool MiscTab = true;
     private bool ConfigTab = true;
     private bool HostFunctsTab = true;
+    private Rect objectSpawnerRect = new Rect(620, 110, 700, 640);
+    private Vector2 objectSpawnerScroll = Vector2.zero;
+    private float objectSpawnerAnimationProgress;
+    private Rect gameControllerRect = new Rect(660, 140, 760, 660);
+    private Vector2 gameControllerScroll = Vector2.zero;
+    private float gameControllerAnimationProgress;
     internal static bool HideAllHints;
     internal static bool HideAllTooltips;
     
@@ -230,6 +236,7 @@ public partial class Core
     internal static float noclipSpeed = 5f;
     
     internal static bool isOneShotModeEnabled;
+    internal static bool isPeacefulEnemiesEnabled;
     internal static bool isLiteItemsModeEnabled;
     internal static bool isFragilityDisabled;
     internal static bool isGhostItemsMode;
@@ -272,6 +279,13 @@ public partial class Core
     internal static bool em_teleportOnTouch = false;
     internal static float em_teleportYOffset = 0.5f;
     internal static bool em_one_any;
+
+    internal static bool objectSpawnerWindowOpen;
+    internal static bool gameControllerWindowOpen;
+    internal static bool gcDisableSpawnAI;
+    internal static bool gcDisableAutoExtract;
+    internal static bool gcSharedUpgrades;
+    internal static bool gcAutoRevive;
     
     internal static bool WH_BlockUpdates = false;
     internal static bool WH_AlreadyCleared = false;

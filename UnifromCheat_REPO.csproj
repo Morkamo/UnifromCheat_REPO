@@ -12,6 +12,7 @@
         <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>latest</LangVersion>
+        <CodePage>65001</CodePage>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>x64</PlatformTarget>
@@ -40,6 +41,9 @@
         <Compile Include="GUITooltip.cs" />
         <Compile Include="Loader.cs" />
         <Compile Include="MiscFunctions.cs" />
+        <Compile Include="Notifications.cs" />
+        <Compile Include="GameControllerWindow.cs" />
+        <Compile Include="ObjectSpawnerWindow.cs" />
         <Compile Include="Patches\CosmeticObjectSearcher.cs" />
         <Compile Include="Patches\PatchCameraAimUpdate.cs" />
         <Compile Include="Patches\PatchGameMouseInput.cs" />
@@ -50,11 +54,13 @@
         <Compile Include="Patches\MultiJumps.cs" />
         <Compile Include="Patches\Noclip.cs" />
         <Compile Include="Patches\OneTapMode.cs" />
+        <Compile Include="Patches\PeacefulEnemies.cs" />
         <Compile Include="Patches\PatchGameCursorVisible.cs" />
         <Compile Include="Patches\PatchUnityCursorVisible.cs" />
         <Compile Include="Patches\ProtectedSessionPatch.cs" />
         <Compile Include="Patches\SpawnTaxReturn.cs" />
         <Compile Include="Patches\SpeedHack.cs" />
+        <Compile Include="Patches\GameControllerPatches.cs" />
         <Compile Include="Patches\OverridePhysAttributes.cs" />
         <Compile Include="Patches\WallHackSceneTransitionPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
@@ -64,10 +70,13 @@
         <Compile Include="Utils\EnemiesTeleporter.cs" />
         <Compile Include="Utils\FireboxConsole.cs" />
         <Compile Include="Utils\FullbrightManager.cs" />
+        <Compile Include="Utils\GameController.cs" />
         <Compile Include="Utils\GameObjectAnalyzer.cs" />
         <Compile Include="Utils\GrabWatcher.cs" />
         <Compile Include="Utils\HintsController.cs" />
         <Compile Include="Header.cs" />
+        <Compile Include="Utils\HostOnlyGuard.cs" />
+        <Compile Include="Utils\LocalizedMessages.cs" />
         <Compile Include="Utils\PhysGrabberRefs.cs" />
         <Compile Include="Utils\PhysGrabObjectRefs.cs" />
         <Compile Include="Utils\PlayerAvatarRefs.cs" />
@@ -77,6 +86,7 @@
         <Compile Include="Utils\PlayerTumbleRefs.cs" />
         <Compile Include="Utils\ResourceLoader.cs" />
         <Compile Include="Utils\RGBPlayer.cs" />
+        <Compile Include="Utils\ObjectSpawner.cs" />
         <Compile Include="Utils\TutorialDirectorRefs.cs" />
         <Compile Include="Utils\ValuableTeleporter.cs" />
         <Compile Include="WallHack\EnemiesWallHack.cs" />

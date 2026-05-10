@@ -24,7 +24,7 @@ namespace UnifromCheat_REPO.Patches
 
         static bool Prefix(ItemGun __instance)
         {
-            if (Core.isInfiniteAmmo)
+            if (Core.isInfiniteAmmo && HostOnlyGuard.IsHostOnlyActive())
             {
                 ItemBattery battery =
                     (ItemBattery)ItemBatteryField.GetValue(__instance);
@@ -49,7 +49,7 @@ namespace UnifromCheat_REPO.Patches
         {
             static void Postfix(ItemGun __instance)
             {
-                if (Core.isInfiniteAmmo)
+                if (Core.isInfiniteAmmo && HostOnlyGuard.IsHostOnlyActive())
                     return;
 
                 ItemBattery battery = (ItemBattery)ItemBatteryField.GetValue(__instance);

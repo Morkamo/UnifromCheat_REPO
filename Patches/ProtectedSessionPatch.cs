@@ -1,4 +1,5 @@
 using HarmonyLib;
+using UnifromCheat_REPO.Utils;
 
 namespace UnifromCheat_REPO.Patches
 {
@@ -13,10 +14,7 @@ namespace UnifromCheat_REPO.Patches
 
         private static bool Prefix()
         {
-            if (!Core.isProtectedSession)
-                return true;
-
-            if (!SemiFunc.IsMasterClientOrSingleplayer())
+            if (!Core.isProtectedSession || !HostOnlyGuard.IsHostOnlyActive())
                 return true;
 
             RunManager runManager = RunManager.instance;

@@ -13,6 +13,18 @@ namespace UnifromCheat_REPO;
 
 public partial class Core
 {
+    private void DrawHostOnlyToggle(string label, ref bool value, Color? onColor = null, string tooltip = null, string animationKey = null)
+    {
+        bool before = value;
+        Color activeColor = value && HostOnlyGuard.ShouldShowUnavailableStatus()
+            ? new Color(1f, 0.22f, 0.18f, 1f)
+            : onColor ?? Color.green;
+
+        DrawToggle(label, ref value, activeColor, tooltip, animationKey);
+        if (value && !before && HostOnlyGuard.ShouldShowUnavailableStatus())
+            HostOnlyGuard.CanUseHostOnly(true, label);
+    }
+
     private void GUIMenuInit(int id)
     {
         float baseWidth = 1920;
@@ -861,17 +873,18 @@ public partial class Core
         {
             GUILayout.BeginVertical(windowStyle);
             
-            DrawToggle("Protected session", ref isProtectedSession, Color.green, Get("protectedSession"));
-            DrawToggle("Infinity ammo", ref isInfiniteAmmo, Color.green, Get("infAmmo"));
+            DrawHostOnlyToggle("Protected session", ref isProtectedSession, Color.green, Get("protectedSession"));
+            DrawHostOnlyToggle("Infinity ammo", ref isInfiniteAmmo, Color.green, Get("infAmmo"));
             
-            DrawToggle("Valuables teleporter", ref valuablesTeleporter, Color.green, Get("valuablesTp"));
+            DrawHostOnlyToggle("Valuables teleporter", ref valuablesTeleporter, Color.green, Get("valuablesTp"));
             if (BeginAnimatedFoldout("menu.host.valuables", valuablesTeleporter, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
                 if (GUILayout.Button("Teleport", buttonStyle))
                 {
-                    MiscFunctions.Instance.TeleportValuables(vt_state, vtm_one_any, vtm_kinematic);
+                    if (HostOnlyGuard.CanUseHostOnly(true, "Valuables teleporter"))
+                        MiscFunctions.Instance.TeleportValuables(vt_state, vtm_one_any, vtm_kinematic);
                 }
                 
                 GUILayout.EndVertical();
@@ -917,14 +930,15 @@ public partial class Core
                 EndAnimatedFoldout();
             }
             
-            DrawToggle("Enemies teleporter", ref enemiesTeleporter, Color.green, Get("enemiesTp"));
+            DrawHostOnlyToggle("Enemies teleporter", ref enemiesTeleporter, Color.green, Get("enemiesTp"));
             if (BeginAnimatedFoldout("menu.host.enemies", enemiesTeleporter, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
                 if (GUILayout.Button("Teleport", buttonStyle))
                 {
-                    MiscFunctions.Instance.TeleportEnemies(em_state, em_one_any, em_kinematic);
+                    if (HostOnlyGuard.CanUseHostOnly(true, "Enemies teleporter"))
+                        MiscFunctions.Instance.TeleportEnemies(em_state, em_one_any, em_kinematic);
                 }
                 GUILayout.EndVertical();
 
@@ -970,24 +984,38 @@ public partial class Core
                 GUILayout.EndVertical();
             }*/
             
-            DrawToggle("No fragility", ref isFragilityDisabled, Color.green, Get("fragilityOff"));
-            DrawToggle("Ghost items", ref isGhostItemsMode, Color.green, Get("ghostItems"));
-            DrawToggle("Lite items", ref isLiteItemsModeEnabled, Color.green, Get("liteItems"));
-            DrawToggle("One-shot kills", ref isOneShotModeEnabled, Color.green, Get("oneShotKill"));
+            DrawHostOnlyToggle("No fragility", ref isFragilityDisabled, Color.green, Get("fragilityOff"));
+            DrawHostOnlyToggle("Ghost items", ref isGhostItemsMode, Color.green, Get("ghostItems"));
+            DrawHostOnlyToggle("Lite items", ref isLiteItemsModeEnabled, Color.green, Get("liteItems"));
+            DrawHostOnlyToggle("Peaceful enemies", ref isPeacefulEnemiesEnabled, Color.green, Get("peacefulEnemies"));
+            DrawHostOnlyToggle("One-shot kills", ref isOneShotModeEnabled, Color.green, Get("oneShotKill"));
 
             GUILayout.Space(5);
 
             if (GUILayout.Button("<b>KILL ENEMIES</b>", buttonStyle))
             {
-                foreach (var enemy in EnemyDirector.instance.enemiesSpawned)
+                if (HostOnlyGuard.CanUseHostOnly(true, "Kill enemies"))
                 {
-                    var hp = enemy.GetComponentInChildren<EnemyHealth>();
+                    foreach (var enemy in EnemyDirector.instance.enemiesSpawned)
+                    {
+                        var hp = enemy.GetComponentInChildren<EnemyHealth>();
                     
-                    if (hp == null) 
-                        continue;
+                        if (hp == null) 
+                            continue;
 
-                    hp.Hurt(int.MaxValue, Vector3.up);
-                }
+                        hp.Hurt(int.MaxValue, Vector3.up);
+                    }
+                } 
+            }
+            
+            if (GUILayout.Button("<b>OBJECT SPAWNER</b>", buttonStyle))
+            {
+                objectSpawnerWindowOpen = !objectSpawnerWindowOpen;
+            }
+
+            if (GUILayout.Button("<b>GAME CONTROLLER</b>", buttonStyle))
+            {
+                gameControllerWindowOpen = !gameControllerWindowOpen;
             }
 
             /*if (GUILayout.Button("<b>SOULS SPAWNER</b>", buttonStyle))

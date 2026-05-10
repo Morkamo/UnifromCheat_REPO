@@ -405,7 +405,7 @@ namespace UnifromCheat_REPO
             GUI.color = previousColor;
         }
 
-        public static void DrawAnimatedSectionFrame(Rect rect, float time, float alpha, int seed)
+        public static void DrawAnimatedSectionFrame(Rect rect, float time, float alpha, int seed, float speedMultiplier = 1f)
         {
             if (whiteTex == null || Event.current.type != EventType.Repaint || alpha <= 0f)
                 return;
@@ -416,12 +416,13 @@ namespace UnifromCheat_REPO
 
             Color previousColor = GUI.color;
             float phase = seed * 1.37f;
-            DrawAnimatedLine(new Rect(frame.x, frame.y, frame.width, 2f), time, alpha, phase, true);
-            DrawAnimatedLine(new Rect(frame.x, frame.yMax - 2f, frame.width, 2f), time, alpha, phase + 1.7f, true);
-            DrawAnimatedLine(new Rect(frame.x, frame.y, 2f, frame.height), time, alpha, phase + 3.1f, false);
-            DrawAnimatedLine(new Rect(frame.xMax - 2f, frame.y, 2f, frame.height), time, alpha, phase + 4.4f, false);
+            float adjustedTime = time * Mathf.Max(0.05f, speedMultiplier);
+            DrawAnimatedLine(new Rect(frame.x, frame.y, frame.width, 2f), adjustedTime, alpha, phase, true);
+            DrawAnimatedLine(new Rect(frame.x, frame.yMax - 2f, frame.width, 2f), adjustedTime, alpha, phase + 1.7f, true);
+            DrawAnimatedLine(new Rect(frame.x, frame.y, 2f, frame.height), adjustedTime, alpha, phase + 3.1f, false);
+            DrawAnimatedLine(new Rect(frame.xMax - 2f, frame.y, 2f, frame.height), adjustedTime, alpha, phase + 4.4f, false);
 
-            DrawFrameSweep(frame, time, alpha, seed);
+            DrawFrameSweep(frame, adjustedTime, alpha, seed);
             GUI.color = previousColor;
         }
 
@@ -451,9 +452,10 @@ namespace UnifromCheat_REPO
         {
             float sweepWidth = 150f;
             float offset = seed * 97f;
-            float topX = frame.x + Mathf.Repeat(time * (205f + seed * 8f) + offset, frame.width + sweepWidth) - sweepWidth;
-            float bottomX = frame.xMax - Mathf.Repeat(time * (175f + seed * 6f) + 80f + offset, frame.width + sweepWidth);
-            float sideY = frame.y + Mathf.Repeat(time * (130f + seed * 5f) + 40f + offset, frame.height + sweepWidth) - sweepWidth;
+            int speedSeed = Mathf.Abs(seed % 17);
+            float topX = frame.x + Mathf.Repeat(time * (205f + speedSeed * 8f) + offset, frame.width + sweepWidth) - sweepWidth;
+            float bottomX = frame.xMax - Mathf.Repeat(time * (175f + speedSeed * 6f) + 80f + offset, frame.width + sweepWidth);
+            float sideY = frame.y + Mathf.Repeat(time * (130f + speedSeed * 5f) + 40f + offset, frame.height + sweepWidth) - sweepWidth;
 
             GUI.color = new Color(0.92f, 0.96f, 1f, 0.42f * alpha);
             DrawClippedTexture(new Rect(topX, frame.y, sweepWidth, 2f), frame);

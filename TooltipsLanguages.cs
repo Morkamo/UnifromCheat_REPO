@@ -1,4 +1,4 @@
-﻿﻿using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace UnifromCheat_REPO
 {
@@ -51,6 +51,7 @@ namespace UnifromCheat_REPO
                         { "noclipSpeed", "Speed while noclip is active" },
                         { "noTumbleCooldown", "Removes tumble exit cooldown" },
                         { "oneShotKill", "Kill enemies with one hit" },
+                        { "peacefulEnemies", "Enemies ignore you." },
                         { "protectedSession", "Prevents save deletion after losing (if you leave before dying in the losers arena)" },
                         { "renderDistance", "Game render distance" },
                         { "rgbPlayer", "Automatically cycles player color" },
@@ -131,6 +132,7 @@ namespace UnifromCheat_REPO
                         { "noclipSpeed", "Скорость перемещения в режиме noclip" },
                         { "noTumbleCooldown", "Убирает задержку выхода из tumble" },
                         { "oneShotKill", "Уничтожает врагов одним ударом/выстрелом" },
+                        { "peacefulEnemies", "Враги вас игнорируют." },
                         { "protectedSession", "Не даёт удалить сохранение после проигрыша (если выйдите до гибели на арене лузеров)" },
                         { "renderDistance", "Дистанция прорисовки игры" },
                         { "rgbPlayer", "Автоматическая смена цвета модели игрока" },
@@ -211,6 +213,7 @@ namespace UnifromCheat_REPO
                         { "noclipSpeed", "Швидкість у режимі noclip" },
                         { "noTumbleCooldown", "Прибирає затримку виходу з tumble" },
                         { "oneShotKill", "Знищує ворогів одним ударом/пострілом" },
+                        { "peacefulEnemies", "Вороги вас ігнорують." },
                         { "protectedSession", "Не дає видалити збереження після програшу (якщо вийдете до загибелі на арені лузерів)" },
                         { "renderDistance", "Дистанція промальовування гри" },
                         { "rgbPlayer", "Автоматична зміна кольору моделі гравця" },
@@ -291,6 +294,7 @@ namespace UnifromCheat_REPO
                         { "noclipSpeed", "穿墙模式速度" },
                         { "noTumbleCooldown", "移除翻滚退出冷却" },
                         { "oneShotKill", "一击必杀" },
+                        { "peacefulEnemies", "敌人会忽略你。" },
                         { "protectedSession", "失败后防止删除存档（如果在失败者竞技场死亡前退出）" },
                         { "renderDistance", "游戏渲染距离" },
                         { "rgbPlayer", "自动循环玩家颜色" },
@@ -336,7 +340,111 @@ namespace UnifromCheat_REPO
                 if (dict.TryGetValue(key, out var value))
                     return value;
             }
+
+            if (TryGetRuntimeTooltip(Core.lg_state, key, out string runtimeValue))
+                return runtimeValue;
+
             return null;
+        }
+
+        private static bool TryGetRuntimeTooltip(int language, string key, out string value)
+        {
+            value = null;
+            switch (key)
+            {
+                case "objectSpawnerItemsTab":
+                    value = language switch
+                    {
+                        1 => "Предметы из списка игры.",
+                        2 => "Предмети зі списку гри.",
+                        3 => "游戏物品列表。",
+                        _ => "Items from the game's item list."
+                    };
+                    return true;
+                case "objectSpawnerValuablesTab":
+                    value = language switch
+                    {
+                        1 => "Ценности и cosmetic boxes.",
+                        2 => "Цінності та cosmetic boxes.",
+                        3 => "贵重物品和 cosmetic boxes。",
+                        _ => "Valuables and cosmetic boxes."
+                    };
+                    return true;
+                case "objectSpawnerEntityTab":
+                    value = language switch
+                    {
+                        1 => "Спавн монстров.",
+                        2 => "Спавн монстрів.",
+                        3 => "生成怪物。",
+                        _ => "Spawn enemies."
+                    };
+                    return true;
+                case "gameControllerPlayersTab":
+                    value = language switch
+                    {
+                        1 => "Действия с игроками в сессии.",
+                        2 => "Дії з гравцями у сесії.",
+                        3 => "对当前会话中玩家的操作。",
+                        _ => "Actions for players in the session."
+                    };
+                    return true;
+                case "gameControllerMapsTab":
+                    value = language switch
+                    {
+                        1 => "Смена игровой карты с подтверждением.",
+                        2 => "Зміна ігрової карти з підтвердженням.",
+                        3 => "通过确认更改游戏地图。",
+                        _ => "Change the current game map with confirmation."
+                    };
+                    return true;
+                case "gameControllerGameplayTab":
+                    value = language switch
+                    {
+                        1 => "Изменения игрового процесса.",
+                        2 => "Зміни ігрового процесу.",
+                        3 => "游戏流程更改。",
+                        _ => "Gameplay changes."
+                    };
+                    return true;
+                case "gameControllerDisableSpawnAIToggle":
+                    value = language switch
+                    {
+                        1 => "Новые враги не спавнятся, а текущие исчезают.",
+                        2 => "Нові вороги не спавняться, а поточні зникають.",
+                        3 => "新敌人不会生成，现有敌人会被移除。",
+                        _ => "Stops new enemy spawns and removes current enemies."
+                    };
+                    return true;
+                case "gameControllerDisableAutoExtractToggle":
+                    value = language switch
+                    {
+                        1 => "Автозапуск экстрактора по квоте отключается.",
+                        2 => "Автозапуск екстрактора за квотою вимикається.",
+                        3 => "达到配额后的自动提取将被关闭。",
+                        _ => "Disables auto extraction when the quota is reached."
+                    };
+                    return true;
+                case "gameControllerSharedUpgradesToggle":
+                    value = language switch
+                    {
+                        1 => "Апгрейд из коробки выдается всем игрокам.",
+                        2 => "Апгрейд з коробки видається всім гравцям.",
+                        3 => "升级盒效果会分给所有玩家。",
+                        _ => "Upgrade boxes apply their upgrade to all players."
+                    };
+                    return true;
+                case "gameControllerAutoReviveToggle":
+                    value = language switch
+                    {
+                        1 => "Автоматическое возрождение при смерти.",
+                        2 => "Автоматичне відродження після смерті.",
+                        3 => "死亡后自动复活。",
+                        _ => "Automatically revives players after death."
+                    };
+                    return true;
+            }
+
+            return false;
         }
     }
 }

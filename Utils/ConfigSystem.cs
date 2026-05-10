@@ -137,6 +137,7 @@ namespace UnifromCheat_REPO.Utils
         public float FB_R, FB_G, FB_B;
 
         public bool isOneShotModeEnabled;
+        public bool isPeacefulEnemiesEnabled;
         public bool isSuperStrengthEnabled;
         public bool isFragilityDisabled;
         public bool isColliderDisabledOnGrab;
@@ -162,6 +163,12 @@ namespace UnifromCheat_REPO.Utils
         public float em_teleportYOffset;
         public bool em_one_any;
         public bool isProtectedSession;
+
+        // ===== Host Only: Game Controller =====
+        public bool gcDisableSpawnAI;
+        public bool gcDisableAutoExtract;
+        public bool gcSharedUpgrades;
+        public bool gcAutoRevive;
     }
 }
 
@@ -302,6 +309,7 @@ namespace UnifromCheat_REPO
                 FB_R = FB_R, FB_G = FB_G, FB_B = FB_B,
 
                 isOneShotModeEnabled = isOneShotModeEnabled,
+                isPeacefulEnemiesEnabled = isPeacefulEnemiesEnabled,
                 isSuperStrengthEnabled = isLiteItemsModeEnabled,
                 isFragilityDisabled = isFragilityDisabled,
                 isColliderDisabledOnGrab = isGhostItemsMode,
@@ -327,6 +335,12 @@ namespace UnifromCheat_REPO
                 em_teleportYOffset = em_teleportYOffset,
                 em_one_any = em_one_any,
                 isProtectedSession = isProtectedSession,
+
+                // ===== Host Only: Game Controller =====
+                gcDisableSpawnAI = gcDisableSpawnAI,
+                gcDisableAutoExtract = gcDisableAutoExtract,
+                gcSharedUpgrades = gcSharedUpgrades,
+                gcAutoRevive = gcAutoRevive,
             };
 
             string json = JsonUtility.ToJson(cfg, true);
@@ -379,7 +393,7 @@ namespace UnifromCheat_REPO
 
             // ===== Item WH =====
             isItemsWallHackEnabled = cfg.isItemWallHackEnabled;
-            wallHackCameraFarClipPlane = cfg.wallHackCameraFarClipPlane > 0f ? cfg.wallHackCameraFarClipPlane : 4000f;
+            wallHackCameraFarClipPlane = cfg.wallHackCameraFarClipPlane > 0f ? cfg.wallHackCameraFarClipPlane : 300f;
             item_glow_color = cfg.items_glow_color;
             item_text_color = cfg.item_text_color;
             iwh_syncTextColorWithGlow = cfg.iwh_syncTextColorWithGlow;
@@ -484,6 +498,7 @@ namespace UnifromCheat_REPO
             FB_R = cfg.FB_R; FB_G = cfg.FB_G; FB_B = cfg.FB_B;
 
             isOneShotModeEnabled = cfg.isOneShotModeEnabled;
+            isPeacefulEnemiesEnabled = cfg.isPeacefulEnemiesEnabled;
             isLiteItemsModeEnabled = cfg.isSuperStrengthEnabled;
             isFragilityDisabled = cfg.isFragilityDisabled;
             isGhostItemsMode = cfg.isColliderDisabledOnGrab;
@@ -509,6 +524,12 @@ namespace UnifromCheat_REPO
             em_teleportYOffset = cfg.em_teleportYOffset;
             em_one_any = cfg.em_one_any;
             isProtectedSession = cfg.isProtectedSession;
+
+            // ===== Host Only: Game Controller =====
+            gcDisableSpawnAI = cfg.gcDisableSpawnAI;
+            gcDisableAutoExtract = cfg.gcDisableAutoExtract;
+            gcSharedUpgrades = cfg.gcSharedUpgrades;
+            gcAutoRevive = cfg.gcAutoRevive;
 
             FireboxConsole.FireLog("[CFG] Config loaded!");
         }
@@ -629,6 +650,7 @@ namespace UnifromCheat_REPO
             isNoclipEnabled = false; noclipSpeed = 5f;
             isFullbrightEnabled = false; FB_R = 1f; FB_G = 1f; FB_B = 1f;
             isOneShotModeEnabled = false;
+            isPeacefulEnemiesEnabled = false;
             isLiteItemsModeEnabled = false;
             isFragilityDisabled = false;
             isGhostItemsMode = false;
@@ -654,6 +676,12 @@ namespace UnifromCheat_REPO
             em_teleportYOffset = 1f;
             em_one_any = false;
             isProtectedSession = false;
+
+            // ===== Host Only: Game Controller =====
+            gcDisableSpawnAI = false;
+            gcDisableAutoExtract = false;
+            gcSharedUpgrades = false;
+            gcAutoRevive = false;
 
             FireboxConsole.FireLog("[CFG] Config reset to default!");
         }

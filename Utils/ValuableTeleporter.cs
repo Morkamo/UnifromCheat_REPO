@@ -11,8 +11,14 @@ namespace UnifromCheat_REPO.Utils
         public static void Teleport(int targetMode, bool oneAny, bool kinematic)
         {
             var valuables = new List<Component>();
-            valuables.AddRange(ValuableDirector.instance.valuableList);
+            
+            if (ValuableDirector.instance?.valuableList != null)
+                valuables.AddRange(ValuableDirector.instance.valuableList);
+            
             valuables.AddRange(Object.FindObjectsOfType<SurplusValuable>(true));
+            
+            if (RoundDirector.instance?.cosmeticWorldObjects != null)
+                valuables.AddRange(RoundDirector.instance.cosmeticWorldObjects);
 
             var epArray = Object.FindObjectsOfType<ExtractionPoint>(true);
             Vector3? targetPos = GetTargetPos(targetMode, epArray);
@@ -20,7 +26,7 @@ namespace UnifromCheat_REPO.Utils
 
             if (valuables.Count == 0)
             {
-                FireLog("[VT] No valuables or surplus valuables found.");
+                FireLog("[VT] No valuables, surplus valuables or cosmetic boxes found.");
                 return;
             }
 
@@ -47,6 +53,8 @@ namespace UnifromCheat_REPO.Utils
             Component item = rb.GetComponentInParent<ValuableObject>();
             if (item == null)
                 item = rb.GetComponentInParent<SurplusValuable>();
+            if (item == null)
+                item = rb.GetComponentInParent<CosmeticWorldObject>();
 
             if (item != null)
                 TeleportItem(item, targetPos.Value, kinematic);

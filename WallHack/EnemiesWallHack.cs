@@ -113,7 +113,7 @@ namespace UnifromCheat_REPO.WallHack
                 newMf.sharedMesh = mf.sharedMesh;
 
                 var newMr = go.AddComponent<MeshRenderer>(); 
-                newMr.material = BuildWHMaterial(color);
+                WallHackRenderUtils.AssignOverlayMaterial(newMr, BuildWHMaterial(color));
                 WallHackRenderUtils.ConfigureOverlayRenderer(newMr);
                 copiedRenderers++;
             }
@@ -135,7 +135,7 @@ namespace UnifromCheat_REPO.WallHack
                 newSmr.rootBone   = smr.rootBone;
                 newSmr.bones      = smr.bones;
                 newSmr.updateWhenOffscreen = true;
-                newSmr.material   = BuildWHMaterial(color);
+                WallHackRenderUtils.AssignOverlayMaterial(newSmr, BuildWHMaterial(color));
                 WallHackRenderUtils.ConfigureOverlayRenderer(newSmr);
                 copiedRenderers++;
             }

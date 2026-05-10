@@ -17,7 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace UnifromCheat_REPO
 {
-    [BepInPlugin("ru.morkamo.unifrom", "Unifrom", "4.0.0")]
+    [BepInPlugin("ru.morkamo.unifrom", "Unifrom", "4.1.0")]
     public partial class Core : BaseUnityPlugin
     {
         public static Core Instance;
@@ -30,6 +30,7 @@ namespace UnifromCheat_REPO
         public Noclip Noclip;
         public MiscFunctions MiscFunctions;
         public static GameObject unifromCanvasObject;
+        private static Camera[] renderDistanceCameras = new Camera[8];
 
         public static List<GameObject> UnifromHints = new List<GameObject>();
 
@@ -87,6 +88,7 @@ namespace UnifromCheat_REPO
         private void Update()
         {
             UpdateMenuAnimation();
+            GameController.UpdateGameplay();
 
             if (Keyboard.current.insertKey.wasPressedThisFrame || Keyboard.current.rightAltKey.wasPressedThisFrame
                 || Keyboard.current.f11Key.wasPressedThisFrame)
@@ -100,15 +102,23 @@ namespace UnifromCheat_REPO
 
         private static void ApplyRenderDistance()
         {
-            Camera[] cameras = Camera.allCameras;
-            if (cameras == null || cameras.Length == 0)
+            int cameraCount = Camera.allCamerasCount;
+            if (cameraCount <= 0)
             {
                 ApplyRenderDistance(Camera.main);
                 return;
             }
 
-            foreach (Camera camera in cameras)
+            if (renderDistanceCameras.Length < cameraCount)
+                renderDistanceCameras = new Camera[cameraCount];
+
+            int count = Camera.GetAllCameras(renderDistanceCameras);
+            for (int i = 0; i < count; i++)
+            {
+                Camera camera = renderDistanceCameras[i];
                 ApplyRenderDistance(camera);
+                renderDistanceCameras[i] = null;
+            }
         }
 
         internal static void ApplyRenderDistance(Camera camera)
@@ -138,6 +148,8 @@ namespace UnifromCheat_REPO
                 return;
             
             MenuState = !MenuState;
+            if (!MenuState)
+                CloseGameControllerConfirmation();
 
             if (ps_onlyInMenu)
                 unifromCanvasObject.SetActive(MenuState);
@@ -215,14 +227,31 @@ namespace UnifromCheat_REPO
         
         public void OnGUI()
         {
-            if (!MenuState && menuAnimationProgress <= 0.001f)
+            bool shouldDrawMenu = MenuState || menuAnimationProgress > 0.001f;
+            bool shouldDrawMessages = activeMessages.Count > 0;
+            if (!shouldDrawMenu && !shouldDrawMessages)
                 return;
-            
-            if (PlayerController.instance != null)
+
+            if (shouldDrawMenu && PlayerController.instance != null)
                 PlayerController.instance.OverrideLookSpeed(0, 0, 0.1f);
 
             Matrix4x4 originalMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(dpiScaling, dpiScaling, 1f));
+
+            if (GUIMenuSkin.menuSkin == null)
+                InitSkin();
+
+            GUI.skin = GUIMenuSkin.menuSkin;
+            GUI.contentColor = Color.white;
+            GUI.backgroundColor = Color.white;
+            GUI.color = Color.white;
+
+            if (!shouldDrawMenu)
+            {
+                DrawMessages();
+                GUI.matrix = originalMatrix;
+                return;
+            }
 
             if (!isMenuInitialized)
             {
@@ -234,14 +263,6 @@ namespace UnifromCheat_REPO
 
             GUI.backgroundColor = new Color(HC_R, HC_G, HC_B, HC_A);
             GUI.color = new Color(HC_R, HC_G, HC_B, HC_A);
-
-            if (GUIMenuSkin.menuSkin == null)
-                InitSkin();
-
-            GUI.skin = GUIMenuSkin.menuSkin;
-            GUI.contentColor = Color.white;
-            GUI.backgroundColor = Color.white;
-            GUI.color = Color.white;
 
             DrawMenuBackdrop();
             Color menuColor = GUI.color;
@@ -257,6 +278,10 @@ namespace UnifromCheat_REPO
             RectMenu = GUILayout.Window(1, RectMenu, GUIMenuInit, string.Empty);
             GUI.matrix = menuMatrix;
             GUI.color = menuColor;
+
+            DrawObjectSpawnerWindow();
+            DrawGameControllerWindow();
+            DrawMessages();
 
             GUI.matrix = originalMatrix;
         }

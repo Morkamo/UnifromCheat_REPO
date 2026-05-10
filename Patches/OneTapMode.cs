@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using HarmonyLib;
+using UnifromCheat_REPO.Utils;
 
 namespace UnifromCheat_REPO.Patches
 {
@@ -8,7 +9,7 @@ namespace UnifromCheat_REPO.Patches
     {
         protected static bool Prefix(ref int _damage)
         {
-            if (Core.isOneShotModeEnabled)
+            if (Core.isOneShotModeEnabled && HostOnlyGuard.IsHostOnlyActive())
                 _damage = Int32.MaxValue;
             return true;
         }

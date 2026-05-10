@@ -107,7 +107,6 @@ namespace UnifromCheat_REPO.WallHack
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.enableWordWrapping = false;
             tmp.isOverlay = true;
-            tmp.fontSharedMaterial = tmp.font.material;
             WallHackRenderUtils.ConfigureOverlayText(tmp);
             var follower = go.AddComponent<CosmeticBoxTextFollower>();
             follower.Init(tmp, box, -1f);
@@ -200,7 +199,7 @@ namespace UnifromCheat_REPO.WallHack
                 newMf.sharedMesh = mf.sharedMesh;
 
                 var newMr = go.AddComponent<MeshRenderer>();
-                newMr.material = BuildWHMaterial(color);
+                WallHackRenderUtils.AssignOverlayMaterial(newMr, BuildWHMaterial(color));
                 WallHackRenderUtils.ConfigureOverlayRenderer(newMr);
             }
 

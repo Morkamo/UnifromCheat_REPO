@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+using HarmonyLib;
+using UnifromCheat_REPO.Utils;
 
 namespace UnifromCheat_REPO.Patches
 {
@@ -7,17 +8,19 @@ namespace UnifromCheat_REPO.Patches
     {
         protected static bool Prefix(PhysGrabObject __instance)
         {
-            if (Core.isLiteItemsModeEnabled)
+            bool hostOnlyActive = HostOnlyGuard.IsHostOnlyActive();
+
+            if (Core.isLiteItemsModeEnabled && hostOnlyActive)
             {
                 __instance.OverrideMass(1);
             }
-            
-            if (Core.isFragilityDisabled)
+
+            if (Core.isFragilityDisabled && hostOnlyActive)
             {
                 __instance.OverrideFragility(0);
             }
-            
-            if (Core.isGhostItemsMode && __instance.grabbed && __instance.rb.GetComponentInParent<ValuableObject>())
+
+            if (Core.isGhostItemsMode && hostOnlyActive && __instance.grabbed && IsGhostItemTarget(__instance.rb))
             {
                 __instance.rb.detectCollisions = false;
             }
@@ -27,6 +30,15 @@ namespace UnifromCheat_REPO.Patches
             }
 
             return true;
+        }
+
+        private static bool IsGhostItemTarget(UnityEngine.Rigidbody rb)
+        {
+            if (rb == null)
+                return false;
+
+            return rb.GetComponentInParent<ValuableObject>() ||
+                   rb.GetComponentInParent<CosmeticWorldObject>();
         }
     }
 }

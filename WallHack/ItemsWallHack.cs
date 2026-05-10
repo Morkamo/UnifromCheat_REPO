@@ -15,6 +15,8 @@ namespace UnifromCheat_REPO.WallHack
 
         private static readonly Dictionary<ValuableObject, TextMeshPro> trackedItems = new();
         private static readonly Dictionary<ValuableObject, GameObject> itemOutlines = new();
+        private static readonly List<ValuableObject> s_seenItemsThisUpdate = new();
+        private static readonly List<ValuableObject> s_tmpItemsToRemove = new();
 
         internal static readonly Dictionary<SurplusValuable, GameObject> surplusOutlines = new();
         private static readonly Dictionary<ExtractionPoint, GameObject> extractionOutlines = new();
@@ -184,12 +186,20 @@ namespace UnifromCheat_REPO.WallHack
             }
 
             var list = ValuableDirector.instance.valuableList;
+            if (list.Count == 0)
+            {
+                ClearMissingItems(null);
+                return;
+            }
+
             Camera cam = Camera.main;
             if (cam == null) return;
 
+            s_seenItemsThisUpdate.Clear();
             foreach (var item in list)
             {
                 if (item == null || item.gameObject == null) continue;
+                s_seenItemsThisUpdate.Add(item);
 
                 if (!trackedItems.ContainsKey(item))
                 {
@@ -206,6 +216,8 @@ namespace UnifromCheat_REPO.WallHack
                 UpdateText(item, cam);
                 UpdateItemOutline(item);
             }
+
+            ClearMissingItems(s_seenItemsThisUpdate);
         }
 
         private static void UpdateSurplusOutlines()
@@ -261,7 +273,7 @@ namespace UnifromCheat_REPO.WallHack
                 newMf.sharedMesh = mf.sharedMesh;
 
                 var newMr = go.AddComponent<MeshRenderer>();
-                newMr.material = WallHackRenderUtils.CreateOverlayMaterial(color);
+                WallHackRenderUtils.AssignOverlayMaterial(newMr, WallHackRenderUtils.CreateOverlayMaterial(color));
                 WallHackRenderUtils.ConfigureOverlayRenderer(newMr);
             }
 
@@ -282,7 +294,6 @@ namespace UnifromCheat_REPO.WallHack
             if (iwh_syncTextColorWithGlow) tmp.color = new Color(IC_R, IC_G, IC_B, IC_A);
             else tmp.color = new Color(TIC_R, TIC_G, TIC_B, TIC_A);
             
-            tmp.fontSharedMaterial = tmp.font.material;
             WallHackRenderUtils.ConfigureOverlayText(tmp);
             var follower = go.AddComponent<ItemTextFollower>();
             follower.Init(tmp, item, -1f);
@@ -369,6 +380,33 @@ namespace UnifromCheat_REPO.WallHack
 
             foreach (var ep in extractionOutlines.Values)
                 if (ep != null) ep.SetActive(active);
+        }
+
+        private static void ClearMissingItems(List<ValuableObject> currentItems)
+        {
+            s_tmpItemsToRemove.Clear();
+
+            foreach (var item in trackedItems.Keys)
+                if (item == null || currentItems == null || !currentItems.Contains(item))
+                    s_tmpItemsToRemove.Add(item);
+
+            foreach (var item in itemOutlines.Keys)
+                if (item == null || currentItems == null || !currentItems.Contains(item))
+                    s_tmpItemsToRemove.Add(item);
+
+            foreach (var item in s_tmpItemsToRemove)
+                RemoveItem(item);
+        }
+
+        private static void RemoveItem(ValuableObject item)
+        {
+            if (trackedItems.TryGetValue(item, out var tmp) && tmp != null)
+                Object.Destroy(tmp.gameObject);
+            trackedItems.Remove(item);
+
+            if (itemOutlines.TryGetValue(item, out var outline) && outline != null)
+                Object.Destroy(outline);
+            itemOutlines.Remove(item);
         }
         
         public static void ClearAll()
