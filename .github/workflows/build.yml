@@ -23,4 +23,10 @@ jobs:
       run: nuget restore UnifromCheat_REPO.sln
 
     - name: Build
-      run: msbuild UnifromCheat_REPO.sln /p:Configuration=Release /p:Platform="Any CPU"
+      run: msbuild UnifromCheat_REPO.sln /p:Configuration=Release /p:Platform="Any CPU" /p:OutputPath="${{ github.workspace }}\build"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: UnifromCheat_REPO
+        path: ${{ github.workspace }}\build\*.dll
