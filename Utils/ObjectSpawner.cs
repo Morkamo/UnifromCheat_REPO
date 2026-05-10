@@ -24,6 +24,7 @@ namespace UnifromCheat_REPO.Utils
             public GameObject Prefab;
             public SpawnableKind Kind;
             public EnemySetup EnemySetup;
+            public PrefabRef PrefabRef;
         }
 
         private static List<Item> cachedItems;
@@ -82,10 +83,14 @@ namespace UnifromCheat_REPO.Utils
                 if (prefab == null)
                     continue;
 
+                string resourcePath = FindResourcePathForLoadedPrefab(prefab, GetValuableResourceFolders());
+                if (string.IsNullOrWhiteSpace(resourcePath))
+                    continue;
+
                 if (prefab.GetComponentInChildren<CosmeticWorldObject>(true) != null)
-                    AddPrefab(cosmeticBoxes, prefab, "Valuables/" + prefab.name, SpawnableKind.Valuable);
+                    AddPrefab(cosmeticBoxes, prefab, resourcePath, SpawnableKind.Valuable);
                 else if (prefab.GetComponentInChildren<ValuableObject>(true) != null)
-                    AddPrefab(valuables, prefab, "Valuables/" + prefab.name, SpawnableKind.Valuable);
+                    AddPrefab(valuables, prefab, resourcePath, SpawnableKind.Valuable);
             }
 
             cachedValuables = valuables.Values
@@ -114,9 +119,13 @@ namespace UnifromCheat_REPO.Utils
                 if (prefab == null)
                     continue;
 
+                string resourcePath = FindResourcePathForLoadedPrefab(prefab, GetEnemyResourceFolders());
+                if (string.IsNullOrWhiteSpace(resourcePath))
+                    continue;
+
                 if (prefab.GetComponentInChildren<EnemyParent>(true) != null ||
                     prefab.GetComponentInChildren<Enemy>(true) != null)
-                    AddPrefab(entries, prefab, "Enemies/" + prefab.name, SpawnableKind.Entity);
+                    AddPrefab(entries, prefab, resourcePath, SpawnableKind.Entity);
             }
 
             cachedEntities = entries.Values
@@ -360,16 +369,16 @@ namespace UnifromCheat_REPO.Utils
             if (prefabRef == null)
                 return;
 
-            string resourcePath = CombineResourcePath(prefabRef.ResourcePath, prefabRef.PrefabName);
-            AddPrefab(entries, prefabRef.Prefab, resourcePath, kind, enemySetup);
+            string resourcePath = NormalizeResourcePath(prefabRef.ResourcePath);
+            AddPrefab(entries, prefabRef.Prefab, resourcePath, kind, enemySetup, prefabRef);
         }
 
-        private static void AddPrefab(Dictionary<string, SpawnableEntry> entries, GameObject prefab, string resourcePath, SpawnableKind kind, EnemySetup enemySetup = null)
+        private static void AddPrefab(Dictionary<string, SpawnableEntry> entries, GameObject prefab, string resourcePath, SpawnableKind kind, EnemySetup enemySetup = null, PrefabRef prefabRef = null)
         {
             if (prefab == null || string.IsNullOrWhiteSpace(resourcePath))
                 return;
 
-            string key = resourcePath.Trim();
+            string key = NormalizeResourcePath(resourcePath);
             if (entries.ContainsKey(key))
                 return;
 
@@ -379,7 +388,8 @@ namespace UnifromCheat_REPO.Utils
                 ResourcePath = key,
                 Prefab = prefab,
                 Kind = kind,
-                EnemySetup = enemySetup
+                EnemySetup = enemySetup,
+                PrefabRef = prefabRef
             };
         }
 
@@ -551,6 +561,85 @@ namespace UnifromCheat_REPO.Utils
             return resourcePath.EndsWith("/")
                 ? resourcePath + prefabName
                 : resourcePath + "/" + prefabName;
+        }
+
+        private static string FindResourcePathForLoadedPrefab(GameObject prefab, IEnumerable<string> folders)
+        {
+            if (prefab == null || folders == null)
+                return null;
+
+            foreach (string folder in folders)
+            {
+                string normalizedFolder = NormalizeResourcePath(folder);
+                if (string.IsNullOrWhiteSpace(normalizedFolder))
+                    continue;
+
+                string candidate = NormalizeResourcePath(normalizedFolder + "/" + prefab.name);
+                GameObject loaded = Resources.Load<GameObject>(candidate);
+                if (loaded == prefab)
+                    return candidate;
+            }
+
+            return null;
+        }
+
+        private static IEnumerable<string> GetValuableResourceFolders()
+        {
+            string root = NormalizeResourcePath(GetStringField(ValuableDirector.instance, "resourcePath")) ?? "Valuables";
+            yield return root;
+
+            foreach (string fieldName in new[]
+                     {
+                         "tinyPath",
+                         "smallPath",
+                         "mediumPath",
+                         "bigPath",
+                         "widePath",
+                         "tallPath",
+                         "veryTallPath"
+                     })
+            {
+                string folder = GetStringField(ValuableDirector.instance, fieldName);
+                if (!string.IsNullOrWhiteSpace(folder))
+                    yield return CombineResourcePath(root, folder);
+            }
+        }
+
+        private static IEnumerable<string> GetEnemyResourceFolders()
+        {
+            yield return "Enemies";
+
+            foreach (EnemySetup setup in GetAllEnemySetups())
+            {
+                if (setup?.spawnObjects == null)
+                    continue;
+
+                foreach (PrefabRef prefabRef in setup.spawnObjects)
+                {
+                    string path = NormalizeResourcePath(prefabRef?.ResourcePath);
+                    if (string.IsNullOrWhiteSpace(path))
+                        continue;
+
+                    int slash = path.LastIndexOf('/');
+                    if (slash > 0)
+                        yield return path.Substring(0, slash);
+                }
+            }
+        }
+
+        private static IEnumerable<EnemySetup> GetAllEnemySetups()
+        {
+            foreach (EnemySetup setup in EnemyDirector.instance?.enemiesDifficulty1 ?? Enumerable.Empty<EnemySetup>())
+                yield return setup;
+
+            foreach (EnemySetup setup in EnemyDirector.instance?.enemiesDifficulty2 ?? Enumerable.Empty<EnemySetup>())
+                yield return setup;
+
+            foreach (EnemySetup setup in EnemyDirector.instance?.enemiesDifficulty3 ?? Enumerable.Empty<EnemySetup>())
+                yield return setup;
+
+            foreach (EnemySetup setup in GetFieldValue<List<EnemySetup>>(EnemyDirector.instance, "enemyList") ?? Enumerable.Empty<EnemySetup>())
+                yield return setup;
         }
 
         private static string NormalizeResourcePath(string path)
