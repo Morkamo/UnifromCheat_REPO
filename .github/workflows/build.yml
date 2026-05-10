@@ -23,4 +23,4 @@ jobs:
       run: nuget restore UnifromCheat_REPO.sln
 
     - name: Build
-      run: msbuild UnifromCheat_REPO.sln /p:Configuration=Release /p:Platform=AnyCPU
+      run: msbuild UnifromCheat_REPO.sln /p:Configuration=Release /p:Platform="Any CPU"
