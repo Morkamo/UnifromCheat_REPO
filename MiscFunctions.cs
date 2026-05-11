@@ -37,6 +37,12 @@ namespace UnifromCheat_REPO
             Camera.onPreRender -= ChangeFOV;
             Camera.onPreCull -= WallHackRenderUtils.ApplyCameraOverrides;
             GrabWatcher.OnGrabbedObject -= OnGrabbedObject;
+            NoPostProcessingManager.RestoreAll();
+        }
+
+        private void LateUpdate()
+        {
+            NoPostProcessingManager.Update(Core.isNoPostProcessingEnabled);
         }
 
         private void Fullbright(Camera cam)

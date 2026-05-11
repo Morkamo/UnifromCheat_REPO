@@ -91,10 +91,12 @@ public partial class Core
         isNoclipEnabled = false;
         isCustomFovEnabled = false;
         isRGBPlayerEnabled = false;
+        isNoPostProcessingEnabled = false;
         isFlashlightSettingsEnabled = false;
         isFullbrightEnabled = false;
 
         RGBPlayer.StopCycle();
+        NoPostProcessingManager.RestoreAll();
         MiscFunctions.RestoreAllCameraFov();
         MiscFunctions.RestoreDefaultFlashlightSettings();
 

@@ -47,6 +47,7 @@
         <Compile Include="GameControllerWindow.cs" />
         <Compile Include="ObjectSpawnerWindow.cs" />
         <Compile Include="Patches\CosmeticObjectSearcher.cs" />
+        <Compile Include="Patches\CosmeticWorldObjectExtractPatch.cs" />
         <Compile Include="Patches\PatchCameraAimUpdate.cs" />
         <Compile Include="Patches\PatchGameMouseInput.cs" />
         <Compile Include="Patches\GodMode.cs" />
@@ -80,6 +81,7 @@
         <Compile Include="Header.cs" />
         <Compile Include="Utils\HostOnlyGuard.cs" />
         <Compile Include="Utils\LocalizedMessages.cs" />
+        <Compile Include="Utils\NoPostProcessingManager.cs" />
         <Compile Include="Utils\PhysGrabberRefs.cs" />
         <Compile Include="Utils\PhysGrabObjectRefs.cs" />
         <Compile Include="Utils\PlayerAvatarRefs.cs" />

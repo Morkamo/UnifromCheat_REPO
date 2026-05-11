@@ -7,7 +7,7 @@ namespace UnifromCheat_REPO;
 
 public partial class Core
 {
-    internal string cheatVersion = "4.1.0";
+    internal string cheatVersion = "4.2.0";
 
     private Rect RectMenu;
     private float dpiScaling => Mathf.Min(Screen.width / 1920f, Screen.height / 1080f);
@@ -248,6 +248,8 @@ public partial class Core
 
     internal static bool isRGBPlayerEnabled;
     internal static ushort RGBupdateInterval = 200;
+
+    internal static bool isNoPostProcessingEnabled = false;
 
     internal static bool isFlashlightSettingsEnabled = false;
     internal static bool isFlashlightShadowsEnabled = true;

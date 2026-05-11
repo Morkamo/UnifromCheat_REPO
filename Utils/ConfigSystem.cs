@@ -35,6 +35,8 @@ namespace UnifromCheat_REPO.Utils
         public bool isRGBPlayerEnabled;
         public ushort RGBupdateInterval;
 
+        public bool isNoPostProcessingEnabled;
+
         // ===== Flashlight =====
         public bool isFlashlightSettingsEnabled;
         public bool isFlashlightShadowsEnabled;
@@ -209,6 +211,7 @@ namespace UnifromCheat_REPO
 
                 isRGBPlayerEnabled = isRGBPlayerEnabled,
                 RGBupdateInterval = RGBupdateInterval,
+                isNoPostProcessingEnabled = isNoPostProcessingEnabled,
 
                 // ===== Flashlight =====
                 isFlashlightSettingsEnabled = isFlashlightSettingsEnabled,
@@ -389,6 +392,8 @@ namespace UnifromCheat_REPO
 
             isRGBPlayerEnabled = cfg.isRGBPlayerEnabled;
             RGBupdateInterval = cfg.RGBupdateInterval;
+            isNoPostProcessingEnabled = cfg.isNoPostProcessingEnabled;
+            NoPostProcessingManager.SetEnabled(isNoPostProcessingEnabled);
 
             // ===== Flashlight =====
             isFlashlightSettingsEnabled = cfg.isFlashlightSettingsEnabled;
@@ -568,6 +573,8 @@ namespace UnifromCheat_REPO
 
             isRGBPlayerEnabled = false;
             RGBupdateInterval = 200;
+            isNoPostProcessingEnabled = false;
+            NoPostProcessingManager.RestoreAll();
 
             // ===== Flashlight =====
             isFlashlightSettingsEnabled = false;

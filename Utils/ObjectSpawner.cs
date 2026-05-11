@@ -25,6 +25,8 @@ namespace UnifromCheat_REPO.Utils
             public SpawnableKind Kind;
             public EnemySetup EnemySetup;
             public PrefabRef PrefabRef;
+            public bool IsCosmeticWorldObject;
+            public SemiFunc.Rarity CosmeticRarity;
         }
 
         private static List<Item> cachedItems;
@@ -33,6 +35,9 @@ namespace UnifromCheat_REPO.Utils
         private static bool itemsCacheBuilt;
         private static bool valuablesCacheBuilt;
         private static bool entitiesCacheBuilt;
+        private static readonly HashSet<int> spawnedCosmeticWorldObjectInstanceIds = new HashSet<int>();
+        private static readonly HashSet<int> spawnedCosmeticWorldObjectViewIds = new HashSet<int>();
+        private static readonly Dictionary<int, SemiFunc.Rarity> spawnedCosmeticWorldObjectRarities = new Dictionary<int, SemiFunc.Rarity>();
 
         public static List<Item> GetSpawnableItems()
         {
@@ -75,7 +80,7 @@ namespace UnifromCheat_REPO.Utils
             if (ValuableDirector.instance?.cosmeticWorldObjectSetups != null)
             {
                 foreach (var setup in ValuableDirector.instance.cosmeticWorldObjectSetups)
-                    AddPrefabRef(cosmeticBoxes, setup?.prefab, SpawnableKind.Valuable);
+                    AddCosmeticWorldObjectSetup(cosmeticBoxes, setup);
             }
 
             foreach (GameObject prefab in Resources.LoadAll<GameObject>("Valuables"))
@@ -87,8 +92,9 @@ namespace UnifromCheat_REPO.Utils
                 if (string.IsNullOrWhiteSpace(resourcePath))
                     continue;
 
-                if (prefab.GetComponentInChildren<CosmeticWorldObject>(true) != null)
-                    AddPrefab(cosmeticBoxes, prefab, resourcePath, SpawnableKind.Valuable);
+                CosmeticWorldObject cosmeticWorldObject = prefab.GetComponentInChildren<CosmeticWorldObject>(true);
+                if (cosmeticWorldObject != null)
+                    AddPrefab(cosmeticBoxes, prefab, resourcePath, SpawnableKind.Valuable, null, null, null, null, true, cosmeticWorldObject.rarity);
                 else if (prefab.GetComponentInChildren<ValuableObject>(true) != null)
                     AddPrefab(valuables, prefab, resourcePath, SpawnableKind.Valuable);
             }
@@ -202,9 +208,34 @@ namespace UnifromCheat_REPO.Utils
                 EnemyParent enemyParent = spawned.GetComponentInChildren<EnemyParent>(true);
                 InitializeSpawnedEnemy(enemyParent, spawnPosition);
             }
+            else if (entry.IsCosmeticWorldObject && Core.Instance != null)
+            {
+                Core.Instance.StartCoroutine(InitializeSpawnedCosmeticWorldObjectWhenReady(spawned, entry.CosmeticRarity));
+            }
 
             resultMessage = LocalizedMessages.Format("spawnedItem", entry.DisplayName);
             return true;
+        }
+
+        public static bool TryGetSpawnedCosmeticWorldObjectRarity(CosmeticWorldObject cosmeticWorldObject, out SemiFunc.Rarity rarity)
+        {
+            rarity = SemiFunc.Rarity.Common;
+            if (cosmeticWorldObject == null)
+                return false;
+
+            int instanceId = cosmeticWorldObject.GetInstanceID();
+            if (spawnedCosmeticWorldObjectInstanceIds.Contains(instanceId) &&
+                spawnedCosmeticWorldObjectRarities.TryGetValue(instanceId, out rarity))
+                return true;
+
+            PhotonView photonView = cosmeticWorldObject.GetComponent<PhotonView>();
+            int viewId = photonView != null ? photonView.ViewID : 0;
+            if (viewId != 0 &&
+                spawnedCosmeticWorldObjectViewIds.Contains(viewId) &&
+                spawnedCosmeticWorldObjectRarities.TryGetValue(viewId, out rarity))
+                return true;
+
+            return false;
         }
 
         public static string GetDisplayName(Item item)
@@ -373,23 +404,50 @@ namespace UnifromCheat_REPO.Utils
             AddPrefab(entries, prefabRef.Prefab, resourcePath, kind, enemySetup, prefabRef);
         }
 
-        private static void AddPrefab(Dictionary<string, SpawnableEntry> entries, GameObject prefab, string resourcePath, SpawnableKind kind, EnemySetup enemySetup = null, PrefabRef prefabRef = null)
+        private static void AddCosmeticWorldObjectSetup(Dictionary<string, SpawnableEntry> entries, ValuableDirector.CosmeticWorldObjectSetup setup)
+        {
+            if (setup?.prefab == null)
+                return;
+
+            string resourcePath = NormalizeResourcePath(setup.prefab.ResourcePath);
+            string keyOverride = resourcePath + ":cosmetic:" + (int)setup.rarity;
+            string displayName = CleanPrefabName(setup.prefab.Prefab != null ? setup.prefab.Prefab.name : setup.prefab.PrefabName);
+            displayName = string.IsNullOrWhiteSpace(displayName)
+                ? FormatCosmeticRarity(setup.rarity) + " Cosmetic Box"
+                : displayName + " " + FormatCosmeticRarity(setup.rarity);
+
+            AddPrefab(entries, setup.prefab.Prefab, resourcePath, SpawnableKind.Valuable, null, setup.prefab, keyOverride, displayName, true, setup.rarity);
+        }
+
+        private static void AddPrefab(
+            Dictionary<string, SpawnableEntry> entries,
+            GameObject prefab,
+            string resourcePath,
+            SpawnableKind kind,
+            EnemySetup enemySetup = null,
+            PrefabRef prefabRef = null,
+            string keyOverride = null,
+            string displayNameOverride = null,
+            bool isCosmeticWorldObject = false,
+            SemiFunc.Rarity cosmeticRarity = SemiFunc.Rarity.Common)
         {
             if (prefab == null || string.IsNullOrWhiteSpace(resourcePath))
                 return;
 
-            string key = NormalizeResourcePath(resourcePath);
+            string key = NormalizeResourcePath(keyOverride) ?? NormalizeResourcePath(resourcePath);
             if (entries.ContainsKey(key))
                 return;
 
             entries[key] = new SpawnableEntry
             {
-                DisplayName = CleanPrefabName(prefab.name),
-                ResourcePath = key,
+                DisplayName = displayNameOverride ?? CleanPrefabName(prefab.name),
+                ResourcePath = NormalizeResourcePath(resourcePath),
                 Prefab = prefab,
                 Kind = kind,
                 EnemySetup = enemySetup,
-                PrefabRef = prefabRef
+                PrefabRef = prefabRef,
+                IsCosmeticWorldObject = isCosmeticWorldObject,
+                CosmeticRarity = cosmeticRarity
             };
         }
 
@@ -523,6 +581,45 @@ namespace UnifromCheat_REPO.Utils
                 Enemy enemy = enemyParent.GetComponentInChildren<Enemy>(true);
                 enemy?.EnemyTeleported(spawnPosition);
                 yield return null;
+            }
+        }
+
+        private static IEnumerator InitializeSpawnedCosmeticWorldObjectWhenReady(GameObject spawned, SemiFunc.Rarity rarity)
+        {
+            for (int i = 0; i < 60; i++)
+            {
+                if (spawned == null)
+                    yield break;
+
+                CosmeticWorldObject cosmeticWorldObject = spawned.GetComponentInChildren<CosmeticWorldObject>(true);
+                if (cosmeticWorldObject != null)
+                {
+                    cosmeticWorldObject.rarity = rarity;
+                    RegisterSpawnedCosmeticWorldObject(cosmeticWorldObject, rarity);
+                }
+
+                PhotonView photonView = spawned.GetComponent<PhotonView>() ?? spawned.GetComponentInChildren<PhotonView>(true);
+                if (cosmeticWorldObject != null && (!SemiFunc.IsMultiplayer() || photonView == null || photonView.ViewID != 0))
+                    yield break;
+
+                yield return null;
+            }
+        }
+
+        private static void RegisterSpawnedCosmeticWorldObject(CosmeticWorldObject cosmeticWorldObject, SemiFunc.Rarity rarity)
+        {
+            if (cosmeticWorldObject == null)
+                return;
+
+            int instanceId = cosmeticWorldObject.GetInstanceID();
+            spawnedCosmeticWorldObjectInstanceIds.Add(instanceId);
+            spawnedCosmeticWorldObjectRarities[instanceId] = rarity;
+
+            PhotonView photonView = cosmeticWorldObject.GetComponent<PhotonView>();
+            if (photonView != null && photonView.ViewID != 0)
+            {
+                spawnedCosmeticWorldObjectViewIds.Add(photonView.ViewID);
+                spawnedCosmeticWorldObjectRarities[photonView.ViewID] = rarity;
             }
         }
 
@@ -665,6 +762,11 @@ namespace UnifromCheat_REPO.Utils
                 .Replace("Enemy_", "")
                 .Replace("Enemy", "")
                 .Trim();
+        }
+
+        private static string FormatCosmeticRarity(SemiFunc.Rarity rarity)
+        {
+            return rarity == SemiFunc.Rarity.UltraRare ? "Ultra Rare" : rarity.ToString();
         }
 
         private static void GetSpawnPose(out Vector3 spawnPosition, out Quaternion spawnRotation)

@@ -434,6 +434,11 @@ public partial class Core
             /*DrawToggle("Disable camera shake", ref disableCameraShake, Color.green, Get("disableCameraShake"));*/
             
             /*DrawToggle("Nickname animator", ref nicknameAnimator, Color.green, Get(""));*/
+
+            bool oldNoPostProcessing = isNoPostProcessingEnabled;
+            DrawToggle("No Post-Processing", ref isNoPostProcessingEnabled, Color.green, Get("noPostProcessing"));
+            if (oldNoPostProcessing != isNoPostProcessingEnabled)
+                NoPostProcessingManager.SetEnabled(isNoPostProcessingEnabled);
             
             DrawToggle("Flashlight settings", ref isFlashlightSettingsEnabled, Color.green, Get("flashlightSettings"));
             var flashlight = PlayerController.instance.playerAvatarScript.flashlightController.spotlight;

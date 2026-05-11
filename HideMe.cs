@@ -21,6 +21,7 @@ public partial class Core
         public bool PlayerWallHack;
         public bool CustomFov;
         public bool RgbPlayer;
+        public bool NoPostProcessing;
         public bool FlashlightSettings;
     }
 
@@ -65,6 +66,7 @@ public partial class Core
             PlayerWallHack = isPlayerWallHackEnabled,
             CustomFov = isCustomFovEnabled,
             RgbPlayer = isRGBPlayerEnabled,
+            NoPostProcessing = isNoPostProcessingEnabled,
             FlashlightSettings = isFlashlightSettingsEnabled
         };
 
@@ -76,9 +78,11 @@ public partial class Core
         isPlayerWallHackEnabled = false;
         isCustomFovEnabled = false;
         isRGBPlayerEnabled = false;
+        isNoPostProcessingEnabled = false;
         isFlashlightSettingsEnabled = false;
 
         RGBPlayer.StopCycle();
+        NoPostProcessingManager.RestoreAll();
         MiscFunctions.RestoreAllCameraFov();
         MiscFunctions.RestoreDefaultFlashlightSettings();
         SetWallHackTemporaryVisible(false);
@@ -101,10 +105,13 @@ public partial class Core
             isPlayerWallHackEnabled = snapshot.PlayerWallHack;
             isCustomFovEnabled = snapshot.CustomFov;
             isRGBPlayerEnabled = snapshot.RgbPlayer;
+            isNoPostProcessingEnabled = snapshot.NoPostProcessing;
             isFlashlightSettingsEnabled = snapshot.FlashlightSettings;
 
             if (isRGBPlayerEnabled)
                 RGBPlayer.StartCycle();
+
+            NoPostProcessingManager.SetEnabled(isNoPostProcessingEnabled);
 
             if (isFlashlightSettingsEnabled)
                 MiscFunctions.ApplyConfiguredFlashlightSettings();
