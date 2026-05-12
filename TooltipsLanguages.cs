@@ -56,9 +56,12 @@ namespace UnifromCheat_REPO
                         { "jumpForce", "Adjusts jump force" },
                         { "liteItems", "Items become lightweight (minimal weight)" },
                         { "multiJumps", "Allows multiple jumps in the air" },
+                        { "noTokenHud", "Hides cosmetic token HUD from cosmetic boxes" },
+                        { "deadVoice", "You hear dead players' chat and see dead-player icons like spectators" },
                         { "noclip", "Fly through walls" },
                         { "noclipSpeed", "Speed while noclip is active" },
                         { "noPostProcessing", "Disables visual image distortions" },
+                        { "tumbleBypass", "Partially removes tumble climb and full-crouch stand-up locks" },
                         { "noTumbleCooldown", "Removes tumble exit cooldown" },
                         { "oneShotKill", "Kill enemies with one hit" },
                         { "peacefulEnemies", "Enemies ignore you." },
@@ -147,9 +150,12 @@ namespace UnifromCheat_REPO
                         { "jumpForce", "Управление силой прыжка" },
                         { "liteItems", "Режим лёгких предметов (минимальный вес)" },
                         { "multiJumps", "Позволяет прыгать несколько раз в воздухе" },
+                        { "noTokenHud", "Отключает интерфейс полученных монет косметики из косметических ящиков" },
+                        { "deadVoice", "Вы слышите и видите чат мертвых игроков" },
                         { "noclip", "Позволяет проходить сквозь стены и объекты" },
                         { "noclipSpeed", "Скорость перемещения в режиме noclip" },
                         { "noPostProcessing", "Отключает визуальные искажения картинки" },
+                        { "tumbleBypass", "Частично убирает блокировки Tumble Climb и вставания из полного присяда" },
                         { "noTumbleCooldown", "Убирает задержку выхода из tumble" },
                         { "oneShotKill", "Уничтожает врагов одним ударом/выстрелом" },
                         { "peacefulEnemies", "Враги вас игнорируют." },
@@ -238,9 +244,12 @@ namespace UnifromCheat_REPO
                         { "jumpForce", "Керування силою стрибка" },
                         { "liteItems", "Режим легких предметів (мінімальна вага)" },
                         { "multiJumps", "Дозволяє стрибати кілька разів у повітрі" },
+                        { "noTokenHud", "Вимикає інтерфейс отриманих косметичних токенів із косметичних ящиків" },
+                        { "deadVoice", "Ви чуєте чат мертвих гравців і бачите іконки мертвих гравців як у спостерігачах" },
                         { "noclip", "Дозволяє проходити крізь стіни та об'єкти" },
                         { "noclipSpeed", "Швидкість у режимі noclip" },
                         { "noPostProcessing", "Вимикає візуальні спотворення зображення" },
+                        { "tumbleBypass", "Частково прибирає блокування Tumble Climb і вставання з повного присіду" },
                         { "noTumbleCooldown", "Прибирає затримку виходу з tumble" },
                         { "oneShotKill", "Знищує ворогів одним ударом/пострілом" },
                         { "peacefulEnemies", "Вороги вас ігнорують." },
@@ -329,9 +338,12 @@ namespace UnifromCheat_REPO
                         { "jumpForce", "调整跳跃力度" },
                         { "liteItems", "物品轻量化（最小重量）" },
                         { "multiJumps", "允许空中多段跳" },
+                        { "noTokenHud", "隐藏化妆箱获得的化妆币界面" },
+                        { "deadVoice", "听到死亡玩家聊天，并像观察者一样显示死亡玩家图标" },
                         { "noclip", "穿墙模式" },
                         { "noclipSpeed", "穿墙模式速度" },
                         { "noPostProcessing", "关闭画面视觉扭曲效果" },
+                        { "tumbleBypass", "部分移除 Tumble Climb 和完全下蹲起身限制" },
                         { "noTumbleCooldown", "移除翻滚退出冷却" },
                         { "oneShotKill", "一击必杀" },
                         { "peacefulEnemies", "敌人会忽略你。" },
@@ -480,6 +492,24 @@ namespace UnifromCheat_REPO
                         2 => "Автоматичне відродження після смерті.",
                         3 => "死亡后自动复活。",
                         _ => "Automatically revives players after death."
+                    };
+                    return true;
+                case "gameControllerSetLevel":
+                    value = language switch
+                    {
+                        1 => "Устанавливает указанный вами уровень.",
+                        2 => "Встановлює вказаний вами рівень.",
+                        3 => "设置你指定的关卡等级。",
+                        _ => "Sets the level you specify."
+                    };
+                    return true;
+                case "gameControllerSetMoney":
+                    value = language switch
+                    {
+                        1 => "Устанавливает или добавляет деньги текущей сессии.",
+                        2 => "Встановлює або додає гроші поточної сесії.",
+                        3 => "设置或增加当前会话的钱。",
+                        _ => "Sets or adds money for the current session."
                     };
                     return true;
             }

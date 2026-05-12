@@ -36,6 +36,7 @@ namespace UnifromCheat_REPO.Utils
         public ushort RGBupdateInterval;
 
         public bool isNoPostProcessingEnabled;
+        public bool isTumbleBypassEnabled;
 
         // ===== Flashlight =====
         public bool isFlashlightSettingsEnabled;
@@ -140,6 +141,7 @@ namespace UnifromCheat_REPO.Utils
 
         public bool isFullbrightEnabled;
         public float FB_R, FB_G, FB_B;
+        public bool isDeadVoiceEnabled;
 
         public bool isOneShotModeEnabled;
         public bool isPeacefulEnemiesEnabled;
@@ -147,6 +149,7 @@ namespace UnifromCheat_REPO.Utils
         public bool isFragilityDisabled;
         public bool isColliderDisabledOnGrab;
         public bool multiJumps;
+        public bool isNoTokenHudEnabled;
 
         // ===== Teleporters: Valuables =====
         public bool valuablesTeleporter;
@@ -212,6 +215,7 @@ namespace UnifromCheat_REPO
                 isRGBPlayerEnabled = isRGBPlayerEnabled,
                 RGBupdateInterval = RGBupdateInterval,
                 isNoPostProcessingEnabled = isNoPostProcessingEnabled,
+                isTumbleBypassEnabled = isTumbleBypassEnabled,
 
                 // ===== Flashlight =====
                 isFlashlightSettingsEnabled = isFlashlightSettingsEnabled,
@@ -316,6 +320,7 @@ namespace UnifromCheat_REPO
 
                 isFullbrightEnabled = isFullbrightEnabled,
                 FB_R = FB_R, FB_G = FB_G, FB_B = FB_B,
+                isDeadVoiceEnabled = isDeadVoiceEnabled,
 
                 isOneShotModeEnabled = isOneShotModeEnabled,
                 isPeacefulEnemiesEnabled = isPeacefulEnemiesEnabled,
@@ -323,6 +328,7 @@ namespace UnifromCheat_REPO
                 isFragilityDisabled = isFragilityDisabled,
                 isColliderDisabledOnGrab = isGhostItemsMode,
                 multiJumps = multiJumps,
+                isNoTokenHudEnabled = isNoTokenHudEnabled,
 
                 // ===== TP Valuables =====
                 valuablesTeleporter = valuablesTeleporter,
@@ -394,6 +400,7 @@ namespace UnifromCheat_REPO
             RGBupdateInterval = cfg.RGBupdateInterval;
             isNoPostProcessingEnabled = cfg.isNoPostProcessingEnabled;
             NoPostProcessingManager.SetEnabled(isNoPostProcessingEnabled);
+            isTumbleBypassEnabled = cfg.isTumbleBypassEnabled;
 
             // ===== Flashlight =====
             isFlashlightSettingsEnabled = cfg.isFlashlightSettingsEnabled;
@@ -511,6 +518,7 @@ namespace UnifromCheat_REPO
 
             isFullbrightEnabled = cfg.isFullbrightEnabled;
             FB_R = cfg.FB_R; FB_G = cfg.FB_G; FB_B = cfg.FB_B;
+            isDeadVoiceEnabled = cfg.isDeadVoiceEnabled;
 
             isOneShotModeEnabled = cfg.isOneShotModeEnabled;
             isPeacefulEnemiesEnabled = cfg.isPeacefulEnemiesEnabled;
@@ -518,6 +526,7 @@ namespace UnifromCheat_REPO
             isFragilityDisabled = cfg.isFragilityDisabled;
             isGhostItemsMode = cfg.isColliderDisabledOnGrab;
             multiJumps = cfg.multiJumps;
+            isNoTokenHudEnabled = cfg.isNoTokenHudEnabled;
 
             // ===== TP Valuables =====
             valuablesTeleporter = cfg.valuablesTeleporter;
@@ -574,6 +583,7 @@ namespace UnifromCheat_REPO
             isRGBPlayerEnabled = false;
             RGBupdateInterval = 200;
             isNoPostProcessingEnabled = false;
+            isTumbleBypassEnabled = false;
             NoPostProcessingManager.RestoreAll();
 
             // ===== Flashlight =====
@@ -670,12 +680,14 @@ namespace UnifromCheat_REPO
             hideMeBind = "F9";
             isHideMeActive = false;
             isFullbrightEnabled = false; FB_R = 1f; FB_G = 1f; FB_B = 1f;
+            isDeadVoiceEnabled = false;
             isOneShotModeEnabled = false;
             isPeacefulEnemiesEnabled = false;
             isLiteItemsModeEnabled = false;
             isFragilityDisabled = false;
             isGhostItemsMode = false;
             multiJumps = false;
+            isNoTokenHudEnabled = false;
 
             // ===== TP Valuables =====
             valuablesTeleporter = false;

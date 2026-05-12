@@ -9,8 +9,8 @@ internal static class PlayerAvatarRefs
     // private
     public static readonly AccessTools.FieldRef<PlayerAvatar, Collider> collider =
         AccessTools.FieldRefAccess<PlayerAvatar, Collider>("collider");
-    public static readonly AccessTools.FieldRef<PlayerAvatar, Camera> localCamera =
-        AccessTools.FieldRefAccess<PlayerAvatar, Camera>("localCamera");
+    public static readonly AccessTools.FieldRef<PlayerAvatar, PlayerLocalCamera> localCamera =
+        AccessTools.FieldRefAccess<PlayerAvatar, PlayerLocalCamera>("localCamera");
     public static readonly AccessTools.FieldRef<PlayerAvatar, bool> spawnImpulse =
         AccessTools.FieldRefAccess<PlayerAvatar, bool>("spawnImpulse");
     public static readonly AccessTools.FieldRef<PlayerAvatar, int> spawnFrames =

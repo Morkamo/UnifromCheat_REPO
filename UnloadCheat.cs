@@ -84,6 +84,7 @@ public partial class Core
         menuAnimationProgress = 0f;
         objectSpawnerWindowOpen = false;
         gameControllerWindowOpen = false;
+        gameControllerUpgradesAvatar = null;
         CloseGameControllerConfirmation();
         unloadConfirmationOpen = false;
 
@@ -92,6 +93,7 @@ public partial class Core
         isCustomFovEnabled = false;
         isRGBPlayerEnabled = false;
         isNoPostProcessingEnabled = false;
+        isNoTokenHudEnabled = false;
         isFlashlightSettingsEnabled = false;
         isFullbrightEnabled = false;
 

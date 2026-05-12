@@ -36,6 +36,48 @@ namespace UnifromCheat_REPO.Utils
         private static List<MapEntry> cachedMaps = new List<MapEntry>();
         private static RunManager cachedMapsManager;
         private static int cachedMapsSignature;
+        public const int MaxLevelNumber = 1000000000;
+        public const int MaxMoney = int.MaxValue;
+        public const int MaxUpgradeLevel = 100000000;
+        private static readonly Dictionary<int, FrozenPlayerState> FrozenPlayers = new Dictionary<int, FrozenPlayerState>();
+        private static float nextFreezeSyncTime;
+
+        private sealed class FrozenPlayerState
+        {
+            public Vector3 Position;
+            public Quaternion Rotation;
+        }
+
+        public sealed class UpgradeEntry
+        {
+            public string Id;
+            public string Label;
+            public int CurrentLevel;
+        }
+
+        private sealed class UpgradeDefinition
+        {
+            public string Id;
+            public string Label;
+            public string DictionaryField;
+        }
+
+        private static readonly UpgradeDefinition[] UpgradeDefinitions =
+        {
+            new UpgradeDefinition { Id = "Health", Label = "Health", DictionaryField = "playerUpgradeHealth" },
+            new UpgradeDefinition { Id = "Stamina", Label = "Stamina", DictionaryField = "playerUpgradeStamina" },
+            new UpgradeDefinition { Id = "ExtraJump", Label = "Extra Jump", DictionaryField = "playerUpgradeExtraJump" },
+            new UpgradeDefinition { Id = "MapPlayerCount", Label = "Map Player Count", DictionaryField = "playerUpgradeMapPlayerCount" },
+            new UpgradeDefinition { Id = "Launch", Label = "Tumble Launch", DictionaryField = "playerUpgradeLaunch" },
+            new UpgradeDefinition { Id = "TumbleClimb", Label = "Tumble Climb", DictionaryField = "playerUpgradeTumbleClimb" },
+            new UpgradeDefinition { Id = "DeathHeadBattery", Label = "Death Head Battery", DictionaryField = "playerUpgradeDeathHeadBattery" },
+            new UpgradeDefinition { Id = "TumbleWings", Label = "Tumble Wings", DictionaryField = "playerUpgradeTumbleWings" },
+            new UpgradeDefinition { Id = "Speed", Label = "Sprint Speed", DictionaryField = "playerUpgradeSpeed" },
+            new UpgradeDefinition { Id = "CrouchRest", Label = "Crouch Rest", DictionaryField = "playerUpgradeCrouchRest" },
+            new UpgradeDefinition { Id = "Strength", Label = "Grab Strength", DictionaryField = "playerUpgradeStrength" },
+            new UpgradeDefinition { Id = "Throw", Label = "Throw Strength", DictionaryField = "playerUpgradeThrow" },
+            new UpgradeDefinition { Id = "Range", Label = "Grab Range", DictionaryField = "playerUpgradeRange" }
+        };
 
         public static bool IsDisableSpawnAIActive()
         {
@@ -59,11 +101,13 @@ namespace UnifromCheat_REPO.Utils
 
         public static void UpdateGameplay()
         {
-            if (!IsDisableSpawnAIActive() || Time.time < nextEnemyDespawnTime)
-                return;
+            UpdateFrozenPlayers();
 
-            nextEnemyDespawnTime = Time.time + 0.75f;
-            DespawnAllEnemies();
+            if (IsDisableSpawnAIActive() && Time.time >= nextEnemyDespawnTime)
+            {
+                nextEnemyDespawnTime = Time.time + 0.75f;
+                DespawnAllEnemies();
+            }
         }
 
         public static List<PlayerEntry> GetPlayers()
@@ -241,6 +285,188 @@ namespace UnifromCheat_REPO.Utils
             return true;
         }
 
+        public static int GetCurrentLevelNumber()
+        {
+            RunManager manager = RunManager.instance;
+            if (manager == null)
+                return 1;
+
+            return Mathf.Clamp(manager.levelsCompleted + 1, 1, MaxLevelNumber);
+        }
+
+        public static int GetCurrentMoney()
+        {
+            try
+            {
+                return Mathf.Clamp(SemiFunc.StatGetRunCurrency(), 0, MaxMoney);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        public static bool SetLevel(int levelNumber, out string message)
+        {
+            message = string.Empty;
+            if (!CanRunSessionMutation(LocalizedMessages.Get("setLevelActionName"), out message))
+                return false;
+
+            RunManager manager = RunManager.instance;
+            if (manager == null || manager.levelCurrent == null || GetBoolField(manager, "restarting") || GetBoolField(manager, "restartingDone") || GetBoolField(manager, "waitToChangeScene"))
+            {
+                message = LocalizedMessages.Get("mapChangeBlocked");
+                return false;
+            }
+
+            if (GameDirector.instance != null && GameDirector.instance.currentState != GameDirector.gameState.Main)
+            {
+                message = LocalizedMessages.Get("mapChangeBlocked");
+                return false;
+            }
+
+            int levelsCompleted = Mathf.Clamp(levelNumber - 1, 0, MaxLevelNumber - 1);
+            manager.levelsCompleted = levelsCompleted;
+            SemiFunc.StatSetRunLevel(levelsCompleted);
+            SyncLevelToClients(manager, manager.levelCurrent);
+            manager.RestartScene();
+            SemiFunc.OnSceneSwitch(false, false);
+            message = LocalizedMessages.Format("levelSet", levelNumber);
+            return true;
+        }
+
+        public static bool SetMoney(int money, out string message)
+        {
+            message = string.Empty;
+            if (!CanRunSessionMutation(LocalizedMessages.Get("setMoneyActionName"), out message))
+                return false;
+
+            money = Mathf.Clamp(money, 0, MaxMoney);
+            SemiFunc.StatSetRunCurrency(money);
+            SemiFunc.ShopUpdateCost();
+            message = LocalizedMessages.Format("moneySet", money);
+            return true;
+        }
+
+        public static bool AddMoney(int amount, out string message)
+        {
+            message = string.Empty;
+            if (!CanRunSessionMutation(LocalizedMessages.Get("addMoneyActionName"), out message))
+                return false;
+
+            int current = GetCurrentMoney();
+            if (amount < 0 || current > MaxMoney - amount)
+            {
+                message = LocalizedMessages.Format("moneyTotalOutOfRange", MaxMoney);
+                return false;
+            }
+
+            int updated = current + amount;
+            SemiFunc.StatSetRunCurrency(updated);
+            SemiFunc.ShopUpdateCost();
+            message = LocalizedMessages.Format("moneySet", updated);
+            return true;
+        }
+
+        public static bool ToggleFreeze(PlayerAvatar avatar, out string message)
+        {
+            message = string.Empty;
+            if (!CanRunPlayerAction(avatar, LocalizedMessages.Get("freezeActionName"), out message))
+                return false;
+
+            int key = GetPlayerKey(avatar);
+            if (FrozenPlayers.ContainsKey(key))
+            {
+                FrozenPlayers.Remove(key);
+                message = LocalizedMessages.Get("playerUnfrozen");
+            }
+            else
+            {
+                FrozenPlayers[key] = new FrozenPlayerState
+                {
+                    Position = avatar.transform.position,
+                    Rotation = avatar.transform.rotation
+                };
+                message = LocalizedMessages.Get("playerFrozen");
+            }
+
+            return true;
+        }
+
+        public static bool IsFrozen(PlayerAvatar avatar)
+        {
+            return avatar != null && FrozenPlayers.ContainsKey(GetPlayerKey(avatar));
+        }
+
+        public static string GetPlayerSteamId(PlayerAvatar avatar)
+        {
+            return avatar == null ? null : SemiFunc.PlayerGetSteamID(avatar);
+        }
+
+        public static List<UpgradeEntry> GetPlayerUpgrades(PlayerAvatar avatar)
+        {
+            string steamId = GetPlayerSteamId(avatar);
+            if (string.IsNullOrWhiteSpace(steamId) || StatsManager.instance == null)
+                return new List<UpgradeEntry>();
+
+            List<UpgradeEntry> result = new List<UpgradeEntry>();
+            foreach (UpgradeDefinition definition in UpgradeDefinitions)
+            {
+                result.Add(new UpgradeEntry
+                {
+                    Id = definition.Id,
+                    Label = definition.Label,
+                    CurrentLevel = GetUpgradeLevel(definition, steamId)
+                });
+            }
+
+            return result;
+        }
+
+        public static bool SetPlayerUpgrade(PlayerAvatar avatar, string upgradeId, int targetLevel, out string message)
+        {
+            message = string.Empty;
+            if (!CanRunPlayerAction(avatar, LocalizedMessages.Get("upgradesActionName"), out message))
+                return false;
+
+            UpgradeDefinition definition = GetUpgradeDefinition(upgradeId);
+            string steamId = GetPlayerSteamId(avatar);
+            if (definition == null || string.IsNullOrWhiteSpace(steamId))
+            {
+                message = LocalizedMessages.Get("playerActionFailed");
+                return false;
+            }
+
+            targetLevel = Mathf.Clamp(targetLevel, 0, MaxUpgradeLevel);
+            int currentLevel = GetUpgradeLevel(definition, steamId);
+            return ApplyPlayerUpgradeDelta(steamId, definition, targetLevel - currentLevel, targetLevel, out message);
+        }
+
+        public static bool AddPlayerUpgrade(PlayerAvatar avatar, string upgradeId, int amount, out string message)
+        {
+            message = string.Empty;
+            if (!CanRunPlayerAction(avatar, LocalizedMessages.Get("upgradesActionName"), out message))
+                return false;
+
+            UpgradeDefinition definition = GetUpgradeDefinition(upgradeId);
+            string steamId = GetPlayerSteamId(avatar);
+            if (definition == null || string.IsNullOrWhiteSpace(steamId))
+            {
+                message = LocalizedMessages.Get("playerActionFailed");
+                return false;
+            }
+
+            int currentLevel = GetUpgradeLevel(definition, steamId);
+            if (amount < 0 || currentLevel > MaxUpgradeLevel - amount)
+            {
+                message = LocalizedMessages.Format("numberOutOfRange", LocalizedMessages.Get("upgradeValue"), 0, MaxUpgradeLevel);
+                return false;
+            }
+
+            int targetLevel = currentLevel + amount;
+            return ApplyPlayerUpgradeDelta(steamId, definition, amount, targetLevel, out message);
+        }
+
         public static void DespawnAllEnemies()
         {
             if (!HostOnlyGuard.IsHostOnlyActive())
@@ -308,6 +534,46 @@ namespace UnifromCheat_REPO.Utils
             }
 
             return HostOnlyGuard.CanUseHostOnly(true, functionName);
+        }
+
+        private static bool CanRunSessionMutation(string functionName, out string message)
+        {
+            message = string.Empty;
+            if (!HostOnlyGuard.IsPlayableSession())
+            {
+                message = LocalizedMessages.Get("playableOnly");
+                return false;
+            }
+
+            return HostOnlyGuard.CanUseHostOnly(true, functionName);
+        }
+
+        private static void UpdateFrozenPlayers()
+        {
+            if (FrozenPlayers.Count == 0)
+                return;
+
+            if (!HostOnlyGuard.IsHostOnlyActive())
+            {
+                FrozenPlayers.Clear();
+                return;
+            }
+
+            if (Time.unscaledTime < nextFreezeSyncTime)
+                return;
+
+            nextFreezeSyncTime = Time.unscaledTime + 0.12f;
+            foreach (PlayerEntry entry in GetPlayers().ToList())
+            {
+                if (entry.Avatar == null)
+                    continue;
+
+                int key = GetPlayerKey(entry.Avatar);
+                if (!FrozenPlayers.TryGetValue(key, out FrozenPlayerState state))
+                    continue;
+
+                Teleport(entry.Avatar, state.Position, state.Rotation);
+            }
         }
 
         private static IEnumerator AutoReviveAfterDelay(PlayerAvatar avatar, int key)
@@ -388,6 +654,14 @@ namespace UnifromCheat_REPO.Utils
                 rotation = Quaternion.LookRotation(flatForward.normalized, Vector3.up);
 
             avatar.Spawn(position, rotation);
+        }
+
+        private static int GetPlayerKey(PlayerAvatar avatar)
+        {
+            if (avatar == null)
+                return 0;
+
+            return avatar.photonView != null ? avatar.photonView.ViewID : avatar.GetInstanceID();
         }
 
         private static void AddMaps(Dictionary<string, MapEntry> maps, IEnumerable<Level> levels)
@@ -487,6 +761,110 @@ namespace UnifromCheat_REPO.Utils
         {
             int photonId = GetIntField(itemToggle, "playerTogglePhotonID");
             return photonId <= 0 ? null : SemiFunc.PlayerAvatarGetFromPhotonID(photonId);
+        }
+
+        private static UpgradeDefinition GetUpgradeDefinition(string upgradeId)
+        {
+            return UpgradeDefinitions.FirstOrDefault(definition => definition.Id == upgradeId);
+        }
+
+        private static int GetUpgradeLevel(UpgradeDefinition definition, string steamId)
+        {
+            Dictionary<string, int> dictionary = GetUpgradeDictionary(definition);
+            if (dictionary == null || string.IsNullOrWhiteSpace(steamId))
+                return 0;
+
+            return dictionary.TryGetValue(steamId, out int value) ? Mathf.Clamp(value, 0, MaxUpgradeLevel) : 0;
+        }
+
+        private static Dictionary<string, int> GetUpgradeDictionary(UpgradeDefinition definition)
+        {
+            if (definition == null || StatsManager.instance == null)
+                return null;
+
+            FieldInfo field = typeof(StatsManager).GetField(definition.DictionaryField, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            return field?.GetValue(StatsManager.instance) as Dictionary<string, int>;
+        }
+
+        private static bool ApplyPlayerUpgradeDelta(string steamId, UpgradeDefinition definition, int delta, int targetLevel, out string message)
+        {
+            message = string.Empty;
+            if (delta == 0)
+            {
+                message = LocalizedMessages.Format("upgradeSet", definition.Label, targetLevel);
+                return true;
+            }
+
+            if (PunManager.instance == null)
+            {
+                message = LocalizedMessages.Get("playerActionFailed");
+                return false;
+            }
+
+            if (GameManager.Multiplayer())
+            {
+                PhotonView photonView = GetFieldValue<PhotonView>(PunManager.instance, "photonView");
+                if (photonView == null)
+                {
+                    message = LocalizedMessages.Get("playerActionFailed");
+                    return false;
+                }
+
+                photonView.RPC("TesterUpgradeCommandRPC", RpcTarget.All, steamId, definition.Id, delta);
+            }
+            else
+            {
+                ApplyUpgradeDeltaLocal(definition.Id, steamId, delta);
+            }
+
+            message = LocalizedMessages.Format("upgradeSet", definition.Label, targetLevel);
+            return true;
+        }
+
+        private static void ApplyUpgradeDeltaLocal(string upgradeId, string steamId, int delta)
+        {
+            switch (upgradeId)
+            {
+                case "Health":
+                    PunManager.instance.UpgradePlayerHealth(steamId, delta);
+                    break;
+                case "Stamina":
+                    PunManager.instance.UpgradePlayerEnergy(steamId, delta);
+                    break;
+                case "ExtraJump":
+                    PunManager.instance.UpgradePlayerExtraJump(steamId, delta);
+                    break;
+                case "MapPlayerCount":
+                    PunManager.instance.UpgradeMapPlayerCount(steamId, delta);
+                    break;
+                case "Launch":
+                    PunManager.instance.UpgradePlayerTumbleLaunch(steamId, delta);
+                    break;
+                case "TumbleClimb":
+                    PunManager.instance.UpgradePlayerTumbleClimb(steamId, delta);
+                    break;
+                case "DeathHeadBattery":
+                    PunManager.instance.UpgradeDeathHeadBattery(steamId, delta);
+                    break;
+                case "TumbleWings":
+                    PunManager.instance.UpgradePlayerTumbleWings(steamId, delta);
+                    break;
+                case "Speed":
+                    PunManager.instance.UpgradePlayerSprintSpeed(steamId, delta);
+                    break;
+                case "CrouchRest":
+                    PunManager.instance.UpgradePlayerCrouchRest(steamId, delta);
+                    break;
+                case "Strength":
+                    PunManager.instance.UpgradePlayerGrabStrength(steamId, delta);
+                    break;
+                case "Throw":
+                    PunManager.instance.UpgradePlayerThrowStrength(steamId, delta);
+                    break;
+                case "Range":
+                    PunManager.instance.UpgradePlayerGrabRange(steamId, delta);
+                    break;
+            }
         }
 
         private static void ApplyUpgradeToSteamId(string upgradeTypeName, string steamId)

@@ -440,6 +440,9 @@ public partial class Core
             if (oldNoPostProcessing != isNoPostProcessingEnabled)
                 NoPostProcessingManager.SetEnabled(isNoPostProcessingEnabled);
             
+            DrawToggle("Dead voice", ref isDeadVoiceEnabled, Color.green, Get("deadVoice"));
+            DrawToggle("Tumble Bypass", ref isTumbleBypassEnabled, Color.green, Get("tumbleBypass"));
+            
             DrawToggle("Flashlight settings", ref isFlashlightSettingsEnabled, Color.green, Get("flashlightSettings"));
             var flashlight = PlayerController.instance.playerAvatarScript.flashlightController.spotlight;
             if (BeginAnimatedFoldout("menu.player.flashlight", isFlashlightSettingsEnabled, -10f))
@@ -871,6 +874,7 @@ public partial class Core
             }
             
             DrawToggle("Multi-jumps", ref multiJumps, Color.green, Get("multiJumps"));
+            DrawToggle("No Token HUD", ref isNoTokenHudEnabled, Color.green, Get("noTokenHud"));
 
             GUILayout.Space(8);
             if (GUILayout.Button("<b>UNLOAD CHEAT</b>", buttonStyle, GUILayout.Height(32)))

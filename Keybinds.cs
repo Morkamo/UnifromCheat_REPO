@@ -36,13 +36,21 @@ public partial class Core
         if (keyboard == null)
             return;
 
-        if (!keyboard.allKeys.Any(k => k.wasPressedThisFrame))
+        if (keyboard.allKeys.Count == 0)
             return;
 
-        Key pressedKey = keyboard.allKeys
-            .Where(k => k.wasPressedThisFrame)
-            .Select(k => k.keyCode)
-            .FirstOrDefault(k => k != Key.None);
+        Key pressedKey = Key.None;
+        foreach (var keyControl in keyboard.allKeys)
+        {
+            if (keyControl == null || !keyControl.wasPressedThisFrame || keyControl.keyCode == Key.None)
+                continue;
+
+            pressedKey = keyControl.keyCode;
+            break;
+        }
+
+        if (pressedKey == Key.None)
+            return;
 
         ApplyCapturedKeybind(pressedKey);
     }
@@ -168,7 +176,7 @@ public partial class Core
             if (key == Key.Insert)
                 return false;
 
-            var control = keyboard[key];
+            var control = GetKeyControlSafe(keyboard, key);
             if (control == null || !control.isPressed)
                 return false;
 
@@ -177,6 +185,21 @@ public partial class Core
         }
 
         return anyPressedThisFrame;
+    }
+
+    private static UnityEngine.InputSystem.Controls.KeyControl GetKeyControlSafe(Keyboard keyboard, Key key)
+    {
+        if (keyboard == null || key == Key.None)
+            return null;
+
+        try
+        {
+            return keyboard[key];
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static Key[] ParseKeybind(string serializedBind)

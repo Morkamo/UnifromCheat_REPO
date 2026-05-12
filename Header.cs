@@ -7,7 +7,7 @@ namespace UnifromCheat_REPO;
 
 public partial class Core
 {
-    internal string cheatVersion = "4.2.0";
+    internal string cheatVersion = "4.3.0";
 
     private Rect RectMenu;
     private float dpiScaling => Mathf.Min(Screen.width / 1920f, Screen.height / 1080f);
@@ -234,6 +234,7 @@ public partial class Core
     internal static bool showPlayerName = true;
     internal static bool showPlayerHealth = true;
     internal static float playerTextSize = 3;
+    internal static bool isDeadVoiceEnabled;
 
     internal static bool isNoclipEnabled;
     internal static float noclipSpeed = 5f;
@@ -250,6 +251,8 @@ public partial class Core
     internal static ushort RGBupdateInterval = 200;
 
     internal static bool isNoPostProcessingEnabled = false;
+    internal static bool isTumbleBypassEnabled = false;
+    internal static bool isNoTokenHudEnabled = false;
 
     internal static bool isFlashlightSettingsEnabled = false;
     internal static bool isFlashlightShadowsEnabled = true;

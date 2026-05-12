@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using UnifromCheat_REPO.Utils;
 using UnityEngine;
 using static UnifromCheat_REPO.GUIMenuSkin;
@@ -10,6 +11,7 @@ public partial class Core
 {
     private const int GameControllerWindowId = 3003;
     private const int GameControllerConfirmWindowId = 3004;
+    private const int GameControllerUpgradesWindowId = 3005;
     private const float GameControllerButtonHeight = 34f;
 
     private enum GameControllerTab
@@ -21,7 +23,22 @@ public partial class Core
 
     private GameControllerTab gameControllerTab = GameControllerTab.Players;
     private GameController.MapEntry pendingMapEntry;
+    private GameControllerPendingAction pendingAction;
     private Rect gameControllerConfirmRect;
+    private Rect gameControllerUpgradesRect = new Rect(760f, 120f, 520f, 560f);
+    private Vector2 gameControllerUpgradesScroll;
+    private PlayerAvatar gameControllerUpgradesAvatar;
+    private string gameControllerUpgradesPlayerName;
+    private string setLevelInput = "1";
+    private string setMoneyInput = "0";
+    private readonly Dictionary<string, string> upgradeInputs = new Dictionary<string, string>();
+
+    private sealed class GameControllerPendingAction
+    {
+        public string Title;
+        public string Body;
+        public Func<string> Execute;
+    }
 
     private void DrawGameControllerWindow()
     {
@@ -51,8 +68,11 @@ public partial class Core
         gameControllerRect.y += 22f * (1f - eased);
         DrawAnimatedSectionFrame(drawRect, Time.unscaledTime, eased, GameControllerWindowId, 0.28f);
 
-        if (pendingMapEntry != null)
-            DrawMapConfirmation(eased);
+        if (gameControllerUpgradesAvatar != null)
+            DrawGameControllerUpgradesWindow(eased);
+
+        if (pendingMapEntry != null || pendingAction != null)
+            DrawGameControllerConfirmation(eased);
 
         GUI.depth = previousDepth;
         GUI.matrix = previousMatrix;
@@ -75,6 +95,7 @@ public partial class Core
         if (GUILayout.Button("<b>X</b>", buttonStyle, GUILayout.Width(34), GUILayout.Height(28)))
         {
             gameControllerWindowOpen = false;
+            gameControllerUpgradesAvatar = null;
             CloseGameControllerConfirmation();
         }
         GUILayout.EndHorizontal();
@@ -170,6 +191,13 @@ public partial class Core
             DrawPlayerActionButton("BRING", player.Avatar, GameController.Bring);
             DrawPlayerActionButton("KILL", player.Avatar, GameController.Kill);
             GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            DrawPlayerActionButton(GameController.IsFrozen(player.Avatar) ? "UNFREEZE" : "FREEZE", player.Avatar, GameController.ToggleFreeze);
+            if (GUILayout.Button("<b>UPGRADES</b>", buttonStyle, GUILayout.Height(GameControllerButtonHeight)))
+                OpenPlayerUpgrades(player);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
             GUILayout.EndVertical();
             GUILayout.Space(6);
         }
@@ -185,6 +213,23 @@ public partial class Core
         bool ok = action(avatar, out string message);
         if (!ok && !string.IsNullOrWhiteSpace(message))
             ShowMessage(message, 3f);
+    }
+
+    private void OpenPlayerUpgrades(GameController.PlayerEntry player)
+    {
+        if (player?.Avatar == null)
+        {
+            ShowMessage(LocalizedMessages.Get("playerNotFound"), 3f);
+            return;
+        }
+
+        if (!HostOnlyGuard.CanUseHostOnly(true, LocalizedMessages.Get("upgradesActionName")))
+            return;
+
+        gameControllerUpgradesAvatar = player.Avatar;
+        gameControllerUpgradesPlayerName = player.Name;
+        gameControllerUpgradesScroll = Vector2.zero;
+        CloseGameControllerConfirmation();
     }
 
     private void DrawMapsTab()
@@ -239,6 +284,8 @@ public partial class Core
         DrawGameplayToggle("Disable Auto Extract", ref gcDisableAutoExtract, Get("gameControllerDisableAutoExtractToggle"), "gc.disableAutoExtract");
         DrawGameplayToggle("Shared Upgrades", ref gcSharedUpgrades, Get("gameControllerSharedUpgradesToggle"), "gc.sharedUpgrades");
         DrawGameplayToggle("Auto Revive", ref gcAutoRevive, Get("gameControllerAutoReviveToggle"), "gc.autoRevive");
+        DrawSetLevelArea();
+        DrawSetMoneyArea();
     }
 
     private void DrawGameplayToggle(string label, ref bool value, string tooltip, string animationKey)
@@ -249,19 +296,252 @@ public partial class Core
     private void OpenMapConfirmation(GameController.MapEntry mapEntry)
     {
         pendingMapEntry = mapEntry;
-        float width = 360f;
-        float height = 150f;
+        pendingAction = null;
+        OpenGameControllerConfirmationRect();
+    }
+
+    private void DrawSetLevelArea()
+    {
+        GUILayout.Space(6);
+        GUILayout.BeginVertical(windowStyle);
+        GUILayout.BeginHorizontal();
+        GUILayout.Label($"<b>Set level (current: {GameController.GetCurrentLevelNumber()})</b>", labelStyle, GUILayout.Width(210));
+        setLevelInput = GUILayout.TextField(setLevelInput, textFieldStyle, GUILayout.Width(150), GUILayout.Height(24));
+        if (GUILayout.Button("<b>SET</b>", buttonStyle, GUILayout.Width(90), GUILayout.Height(28)))
+            TryOpenSetLevelConfirmation();
+        GUILayout.EndHorizontal();
+        Rect rect = GUILayoutUtility.GetLastRect();
+        if (!string.IsNullOrWhiteSpace(Get("gameControllerSetLevel")) && !HideAllTooltips)
+            GUITooltip.Show(Get("gameControllerSetLevel"), rect);
+        GUILayout.EndVertical();
+    }
+
+    private void DrawSetMoneyArea()
+    {
+        GUILayout.Space(6);
+        GUILayout.BeginVertical(windowStyle);
+        GUILayout.BeginHorizontal();
+        GUILayout.Label($"<b>Set Money (current: {GameController.GetCurrentMoney()})</b>", labelStyle, GUILayout.Width(210));
+        setMoneyInput = GUILayout.TextField(setMoneyInput, textFieldStyle, GUILayout.Width(150), GUILayout.Height(24));
+        if (GUILayout.Button("<b>SET</b>", buttonStyle, GUILayout.Width(70), GUILayout.Height(28)))
+            TryOpenSetMoneyConfirmation(false);
+        if (GUILayout.Button("<b>ADD</b>", buttonStyle, GUILayout.Width(70), GUILayout.Height(28)))
+            TryOpenSetMoneyConfirmation(true);
+        GUILayout.EndHorizontal();
+        Rect rect = GUILayoutUtility.GetLastRect();
+        if (!string.IsNullOrWhiteSpace(Get("gameControllerSetMoney")) && !HideAllTooltips)
+            GUITooltip.Show(Get("gameControllerSetMoney"), rect);
+        GUILayout.EndVertical();
+    }
+
+    private void TryOpenSetLevelConfirmation()
+    {
+        if (!ValidateGameControllerNumber(setLevelInput, 1L, GameController.MaxLevelNumber, "levelValue", out long level))
+            return;
+
+        if (!CanOpenHostOnlyGameControllerAction(LocalizedMessages.Get("setLevelActionName")))
+            return;
+
+        OpenActionConfirmation(LocalizedMessages.Get("setLevelConfirmTitle"), LocalizedMessages.Format("setLevelConfirmBody", level), () =>
+        {
+            bool ok = GameController.SetLevel((int)level, out string message);
+            return string.IsNullOrWhiteSpace(message) ? (ok ? LocalizedMessages.Format("levelSet", level) : LocalizedMessages.Get("levelSetFailed")) : message;
+        });
+    }
+
+    private void TryOpenSetMoneyConfirmation(bool add)
+    {
+        if (!ValidateGameControllerNumber(setMoneyInput, 0L, GameController.MaxMoney, "moneyValue", out long value))
+            return;
+
+        if (!CanOpenHostOnlyGameControllerAction(LocalizedMessages.Get(add ? "addMoneyActionName" : "setMoneyActionName")))
+            return;
+
+        long current = GameController.GetCurrentMoney();
+        long finalValue = add ? current + value : value;
+        if (add && finalValue > GameController.MaxMoney)
+        {
+            ShowMessage(LocalizedMessages.Format("moneyTotalOutOfRange", GameController.MaxMoney), 3.5f);
+            return;
+        }
+
+        string title = LocalizedMessages.Get(add ? "addMoneyConfirmTitle" : "setMoneyConfirmTitle");
+        string body = add
+            ? LocalizedMessages.Format("addMoneyConfirmBody", value, finalValue)
+            : LocalizedMessages.Format("setMoneyConfirmBody", finalValue);
+        OpenActionConfirmation(title, body, () =>
+        {
+            string resultMessage;
+            bool ok = add
+                ? GameController.AddMoney((int)value, out resultMessage)
+                : GameController.SetMoney((int)value, out resultMessage);
+            return string.IsNullOrWhiteSpace(resultMessage) ? (ok ? LocalizedMessages.Format("moneyUpdated", finalValue) : LocalizedMessages.Get("moneyUpdateFailed")) : resultMessage;
+        });
+    }
+
+    private bool ValidateGameControllerNumber(string input, long min, long max, string valueNameKey, out long value)
+    {
+        value = 0;
+        string valueName = LocalizedMessages.Get(valueNameKey);
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            ShowMessage(LocalizedMessages.Format("enterNumber", valueName), 3f);
+            return false;
+        }
+
+        if (!long.TryParse(input.Trim(), out value))
+        {
+            ShowMessage(LocalizedMessages.Format("invalidNumber", valueName), 3f);
+            return false;
+        }
+
+        if (value < min || value > max)
+        {
+            ShowMessage(LocalizedMessages.Format("numberOutOfRange", valueName, min, max), 3.5f);
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool CanOpenHostOnlyGameControllerAction(string functionName)
+    {
+        if (!HostOnlyGuard.IsPlayableSession())
+        {
+            ShowMessage(LocalizedMessages.Get("playableOnly"), 3f);
+            return false;
+        }
+
+        return HostOnlyGuard.CanUseHostOnly(true, functionName);
+    }
+
+    private void OpenActionConfirmation(string title, string body, Func<string> execute)
+    {
+        pendingMapEntry = null;
+        pendingAction = new GameControllerPendingAction
+        {
+            Title = title,
+            Body = body,
+            Execute = execute
+        };
+        OpenGameControllerConfirmationRect();
+    }
+
+    private void OpenGameControllerConfirmationRect()
+    {
+        float width = 380f;
+        float height = 158f;
+        Rect sourceRect = gameControllerUpgradesAvatar != null ? gameControllerUpgradesRect : gameControllerRect;
         gameControllerConfirmRect = new Rect(
-            gameControllerRect.x + (gameControllerRect.width - width) / 2f,
-            gameControllerRect.y + 92f,
+            sourceRect.x + (sourceRect.width - width) / 2f,
+            sourceRect.y + 92f,
             width,
             height
         );
     }
 
-    private void DrawMapConfirmation(float alpha)
+    private void DrawGameControllerUpgradesWindow(float alpha)
     {
-        if (pendingMapEntry == null)
+        Color previousColor = GUI.color;
+        int previousDepth = GUI.depth;
+        GUI.depth = -6500;
+        GUI.color = new Color(previousColor.r, previousColor.g, previousColor.b, previousColor.a * alpha);
+        gameControllerUpgradesRect = GUI.Window(GameControllerUpgradesWindowId, gameControllerUpgradesRect, DrawGameControllerUpgradesContents, string.Empty, windowStyle);
+        GUI.BringWindowToFront(GameControllerUpgradesWindowId);
+        GUI.depth = previousDepth;
+        GUI.color = previousColor;
+    }
+
+    private void DrawGameControllerUpgradesContents(int id)
+    {
+        GUIStyle headerStyle = new GUIStyle(labelStyle)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            fontSize = 15,
+            richText = true
+        };
+
+        GUILayout.BeginVertical();
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(34);
+        GUILayout.Label($"<b>UPGRADES: {gameControllerUpgradesPlayerName}</b>", headerStyle, GUILayout.Height(28));
+        if (GUILayout.Button("<b>X</b>", buttonStyle, GUILayout.Width(34), GUILayout.Height(28)))
+        {
+            gameControllerUpgradesAvatar = null;
+            CloseGameControllerConfirmation();
+        }
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(6);
+        gameControllerUpgradesScroll = GUILayout.BeginScrollView(gameControllerUpgradesScroll, windowStyle);
+        if (gameControllerUpgradesAvatar == null)
+        {
+            DrawLabel(LocalizedMessages.Get("playerNotFound"), Color.gray);
+        }
+        else
+        {
+            List<GameController.UpgradeEntry> upgrades = GameController.GetPlayerUpgrades(gameControllerUpgradesAvatar);
+            foreach (GameController.UpgradeEntry upgrade in upgrades)
+                DrawUpgradeArea(upgrade);
+        }
+
+        GUILayout.EndScrollView();
+        GUILayout.EndVertical();
+        GUI.DragWindow(new Rect(0, 0, gameControllerUpgradesRect.width - 44f, 34f));
+    }
+
+    private void DrawUpgradeArea(GameController.UpgradeEntry upgrade)
+    {
+        string key = upgrade.Id;
+        if (!upgradeInputs.ContainsKey(key))
+            upgradeInputs[key] = "0";
+
+        GUILayout.Space(6);
+        GUILayout.BeginVertical(windowStyle);
+        GUILayout.BeginHorizontal();
+        GUILayout.Label($"<b>{upgrade.Label} (current: {upgrade.CurrentLevel})</b>", labelStyle, GUILayout.Width(245));
+        upgradeInputs[key] = GUILayout.TextField(upgradeInputs[key], textFieldStyle, GUILayout.Width(120), GUILayout.Height(24));
+        if (GUILayout.Button("<b>SET</b>", buttonStyle, GUILayout.Width(64), GUILayout.Height(28)))
+            TryOpenUpgradeConfirmation(upgrade, false);
+        if (GUILayout.Button("<b>ADD</b>", buttonStyle, GUILayout.Width(64), GUILayout.Height(28)))
+            TryOpenUpgradeConfirmation(upgrade, true);
+        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+    }
+
+    private void TryOpenUpgradeConfirmation(GameController.UpgradeEntry upgrade, bool add)
+    {
+        if (!ValidateGameControllerNumber(upgradeInputs[upgrade.Id], 0L, GameController.MaxUpgradeLevel, "upgradeValue", out long value))
+            return;
+
+        if (!HostOnlyGuard.CanUseHostOnly(true, LocalizedMessages.Get("upgradesActionName")))
+            return;
+
+        long finalValue = add ? (long)upgrade.CurrentLevel + value : value;
+        if (finalValue > GameController.MaxUpgradeLevel)
+        {
+            ShowMessage(LocalizedMessages.Format("numberOutOfRange", LocalizedMessages.Get("upgradeValue"), 0, GameController.MaxUpgradeLevel), 3.5f);
+            return;
+        }
+
+        string title = LocalizedMessages.Get(add ? "addUpgradeConfirmTitle" : "setUpgradeConfirmTitle");
+        string body = add
+            ? LocalizedMessages.Format("addUpgradeConfirmBody", value, upgrade.Label, finalValue)
+            : LocalizedMessages.Format("setUpgradeConfirmBody", upgrade.Label, finalValue);
+
+        OpenActionConfirmation(title, body, () =>
+        {
+            string resultMessage;
+            bool ok = add
+                ? GameController.AddPlayerUpgrade(gameControllerUpgradesAvatar, upgrade.Id, (int)value, out resultMessage)
+                : GameController.SetPlayerUpgrade(gameControllerUpgradesAvatar, upgrade.Id, (int)value, out resultMessage);
+            return string.IsNullOrWhiteSpace(resultMessage) ? (ok ? LocalizedMessages.Format("upgradeSet", upgrade.Label, finalValue) : LocalizedMessages.Get("playerActionFailed")) : resultMessage;
+        });
+    }
+
+    private void DrawGameControllerConfirmation(float alpha)
+    {
+        if (pendingMapEntry == null && pendingAction == null)
             return;
 
         Event current = Event.current;
@@ -276,25 +556,36 @@ public partial class Core
         int previousDepth = GUI.depth;
         GUI.depth = -7000;
         GUI.color = new Color(previousColor.r, previousColor.g, previousColor.b, previousColor.a * alpha);
-        gameControllerConfirmRect = GUI.Window(GameControllerConfirmWindowId, gameControllerConfirmRect, DrawMapConfirmationContents, string.Empty, windowStyle);
+        gameControllerConfirmRect = GUI.Window(GameControllerConfirmWindowId, gameControllerConfirmRect, DrawGameControllerConfirmationContents, string.Empty, windowStyle);
         GUI.BringWindowToFront(GameControllerConfirmWindowId);
         GUI.depth = previousDepth;
         GUI.color = previousColor;
     }
 
-    private void DrawMapConfirmationContents(int id)
+    private void DrawGameControllerConfirmationContents(int id)
     {
         GUILayout.BeginVertical();
-        DrawLabel("Change map?", Color.white);
-        GUILayout.Label(pendingMapEntry?.DisplayName ?? string.Empty, labelStyle, GUILayout.Height(34));
+        DrawLabel(pendingAction?.Title ?? "Change map?", Color.white);
+        GUILayout.Label(pendingAction?.Body ?? pendingMapEntry?.DisplayName ?? string.Empty, labelStyle, GUILayout.Height(42));
         GUILayout.FlexibleSpace();
 
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("<b>CONFIRM</b>", buttonStyle, GUILayout.Height(32)))
         {
             GameController.MapEntry map = pendingMapEntry;
+            GameControllerPendingAction action = pendingAction;
             CloseGameControllerConfirmation();
-            bool ok = GameController.ChangeMap(map?.Level, out string message);
+            string message;
+            bool ok = true;
+            if (action != null)
+            {
+                message = action.Execute?.Invoke();
+            }
+            else
+            {
+                ok = GameController.ChangeMap(map?.Level, out message);
+            }
+
             if (!string.IsNullOrWhiteSpace(message))
                 ShowMessage(message, ok ? 2.5f : 3.5f);
         }
@@ -309,5 +600,6 @@ public partial class Core
     private void CloseGameControllerConfirmation()
     {
         pendingMapEntry = null;
+        pendingAction = null;
     }
 }

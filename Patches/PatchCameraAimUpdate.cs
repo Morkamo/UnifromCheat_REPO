@@ -13,7 +13,7 @@ public class PatchCameraAimUpdate
         if (GameDirector.instance == null || GameDirector.instance.currentState != GameDirector.gameState.Main)
             return true;
 
-        if (SemiFunc.IsMainMenu() || SemiFunc.MenuLevel() || SemiFunc.RunIsLobbyMenu() || SemiFunc.RunIsLobby())
+        if (SemiFunc.IsMainMenu() || SemiFunc.MenuLevel() || SemiFunc.RunIsLobbyMenu())
             return true;
 
         return false;

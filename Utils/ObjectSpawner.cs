@@ -38,6 +38,7 @@ namespace UnifromCheat_REPO.Utils
         private static readonly HashSet<int> spawnedCosmeticWorldObjectInstanceIds = new HashSet<int>();
         private static readonly HashSet<int> spawnedCosmeticWorldObjectViewIds = new HashSet<int>();
         private static readonly Dictionary<int, SemiFunc.Rarity> spawnedCosmeticWorldObjectRarities = new Dictionary<int, SemiFunc.Rarity>();
+        private const string CosmeticWorldObjectSpawnMarker = "UnifromCosmeticWorldObject";
 
         public static List<Item> GetSpawnableItems()
         {
@@ -193,8 +194,11 @@ namespace UnifromCheat_REPO.Utils
             if (entry.Kind == SpawnableKind.Entity && SpawnEntity(entry, spawnPosition, out resultMessage))
                 return true;
 
+            object[] instantiationData = entry.IsCosmeticWorldObject
+                ? new object[] { CosmeticWorldObjectSpawnMarker, (int)entry.CosmeticRarity }
+                : null;
             GameObject spawned = SemiFunc.IsMultiplayer()
-                ? PhotonNetwork.InstantiateRoomObject(entry.ResourcePath, spawnPosition, spawnRotation, 0)
+                ? PhotonNetwork.InstantiateRoomObject(entry.ResourcePath, spawnPosition, spawnRotation, 0, instantiationData)
                 : Object.Instantiate(entry.Prefab, spawnPosition, spawnRotation);
 
             if (spawned == null)
@@ -210,6 +214,7 @@ namespace UnifromCheat_REPO.Utils
             }
             else if (entry.IsCosmeticWorldObject && Core.Instance != null)
             {
+                SyncCosmeticWorldObjectTargetAmount();
                 Core.Instance.StartCoroutine(InitializeSpawnedCosmeticWorldObjectWhenReady(spawned, entry.CosmeticRarity));
             }
 
@@ -228,7 +233,7 @@ namespace UnifromCheat_REPO.Utils
                 spawnedCosmeticWorldObjectRarities.TryGetValue(instanceId, out rarity))
                 return true;
 
-            PhotonView photonView = cosmeticWorldObject.GetComponent<PhotonView>();
+            PhotonView photonView = GetCosmeticWorldObjectPhotonView(cosmeticWorldObject);
             int viewId = photonView != null ? photonView.ViewID : 0;
             if (viewId != 0 &&
                 spawnedCosmeticWorldObjectViewIds.Contains(viewId) &&
@@ -236,6 +241,38 @@ namespace UnifromCheat_REPO.Utils
                 return true;
 
             return false;
+        }
+
+        public static bool TryRegisterSpawnedCosmeticWorldObjectFromInstantiationData(CosmeticWorldObject cosmeticWorldObject)
+        {
+            if (cosmeticWorldObject == null)
+                return false;
+
+            PhotonView photonView = GetCosmeticWorldObjectPhotonView(cosmeticWorldObject);
+            object[] data = photonView?.InstantiationData;
+            if (data == null || data.Length < 2 || !(data[0] is string marker) || marker != CosmeticWorldObjectSpawnMarker)
+                return false;
+
+            int rarityValue;
+            if (data[1] is int intValue)
+                rarityValue = intValue;
+            else if (data[1] is byte byteValue)
+                rarityValue = byteValue;
+            else
+                return false;
+
+            SemiFunc.Rarity rarity = (SemiFunc.Rarity)rarityValue;
+            cosmeticWorldObject.rarity = rarity;
+            RegisterSpawnedCosmeticWorldObject(cosmeticWorldObject, rarity);
+            return true;
+        }
+
+        public static int GetSpawnedCosmeticWorldObjectCount()
+        {
+            CleanupSpawnedCosmeticWorldObjectIds();
+            return SemiFunc.IsMultiplayer()
+                ? spawnedCosmeticWorldObjectViewIds.Count
+                : spawnedCosmeticWorldObjectInstanceIds.Count;
         }
 
         public static string GetDisplayName(Item item)
@@ -615,11 +652,89 @@ namespace UnifromCheat_REPO.Utils
             spawnedCosmeticWorldObjectInstanceIds.Add(instanceId);
             spawnedCosmeticWorldObjectRarities[instanceId] = rarity;
 
-            PhotonView photonView = cosmeticWorldObject.GetComponent<PhotonView>();
+            PhotonView photonView = GetCosmeticWorldObjectPhotonView(cosmeticWorldObject);
             if (photonView != null && photonView.ViewID != 0)
             {
                 spawnedCosmeticWorldObjectViewIds.Add(photonView.ViewID);
                 spawnedCosmeticWorldObjectRarities[photonView.ViewID] = rarity;
+            }
+        }
+
+        private static void SyncCosmeticWorldObjectTargetAmount()
+        {
+            ValuableDirector director = ValuableDirector.instance;
+            if (director == null)
+                return;
+
+            int targetAmount = GetIntField(director, "cosmeticWorldObjectTargetAmount") + 1;
+            SetFieldValue(director, "cosmeticWorldObjectTargetAmount", targetAmount);
+
+            PhotonView photonView = GetFieldValue<PhotonView>(director, "PhotonView");
+            if (!SemiFunc.IsMultiplayer() || !PhotonNetwork.IsMasterClient || photonView == null)
+                return;
+
+            photonView.RPC("CosmeticWorldObjectTargetSetRPC", RpcTarget.Others, targetAmount);
+        }
+
+        private static PhotonView GetCosmeticWorldObjectPhotonView(CosmeticWorldObject cosmeticWorldObject)
+        {
+            if (cosmeticWorldObject == null)
+                return null;
+
+            return cosmeticWorldObject.GetComponent<PhotonView>() ??
+                   cosmeticWorldObject.GetComponentInParent<PhotonView>() ??
+                   cosmeticWorldObject.GetComponentInChildren<PhotonView>(true);
+        }
+
+        private static void CleanupSpawnedCosmeticWorldObjectIds()
+        {
+            List<int> removeInstanceIds = null;
+            foreach (int instanceId in spawnedCosmeticWorldObjectInstanceIds)
+            {
+                bool exists = false;
+                foreach (CosmeticWorldObject cosmeticWorldObject in Object.FindObjectsOfType<CosmeticWorldObject>(true))
+                {
+                    if (cosmeticWorldObject != null && cosmeticWorldObject.GetInstanceID() == instanceId)
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists)
+                {
+                    removeInstanceIds ??= new List<int>();
+                    removeInstanceIds.Add(instanceId);
+                }
+            }
+
+            if (removeInstanceIds != null)
+            {
+                foreach (int instanceId in removeInstanceIds)
+                {
+                    spawnedCosmeticWorldObjectInstanceIds.Remove(instanceId);
+                    spawnedCosmeticWorldObjectRarities.Remove(instanceId);
+                }
+            }
+
+            List<int> removeViewIds = null;
+            foreach (int viewId in spawnedCosmeticWorldObjectViewIds)
+            {
+                PhotonView photonView = PhotonView.Find(viewId);
+                if (photonView != null)
+                    continue;
+
+                removeViewIds ??= new List<int>();
+                removeViewIds.Add(viewId);
+            }
+
+            if (removeViewIds == null)
+                return;
+
+            foreach (int viewId in removeViewIds)
+            {
+                spawnedCosmeticWorldObjectViewIds.Remove(viewId);
+                spawnedCosmeticWorldObjectRarities.Remove(viewId);
             }
         }
 

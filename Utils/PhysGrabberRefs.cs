@@ -68,6 +68,11 @@ namespace UnifromCheat_REPO.Utils
         public static readonly AccessTools.FieldRef<PhysGrabber, bool> overrideDisableRotationControls =
             AccessTools.FieldRefAccess<PhysGrabber, bool>("overrideDisableRotationControls");
 
+        public static readonly AccessTools.FieldRef<PhysGrabber, float> overrideDisableSpecialGrabPowersTimer =
+            AccessTools.FieldRefAccess<PhysGrabber, float>("overrideDisableSpecialGrabPowersTimer");
+        public static readonly AccessTools.FieldRef<PhysGrabber, bool> overrideDisableSpecialGrabPowers =
+            AccessTools.FieldRefAccess<PhysGrabber, bool>("overrideDisableSpecialGrabPowers");
+
         public static readonly AccessTools.FieldRef<PhysGrabber, LayerMask> mask =
             AccessTools.FieldRefAccess<PhysGrabber, LayerMask>("mask");
         public static readonly AccessTools.FieldRef<PhysGrabber, float> grabCheckTimer =

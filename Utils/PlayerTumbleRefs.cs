@@ -15,6 +15,8 @@ internal static class PlayerTumbleRefs
         AccessTools.FieldRefAccess<PlayerTumble, PhysGrabObject>("physGrabObject");
     public static readonly AccessTools.FieldRef<PlayerTumble, PhotonView> photonView =
         AccessTools.FieldRefAccess<PlayerTumble, PhotonView>("photonView");
+    public static readonly AccessTools.FieldRef<PlayerTumble, PlayerAvatar> playerAvatar =
+        AccessTools.FieldRefAccess<PlayerTumble, PlayerAvatar>("playerAvatar");
     public static readonly AccessTools.FieldRef<PlayerTumble, bool> isTumbling =
         AccessTools.FieldRefAccess<PlayerTumble, bool>("isTumbling");
     public static readonly AccessTools.FieldRef<PlayerTumble, float> tumbleSetTimer =

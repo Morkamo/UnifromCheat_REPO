@@ -54,8 +54,10 @@
         <Compile Include="Patches\InfiniteAmmoPatch.cs" />
         <Compile Include="Patches\InfiniteSprint.cs" />
         <Compile Include="Patches\CustomJumpForce.cs" />
+        <Compile Include="Patches\DeadVoicePatch.cs" />
         <Compile Include="Patches\MultiJumps.cs" />
         <Compile Include="Patches\Noclip.cs" />
+        <Compile Include="Patches\NoTokenHudPatch.cs" />
         <Compile Include="Patches\OneTapMode.cs" />
         <Compile Include="Patches\PeacefulEnemies.cs" />
         <Compile Include="Patches\PatchGameCursorVisible.cs" />
@@ -63,6 +65,7 @@
         <Compile Include="Patches\ProtectedSessionPatch.cs" />
         <Compile Include="Patches\SpawnTaxReturn.cs" />
         <Compile Include="Patches\SpeedHack.cs" />
+        <Compile Include="Patches\TumbleBypass.cs" />
         <Compile Include="Patches\GameControllerPatches.cs" />
         <Compile Include="Patches\OverridePhysAttributes.cs" />
         <Compile Include="Patches\WallHackSceneTransitionPatch.cs" />
@@ -70,6 +73,7 @@
         <Compile Include="TooltipsLanguages.cs" />
         <Compile Include="UnloadCheat.cs" />
         <Compile Include="UnifromGUI.cs" />
+        <Compile Include="Utils\AudioLowPassLogicRefs.cs" />
         <Compile Include="Utils\ConfigSystem.cs" />
         <Compile Include="Utils\EnemiesTeleporter.cs" />
         <Compile Include="Utils\FireboxConsole.cs" />
@@ -85,6 +89,7 @@
         <Compile Include="Utils\PhysGrabberRefs.cs" />
         <Compile Include="Utils\PhysGrabObjectRefs.cs" />
         <Compile Include="Utils\PlayerAvatarRefs.cs" />
+        <Compile Include="Utils\PlayerVoiceChatRefs.cs" />
         <Compile Include="Utils\PlayerCollisionGroundedRefs.cs" />
         <Compile Include="Utils\PlayerControllerRefs.cs" />
         <Compile Include="Utils\PlayersTeleporter.cs" />
