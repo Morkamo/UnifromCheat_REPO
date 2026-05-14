@@ -7,7 +7,7 @@ namespace UnifromCheat_REPO;
 
 public partial class Core
 {
-    internal string cheatVersion = "4.4.0";
+    internal string cheatVersion = "4.4.1";
 
     private Rect RectMenu;
     private float dpiScaling => Mathf.Min(Screen.width / 1920f, Screen.height / 1080f);
@@ -37,6 +37,7 @@ public partial class Core
     internal static string cursorSourcePath = @"D:\Images\simpleImage.png";
 
     internal static bool tooltipsLanguage = true;
+    internal static bool translateMenu = false;
     internal static int lg_state = 1;
 
     internal static float HC_R = 1f;

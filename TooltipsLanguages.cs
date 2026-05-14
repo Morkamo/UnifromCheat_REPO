@@ -2,7 +2,7 @@
 
 namespace UnifromCheat_REPO
 {
-    public class TooltipsLanguages
+    public partial class TooltipsLanguages
     {
         private static readonly Dictionary<int, Dictionary<string, string>> packs =
             new Dictionary<int, Dictionary<string, string>>()
@@ -409,8 +409,20 @@ namespace UnifromCheat_REPO
                     return value;
             }
 
+            if (TryGetAdditionalTooltip(Core.lg_state, key, out string additionalValue))
+                return additionalValue;
+
+            if (packs.TryGetValue(0, out var englishDict) &&
+                englishDict.TryGetValue(key, out string englishValue) &&
+                TryTranslateMenuOrTooltip(Core.lg_state, englishValue, out string translatedValue))
+                return translatedValue;
+
             if (TryGetRuntimeTooltip(Core.lg_state, key, out string runtimeValue))
                 return runtimeValue;
+
+            if (packs.TryGetValue(0, out var fallbackEnglishDict) &&
+                fallbackEnglishDict.TryGetValue(key, out string fallbackEnglishValue))
+                return fallbackEnglishValue;
 
             return null;
         }

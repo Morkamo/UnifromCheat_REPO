@@ -70,16 +70,16 @@ public partial class Core
         GUILayout.BeginVertical();
         GUILayout.BeginHorizontal();
         GUILayout.Space(34);
-        GUILayout.Label("<b>OBJECT SPAWNER</b>", headerStyle, GUILayout.Height(28));
+        GUILayout.Label(UiBold("OBJECT SPAWNER"), headerStyle, GUILayout.Height(28));
         if (GUILayout.Button("<b>X</b>", buttonStyle, GUILayout.Width(34), GUILayout.Height(28)))
             objectSpawnerWindowOpen = false;
         GUILayout.EndHorizontal();
 
         GUILayout.Space(4);
         GUILayout.BeginHorizontal();
-        DrawObjectSpawnerTabButton("Items", ObjectSpawnerTab.Items, Get("objectSpawnerItemsTab"));
-        DrawObjectSpawnerTabButton("Valuables", ObjectSpawnerTab.Valuables, Get("objectSpawnerValuablesTab"));
-        DrawObjectSpawnerTabButton("Entity", ObjectSpawnerTab.Entity, Get("objectSpawnerEntityTab"));
+        DrawObjectSpawnerTabButton(Ui("Items"), ObjectSpawnerTab.Items, Get("objectSpawnerItemsTab"));
+        DrawObjectSpawnerTabButton(Ui("Valuables"), ObjectSpawnerTab.Valuables, Get("objectSpawnerValuablesTab"));
+        DrawObjectSpawnerTabButton(Ui("Entity"), ObjectSpawnerTab.Entity, Get("objectSpawnerEntityTab"));
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
 
@@ -92,10 +92,10 @@ public partial class Core
                 DrawItemSpawnerGrid();
                 break;
             case ObjectSpawnerTab.Valuables:
-                DrawEntrySpawnerGrid(ObjectSpawner.GetSpawnableValuables(), "No valuables found.");
+                DrawEntrySpawnerGrid(ObjectSpawner.GetSpawnableValuables(), Ui("No valuables found."));
                 break;
             case ObjectSpawnerTab.Entity:
-                DrawEntrySpawnerGrid(ObjectSpawner.GetSpawnableEntities(), "No entities found.");
+                DrawEntrySpawnerGrid(ObjectSpawner.GetSpawnableEntities(), Ui("No entities found."));
                 break;
         }
 

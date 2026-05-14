@@ -158,7 +158,8 @@ namespace UnifromCheat_REPO
         {
             GUILayout.BeginHorizontal();
             GUI.contentColor = Color.white;
-            GUILayout.Label($"{label}: {value:F1}", labelStyle, GUILayout.Width(120));
+            string displayLabel = TooltipsLanguages.Ui(label);
+            GUILayout.Label($"{displayLabel}: {value:F1}", labelStyle, GUILayout.Width(120));
 
             Rect sliderRect = GUILayoutUtility.GetRect(120, 16, GUILayout.ExpandWidth(false));
             DrawSliderTrack(sliderRect, value, min, max);
@@ -170,7 +171,7 @@ namespace UnifromCheat_REPO
 
             if (defaultValue.HasValue)
             {
-                if (GUILayout.Button("Default", buttonStyle, GUILayout.Width(70)))
+                if (GUILayout.Button(TooltipsLanguages.Ui("Default"), buttonStyle, GUILayout.Width(70)))
                     value = defaultValue.Value;
                 Rect bRect = GUILayoutUtility.GetLastRect();
                 if (!string.IsNullOrEmpty(tooltip) && !Core.HideAllTooltips) GUITooltip.Show(tooltip, bRect);
@@ -183,7 +184,8 @@ namespace UnifromCheat_REPO
         {
             GUILayout.BeginHorizontal();
             GUI.contentColor = Color.white;
-            GUILayout.Label($"{label}: {value}", labelStyle, GUILayout.Width(100));
+            string displayLabel = TooltipsLanguages.Ui(label);
+            GUILayout.Label($"{displayLabel}: {value}", labelStyle, GUILayout.Width(100));
 
             Rect sliderRect = GUILayoutUtility.GetRect(120, 16, GUILayout.ExpandWidth(false));
             DrawSliderTrack(sliderRect, value, min, max);
@@ -195,7 +197,7 @@ namespace UnifromCheat_REPO
 
             if (defaultValue.HasValue)
             {
-                if (GUILayout.Button("Default", buttonStyle, GUILayout.Width(70)))
+                if (GUILayout.Button(TooltipsLanguages.Ui("Default"), buttonStyle, GUILayout.Width(70)))
                     value = defaultValue.Value;
                 Rect bRect = GUILayoutUtility.GetLastRect();
                 if (!string.IsNullOrEmpty(tooltip) && !Core.HideAllTooltips) GUITooltip.Show(tooltip, bRect);
@@ -207,6 +209,7 @@ namespace UnifromCheat_REPO
         public static void DrawToggle(string label, ref bool value, Color? onColor = null, string tooltip = null, string animationKey = null)
         {
             GUILayout.BeginHorizontal();
+            string displayLabel = TooltipsLanguages.Ui(label, label == "Translate menu");
 
             Color activeColor   = onColor ?? Color.green;
             Color inactiveColor = Color.gray;
@@ -242,7 +245,7 @@ namespace UnifromCheat_REPO
             }
 
             GUIStyle tempLabel = new GUIStyle(labelStyle) { alignment = TextAnchor.MiddleLeft };
-            Rect labelRect = GUILayoutUtility.GetRect(new GUIContent(label), tempLabel, GUILayout.ExpandWidth(true));
+            Rect labelRect = GUILayoutUtility.GetRect(new GUIContent(displayLabel), tempLabel, GUILayout.ExpandWidth(true));
 
             if (Event.current.type == EventType.MouseDown && labelRect.Contains(Event.current.mousePosition))
             {
@@ -250,7 +253,7 @@ namespace UnifromCheat_REPO
                 Event.current.Use();
             }
 
-            GUI.Label(labelRect, label, tempLabel);
+            GUI.Label(labelRect, displayLabel, tempLabel);
 
             if (!string.IsNullOrEmpty(tooltip) && !Core.HideAllTooltips)
             {
@@ -264,6 +267,7 @@ namespace UnifromCheat_REPO
         public static void DrawRadio(string label, int optionIndex, ref int selectedIndex, Color? onColor = null, string tooltip = null, string animationKey = null)
         {
             GUILayout.BeginHorizontal();
+            string displayLabel = TooltipsLanguages.Ui(label);
 
             Color activeColor   = onColor ?? Color.green;
             Color inactiveColor = Color.gray;
@@ -300,7 +304,7 @@ namespace UnifromCheat_REPO
             }
 
             GUIStyle tempLabel = new GUIStyle(labelStyle) { alignment = TextAnchor.MiddleLeft };
-            Rect labelRect = GUILayoutUtility.GetRect(new GUIContent(label), tempLabel, GUILayout.ExpandWidth(true));
+            Rect labelRect = GUILayoutUtility.GetRect(new GUIContent(displayLabel), tempLabel, GUILayout.ExpandWidth(true));
 
             if (Event.current.type == EventType.MouseDown && labelRect.Contains(Event.current.mousePosition))
             {
@@ -308,7 +312,7 @@ namespace UnifromCheat_REPO
                 Event.current.Use();
             }
 
-            GUI.Label(labelRect, label, tempLabel);
+            GUI.Label(labelRect, displayLabel, tempLabel);
 
             if (!string.IsNullOrEmpty(tooltip) && !Core.HideAllTooltips)
             {
@@ -321,14 +325,15 @@ namespace UnifromCheat_REPO
 
         public static void DrawLabel(string text, Color color, string tooltip = null)
         {
+            string displayText = TooltipsLanguages.Ui(text);
             GUIStyle style = new GUIStyle(labelStyle)
             {
                 normal = { textColor = color },
                 alignment = TextAnchor.MiddleLeft
             };
 
-            Rect rect = GUILayoutUtility.GetRect(new GUIContent(text), style, GUILayout.ExpandWidth(true));
-            GUI.Label(rect, text, style);
+            Rect rect = GUILayoutUtility.GetRect(new GUIContent(displayText), style, GUILayout.ExpandWidth(true));
+            GUI.Label(rect, displayText, style);
 
             if (!string.IsNullOrEmpty(tooltip) && !Core.HideAllTooltips)
             {
@@ -341,7 +346,7 @@ namespace UnifromCheat_REPO
             GUILayout.BeginHorizontal();
 
             GUI.contentColor = Color.white;
-            GUILayout.Label(label, labelStyle, GUILayout.Width(labelWidth));
+            GUILayout.Label(TooltipsLanguages.Ui(label), labelStyle, GUILayout.Width(labelWidth));
 
             Rect rect = GUILayoutUtility.GetRect(fieldWidth, 22, GUILayout.ExpandWidth(false));
             

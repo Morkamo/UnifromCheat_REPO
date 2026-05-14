@@ -201,6 +201,9 @@ namespace UnifromCheat_REPO.Utils
             if (Messages.TryGetValue(Core.lg_state, out var pack) && pack.TryGetValue(key, out string value))
                 return value;
 
+            if (AdditionalLocalizedMessages.TryGet(Core.lg_state, key, out value))
+                return value;
+
             return Messages[0].TryGetValue(key, out string fallback) ? fallback : key;
         }
 

@@ -1,0 +1,73 @@
+using System.Collections.Generic;
+
+namespace UnifromCheat_REPO.Utils
+{
+    internal static class AdditionalLocalizedMessages
+    {
+        private static readonly Dictionary<int, Dictionary<string, string>> Messages = new()
+        {
+            [4] = Make("この機能はロビーホスト専用です。", "{0}はロビーホスト専用です。", "プレイ可能なセッションに参加した後にのみ使用できます。", "アイテムのプレハブが見つかりません。", "プレイヤーが見つかりません。", "{0}を生成しました。", "{0}の生成に失敗しました。", "プレイヤー操作に失敗しました。", "現在マップは変更できません。", "マップ変更に失敗しました。", "{0}へマップを変更中です。", "数値を入力してください: {0}。", "{0}の数値が無効です。", "{0}が範囲外です。許可範囲: {1}-{2}。", "所持金の合計が範囲外です。許可範囲: 0-{0}。", "レベルを設定しますか？", "現在のレベルを{0}にしてマップを再起動しますか？", "所持金を設定しますか？", "セッションの所持金を{0}にしますか？", "所持金を追加しますか？", "{0}を追加しますか？ 新しい合計: {1}。", "レベルを{0}に設定しました。", "レベル設定に失敗しました。", "所持金を{0}に設定しました。", "所持金を{0}に更新しました。", "所持金の更新に失敗しました。", "プレイヤーを固定しました。", "プレイヤーの固定を解除しました。", "アップグレードを設定しますか？", "{0}のアップグレードレベルを{1}にしますか？", "アップグレードを追加しますか？", "{1}に{0}を追加しますか？ 新しいレベル: {2}。", "{0}のアップグレードレベルは{1}です。"),
+            [5] = Make("이 기능은 로비 호스트만 사용할 수 있습니다.", "{0}은(는) 로비 호스트만 사용할 수 있습니다.", "플레이 가능한 세션에 참가한 후에만 사용할 수 있습니다.", "아이템 프리팹을 찾을 수 없습니다.", "플레이어를 찾을 수 없습니다.", "{0} 생성됨.", "{0} 생성 실패.", "플레이어 작업 실패.", "지금은 맵을 변경할 수 없습니다.", "맵 변경 실패.", "{0}(으)로 맵 변경 중.", "{0} 숫자를 입력하세요.", "잘못된 {0} 숫자입니다.", "{0}이(가) 범위를 벗어났습니다. 허용: {1}-{2}.", "총 돈이 범위를 벗어났습니다. 허용: 0-{0}.", "레벨을 설정할까요?", "현재 레벨을 {0}(으)로 설정하고 맵을 다시 시작할까요?", "돈을 설정할까요?", "세션 돈을 {0}(으)로 설정할까요?", "돈을 추가할까요?", "{0} 돈을 추가할까요? 새 합계: {1}.", "레벨이 {0}(으)로 설정되었습니다.", "레벨 설정 실패.", "돈이 {0}(으)로 설정되었습니다.", "돈이 {0}(으)로 업데이트되었습니다.", "돈 업데이트 실패.", "플레이어가 얼었습니다.", "플레이어 동결 해제.", "업그레이드를 설정할까요?", "{0} 업그레이드 레벨을 {1}(으)로 설정할까요?", "업그레이드를 추가할까요?", "{1}에 {0}을(를) 추가할까요? 새 레벨: {2}.", "{0} 업그레이드 레벨은 이제 {1}입니다."),
+            [6] = Make("Ta funkcja jest dostępna tylko dla hosta lobby.", "{0} jest dostępne tylko dla hosta lobby.", "Ta funkcja działa dopiero po dołączeniu do gry.", "Nie znaleziono prefabu przedmiotu.", "Nie znaleziono gracza.", "Utworzono {0}.", "Nie udało się utworzyć {0}.", "Akcja na graczu nie powiodła się.", "Nie można teraz zmienić mapy.", "Nie udało się zmienić mapy.", "Zmiana mapy na {0}.", "Wpisz liczbę dla: {0}.", "Nieprawidłowa liczba dla: {0}.", "{0} poza zakresem. Dozwolone: {1}-{2}.", "Suma pieniędzy poza zakresem. Dozwolone: 0-{0}.", "Ustawić poziom?", "Ustawić bieżący poziom na {0} i zrestartować mapę?", "Ustawić pieniądze?", "Ustawić pieniądze sesji na {0}?", "Dodać pieniądze?", "Dodać {0} pieniędzy? Nowa suma: {1}.", "Poziom ustawiony na {0}.", "Nie udało się ustawić poziomu.", "Pieniądze ustawione na {0}.", "Pieniądze zaktualizowane do {0}.", "Nie udało się zaktualizować pieniędzy.", "Gracz zamrożony.", "Gracz odmrożony.", "Ustawić ulepszenie?", "Ustawić poziom ulepszenia {0} na {1}?", "Dodać ulepszenie?", "Dodać {0} do {1}? Nowy poziom: {2}.", "Poziom ulepszenia {0}: {1}."),
+            [7] = Make("Esta función solo está disponible para el host del lobby.", "{0} solo está disponible para el host del lobby.", "Esta función solo está disponible dentro de una sesión jugable.", "No se encontró el prefab del objeto.", "Jugador no encontrado.", "Generado {0}.", "No se pudo generar {0}.", "Falló la acción sobre el jugador.", "No se puede cambiar el mapa ahora.", "No se pudo cambiar el mapa.", "Cambiando mapa a {0}.", "Introduce un número para {0}.", "Número de {0} no válido.", "{0} está fuera de rango. Permitido: {1}-{2}.", "El total de dinero está fuera de rango. Permitido: 0-{0}.", "¿Establecer nivel?", "¿Establecer el nivel actual en {0} y reiniciar el mapa?", "¿Establecer dinero?", "¿Establecer el dinero de la sesión en {0}?", "¿Añadir dinero?", "¿Añadir {0} de dinero? Nuevo total: {1}.", "Nivel establecido en {0}.", "No se pudo establecer el nivel.", "Dinero establecido en {0}.", "Dinero actualizado a {0}.", "No se pudo actualizar el dinero.", "Jugador congelado.", "Jugador descongelado.", "¿Establecer mejora?", "¿Establecer la mejora {0} al nivel {1}?", "¿Añadir mejora?", "¿Añadir {0} a {1}? Nuevo nivel: {2}.", "La mejora {0} ahora está en nivel {1}."),
+            [8] = Make("Cette fonction est réservée à l'hôte du lobby.", "{0} est réservé à l'hôte du lobby.", "Cette fonction n'est disponible qu'après avoir rejoint une session jouable.", "Prefab d'objet introuvable.", "Joueur introuvable.", "{0} créé.", "Échec de la création de {0}.", "L'action sur le joueur a échoué.", "Le changement de carte est indisponible maintenant.", "Échec du changement de carte.", "Changement de carte vers {0}.", "Entrez un nombre pour {0}.", "Nombre invalide pour {0}.", "{0} est hors limites. Autorisé: {1}-{2}.", "Total d'argent hors limites. Autorisé: 0-{0}.", "Définir le niveau ?", "Définir le niveau actuel sur {0} et redémarrer la carte ?", "Définir l'argent ?", "Définir l'argent de la session sur {0} ?", "Ajouter de l'argent ?", "Ajouter {0} d'argent ? Nouveau total: {1}.", "Niveau défini sur {0}.", "Échec de la définition du niveau.", "Argent défini sur {0}.", "Argent mis à jour à {0}.", "Échec de la mise à jour de l'argent.", "Joueur gelé.", "Joueur dégelé.", "Définir l'amélioration ?", "Définir le niveau de l'amélioration {0} sur {1} ?", "Ajouter une amélioration ?", "Ajouter {0} à {1} ? Nouveau niveau: {2}.", "Le niveau de l'amélioration {0} est maintenant {1}."),
+            [9] = Make("هذه الوظيفة متاحة لمضيف الردهة فقط.", "{0} متاح لمضيف الردهة فقط.", "هذه الوظيفة متاحة فقط بعد الانضمام إلى جلسة قابلة للعب.", "لم يتم العثور على قالب العنصر.", "لم يتم العثور على اللاعب.", "تم إنشاء {0}.", "فشل إنشاء {0}.", "فشل تنفيذ إجراء اللاعب.", "تغيير الخريطة غير متاح الآن.", "فشل تغيير الخريطة.", "جار تغيير الخريطة إلى {0}.", "أدخل رقما لـ {0}.", "رقم {0} غير صالح.", "{0} خارج النطاق. المسموح: {1}-{2}.", "إجمالي المال خارج النطاق. المسموح: 0-{0}.", "تعيين المستوى؟", "تعيين المستوى الحالي إلى {0} وإعادة تشغيل الخريطة؟", "تعيين المال؟", "تعيين مال الجلسة إلى {0}؟", "إضافة مال؟", "إضافة {0} مال؟ الإجمالي الجديد: {1}.", "تم تعيين المستوى إلى {0}.", "فشل تعيين المستوى.", "تم تعيين المال إلى {0}.", "تم تحديث المال إلى {0}.", "فشل تحديث المال.", "تم تجميد اللاعب.", "تم إلغاء تجميد اللاعب.", "تعيين الترقية؟", "تعيين مستوى ترقية {0} إلى {1}؟", "إضافة ترقية؟", "إضافة {0} إلى {1}؟ المستوى الجديد: {2}.", "مستوى ترقية {0} الآن {1}."),
+            [10] = Make("Ова функција је доступна само хосту лобија.", "{0} је доступно само хосту лобија.", "Ова функција је доступна тек после уласка у сесију за играње.", "Префаб предмета није пронађен.", "Играч није пронађен.", "Створено: {0}.", "Није успело стварање: {0}.", "Акција над играчем није успела.", "Мапа сада не може да се промени.", "Промена мапе није успела.", "Промена мапе на {0}.", "Унесите број за {0}.", "Неисправан број за {0}.", "{0} је ван опсега. Дозвољено: {1}-{2}.", "Укупни новац је ван опсега. Дозвољено: 0-{0}.", "Поставити ниво?", "Поставити тренутни ниво на {0} и рестартовати мапу?", "Поставити новац?", "Поставити новац сесије на {0}?", "Додати новац?", "Додати {0} новца? Нови износ: {1}.", "Ниво постављен на {0}.", "Постављање нивоа није успело.", "Новац постављен на {0}.", "Новац ажуриран на {0}.", "Ажурирање новца није успело.", "Играч замрзнут.", "Играч одмрзнут.", "Поставити надоградњу?", "Поставити ниво надоградње {0} на {1}?", "Додати надоградњу?", "Додати {0} на {1}? Нови ниво: {2}.", "Ниво надоградње {0} је сада {1}."),
+            [11] = Make("Гэта функцыя даступная толькі хосту лобі.", "{0} даступна толькі хосту лобі.", "Гэта функцыя даступная толькі пасля ўваходу ў гульнявую сесію.", "Прэфаб прадмета не знойдзены.", "Гулец не знойдзены.", "Створана: {0}.", "Не ўдалося стварыць: {0}.", "Не ўдалося выканаць дзеянне з гульцом.", "Зараз нельга змяніць карту.", "Не ўдалося змяніць карту.", "Змена карты на {0}.", "Увядзіце лік для {0}.", "Няправільны лік для {0}.", "{0} па-за дыяпазонам. Дазволена: {1}-{2}.", "Агульная сума грошай па-за дыяпазонам. Дазволена: 0-{0}.", "Усталяваць узровень?", "Усталяваць бягучы ўзровень на {0} і перазапусціць карту?", "Усталяваць грошы?", "Усталяваць грошы сесіі на {0}?", "Дадаць грошы?", "Дадаць {0} грошай? Новы вынік: {1}.", "Узровень усталяваны на {0}.", "Не ўдалося ўсталяваць узровень.", "Грошы ўсталяваны на {0}.", "Грошы абноўлены да {0}.", "Не ўдалося абнавіць грошы.", "Гулец замарожаны.", "Гулец размарожаны.", "Усталяваць паляпшэнне?", "Усталяваць узровень паляпшэння {0} на {1}?", "Дадаць паляпшэнне?", "Дадаць {0} да {1}? Новы ўзровень: {2}.", "Узровень паляпшэння {0}: {1}."),
+            [12] = Make("Bu işlev yalnızca lobi hostu tarafından kullanılabilir.", "{0} yalnızca lobi hostu tarafından kullanılabilir.", "Bu işlev yalnızca oynanabilir bir oturuma katıldıktan sonra kullanılabilir.", "Eşya prefabı bulunamadı.", "Oyuncu bulunamadı.", "{0} oluşturuldu.", "{0} oluşturulamadı.", "Oyuncu işlemi başarısız.", "Harita şu anda değiştirilemez.", "Harita değiştirilemedi.", "Harita {0} olarak değiştiriliyor.", "{0} için sayı girin.", "Geçersiz {0} sayısı.", "{0} aralık dışında. İzin verilen: {1}-{2}.", "Toplam para aralık dışında. İzin verilen: 0-{0}.", "Seviye ayarlansın mı?", "Mevcut seviye {0} yapılıp harita yeniden başlatılsın mı?", "Para ayarlansın mı?", "Oturum parası {0} yapılsın mı?", "Para eklensin mi?", "{0} para eklensin mi? Yeni toplam: {1}.", "Seviye {0} olarak ayarlandı.", "Seviye ayarlanamadı.", "Para {0} olarak ayarlandı.", "Para {0} olarak güncellendi.", "Para güncellenemedi.", "Oyuncu donduruldu.", "Oyuncu çözüldü.", "Yükseltme ayarlansın mı?", "{0} yükseltme seviyesi {1} yapılsın mı?", "Yükseltme eklensin mi?", "{1} üzerine {0} eklensin mi? Yeni seviye: {2}.", "{0} yükseltme seviyesi artık {1}.")
+        };
+
+        public static bool TryGet(int language, string key, out string value)
+        {
+            value = null;
+            if (ActionWords.TryGetValue(language, out var words) && words.TryGetValue(key, out value))
+                return true;
+
+            return Messages.TryGetValue(language, out var pack) && pack.TryGetValue(key, out value);
+        }
+
+        private static readonly Dictionary<int, Dictionary<string, string>> ActionWords = new()
+        {
+            [4] = new Dictionary<string, string> { ["setLevelActionName"] = "レベル設定", ["setMoneyActionName"] = "所持金設定", ["addMoneyActionName"] = "所持金追加", ["freezeActionName"] = "固定", ["upgradesActionName"] = "アップグレード", ["levelValue"] = "レベル", ["moneyValue"] = "所持金", ["upgradeValue"] = "アップグレードレベル" },
+            [5] = new Dictionary<string, string> { ["setLevelActionName"] = "레벨 설정", ["setMoneyActionName"] = "돈 설정", ["addMoneyActionName"] = "돈 추가", ["freezeActionName"] = "동결", ["upgradesActionName"] = "업그레이드", ["levelValue"] = "레벨", ["moneyValue"] = "돈", ["upgradeValue"] = "업그레이드 레벨" },
+            [6] = new Dictionary<string, string> { ["setLevelActionName"] = "Ustaw poziom", ["setMoneyActionName"] = "Ustaw pieniądze", ["addMoneyActionName"] = "Dodaj pieniądze", ["freezeActionName"] = "Zamroź", ["upgradesActionName"] = "Ulepszenia", ["levelValue"] = "poziomu", ["moneyValue"] = "pieniędzy", ["upgradeValue"] = "poziomu ulepszenia" },
+            [7] = new Dictionary<string, string> { ["setLevelActionName"] = "Establecer nivel", ["setMoneyActionName"] = "Establecer dinero", ["addMoneyActionName"] = "Añadir dinero", ["freezeActionName"] = "Congelar", ["upgradesActionName"] = "Mejoras", ["levelValue"] = "nivel", ["moneyValue"] = "dinero", ["upgradeValue"] = "nivel de mejora" },
+            [8] = new Dictionary<string, string> { ["setLevelActionName"] = "Définir niveau", ["setMoneyActionName"] = "Définir argent", ["addMoneyActionName"] = "Ajouter argent", ["freezeActionName"] = "Geler", ["upgradesActionName"] = "Améliorations", ["levelValue"] = "niveau", ["moneyValue"] = "argent", ["upgradeValue"] = "niveau d'amélioration" },
+            [9] = new Dictionary<string, string> { ["setLevelActionName"] = "تعيين المستوى", ["setMoneyActionName"] = "تعيين المال", ["addMoneyActionName"] = "إضافة المال", ["freezeActionName"] = "تجميد", ["upgradesActionName"] = "الترقيات", ["levelValue"] = "المستوى", ["moneyValue"] = "المال", ["upgradeValue"] = "مستوى الترقية" },
+            [10] = new Dictionary<string, string> { ["setLevelActionName"] = "Постави ниво", ["setMoneyActionName"] = "Постави новац", ["addMoneyActionName"] = "Додај новац", ["freezeActionName"] = "Замрзни", ["upgradesActionName"] = "Надоградње", ["levelValue"] = "ниво", ["moneyValue"] = "новац", ["upgradeValue"] = "ниво надоградње" },
+            [11] = new Dictionary<string, string> { ["setLevelActionName"] = "Усталяваць узровень", ["setMoneyActionName"] = "Усталяваць грошы", ["addMoneyActionName"] = "Дадаць грошы", ["freezeActionName"] = "Замарозіць", ["upgradesActionName"] = "Паляпшэнні", ["levelValue"] = "узровень", ["moneyValue"] = "грошы", ["upgradeValue"] = "узровень паляпшэння" },
+            [12] = new Dictionary<string, string> { ["setLevelActionName"] = "Seviye ayarla", ["setMoneyActionName"] = "Para ayarla", ["addMoneyActionName"] = "Para ekle", ["freezeActionName"] = "Dondur", ["upgradesActionName"] = "Yükseltmeler", ["levelValue"] = "seviye", ["moneyValue"] = "para", ["upgradeValue"] = "yükseltme seviyesi" }
+        };
+
+        private static Dictionary<string, string> Make(params string[] values)
+        {
+            string[] keys =
+            {
+                "hostOnlyUnavailable", "hostOnlyFunctionUnavailable", "playableOnly", "itemPrefabNotFound", "playerNotFound",
+                "spawnedItem", "spawnFailed", "playerActionFailed", "mapChangeBlocked", "mapChangeFailed", "mapChangeStarted",
+                "enterNumber", "invalidNumber", "numberOutOfRange", "moneyTotalOutOfRange", "setLevelConfirmTitle",
+                "setLevelConfirmBody", "setMoneyConfirmTitle", "setMoneyConfirmBody", "addMoneyConfirmTitle", "addMoneyConfirmBody",
+                "levelSet", "levelSetFailed", "moneySet", "moneyUpdated", "moneyUpdateFailed", "playerFrozen", "playerUnfrozen",
+                "setUpgradeConfirmTitle", "setUpgradeConfirmBody", "addUpgradeConfirmTitle", "addUpgradeConfirmBody", "upgradeSet"
+            };
+
+            var pack = new Dictionary<string, string>
+            {
+                ["objectSpawnerHostOnly"] = values[1].Replace("{0}", "Object Spawner"),
+                ["setLevelActionName"] = "Set Level",
+                ["setMoneyActionName"] = "Set Money",
+                ["addMoneyActionName"] = "Add Money",
+                ["freezeActionName"] = "Freeze",
+                ["upgradesActionName"] = "Upgrades",
+                ["levelValue"] = "level",
+                ["moneyValue"] = "money",
+                ["upgradeValue"] = "upgrade level"
+            };
+
+            for (int i = 0; i < keys.Length && i < values.Length; i++)
+                pack[keys[i]] = values[i];
+
+            return pack;
+        }
+    }
+}

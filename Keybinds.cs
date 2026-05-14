@@ -64,7 +64,7 @@ public partial class Core
     private void DrawKeybindField(string label, ref string serializedBind, string defaultBind, string captureId)
     {
         GUILayout.BeginHorizontal();
-        GUILayout.Label(label, labelStyle, GUILayout.Width(40));
+        GUILayout.Label(Ui(label), labelStyle, GUILayout.Width(40));
 
         bool capturing = activeKeybindCaptureId == captureId;
         if (capturing)
@@ -76,14 +76,14 @@ public partial class Core
         GUI.Box(fieldRect, GUIContent.none, textFieldStyle);
         GUI.Label(new Rect(fieldRect.x + 6f, fieldRect.y + 3f, fieldRect.width - 12f, fieldRect.height), display, labelStyle);
 
-        if (GUILayout.Button("<b>SET</b>", buttonStyle, GUILayout.Width(46), GUILayout.Height(24)))
+        if (GUILayout.Button(UiBold("SET"), buttonStyle, GUILayout.Width(46), GUILayout.Height(24)))
         {
             activeKeybindCaptureId = captureId;
             keybindCaptureError = null;
             GUI.FocusControl(null);
         }
 
-        if (GUILayout.Button("<b>R</b>", buttonStyle, GUILayout.Width(28), GUILayout.Height(24)))
+        if (GUILayout.Button(UiBold("RESET"), buttonStyle, GUILayout.Width(90), GUILayout.Height(24)))
         {
             if (activeKeybindCaptureId == captureId)
                 activeKeybindCaptureId = null;
@@ -227,7 +227,7 @@ public partial class Core
     {
         Key[] keys = ParseKeybind(serializedBind);
         if (keys.Length == 0)
-            return "None";
+            return TooltipsLanguages.Ui("None");
 
         return string.Join(" + ", keys.Select(FormatKey).ToArray());
     }

@@ -137,7 +137,7 @@ public partial class Core
     {
         GUILayout.BeginVertical(windowStyle, GUILayout.Width(320));
         
-        if (GUILayout.Button("<b>MENU SETTINGS</b>", buttonStyle)) 
+        if (GUILayout.Button(UiBold("MENU SETTINGS"), buttonStyle)) 
             advancedMenuSettings = !advancedMenuSettings;
 
         if (BeginAnimatedFoldout("menu.settings", advancedMenuSettings))
@@ -186,7 +186,7 @@ public partial class Core
 
             GUILayout.Space(5);
             
-            if (GUILayout.Button("<b>CUSTOM CURSOR</b>", buttonStyle)) customCursor = !customCursor;
+            if (GUILayout.Button(UiBold("CUSTOM CURSOR"), buttonStyle)) customCursor = !customCursor;
             if (BeginAnimatedFoldout("menu.settings.cursor", customCursor))
             {
                 GUILayout.BeginVertical(windowStyle);
@@ -209,7 +209,7 @@ public partial class Core
                     
                     GUILayout.Space(5);
                     
-                    if (GUILayout.Button("<b>UPDATE</b>", buttonStyle))
+                    if (GUILayout.Button(UiBold("UPDATE"), buttonStyle))
                     {
                         if (!string.IsNullOrEmpty(cursorSourcePath) && File.Exists(cursorSourcePath))
                         {
@@ -235,7 +235,7 @@ public partial class Core
                         }
                     }
                     
-                    if (GUILayout.Button("<b>RESET</b>", buttonStyle))
+                    if (GUILayout.Button(UiBold("RESET"), buttonStyle))
                     {
                         CursorTexture = ResourceLoader.LoadTexture("UnifromCheat_REPO.Assets.unifrom_cursor.png");
                         if (CursorTexture != null)
@@ -254,7 +254,7 @@ public partial class Core
             }
 
 
-            if (GUILayout.Button("<b>PROCEDURAL SNOWFALL</b>", buttonStyle))  proceduralSnowfall = !proceduralSnowfall;
+            if (GUILayout.Button(UiBold("PROCEDURAL SNOWFALL"), buttonStyle))  proceduralSnowfall = !proceduralSnowfall;
             if (BeginAnimatedFoldout("menu.settings.snowfall", proceduralSnowfall))
             {
                 DrawToggle("Enable snowfall", ref enableProceduralSnowfall, Color.green, Get("enableProceduralSnowfall"));
@@ -287,7 +287,7 @@ public partial class Core
                         
                         GUILayout.Space(5);
                         
-                        if (GUILayout.Button("<b>UPDATE</b>", buttonStyle))
+                        if (GUILayout.Button(UiBold("UPDATE"), buttonStyle))
                         {
                             if (!string.IsNullOrEmpty(pss_sourcePath) && File.Exists(pss_sourcePath))
                             {
@@ -309,7 +309,7 @@ public partial class Core
                             }
                         }
 
-                        if (GUILayout.Button("<b>RESET</b>", buttonStyle))
+                        if (GUILayout.Button(UiBold("RESET"), buttonStyle))
                         {
                             pss_flakeTexture = ResourceLoader.LoadTexture("UnifromCheat_REPO.Assets.snowflake.png");
                             SnowfallUI.Instance.RefreshFlakeTexture();
@@ -344,16 +344,16 @@ public partial class Core
                 EndAnimatedFoldout();
             }
 
-            if (GUILayout.Button("<b>TOOLTIPS LANGUAGE</b>", buttonStyle)) 
+            if (GUILayout.Button(UiBold("LANGUAGES"), buttonStyle)) 
                 tooltipsLanguage = !tooltipsLanguage;
 
             if (BeginAnimatedFoldout("menu.settings.language", tooltipsLanguage))
             {
                 GUILayout.BeginVertical(windowStyle);
-                DrawRadio("English", 0, ref lg_state, Color.white);
-                DrawRadio("Russian", 1, ref lg_state, Color.white);
-                DrawRadio("Ukrainian", 2, ref lg_state, Color.white);
-                DrawRadio("Chinese", 3, ref lg_state, Color.white);
+                DrawToggle("Translate menu", ref translateMenu, Color.green, Get("translateMenu"), "menu.translateMenu");
+                GUILayout.Space(5);
+                foreach (var language in LanguageOptions)
+                    DrawRadio(language.NativeName, language.Id, ref lg_state, Color.white);
                 GUILayout.Space(5);
                 GUILayout.EndVertical();
                 EndAnimatedFoldout();
@@ -367,7 +367,7 @@ public partial class Core
     private void PlayerSettingsTab()
     {
         GUILayout.BeginVertical(windowStyle, GUILayout.Width(150));
-        if (GUILayout.Button("<b>PLAYER</b>", buttonStyle)) PlayerTab = !PlayerTab;
+        if (GUILayout.Button(UiBold("PLAYER"), buttonStyle)) PlayerTab = !PlayerTab;
 
         if (BeginAnimatedFoldout("menu.player", PlayerTab))
         {
@@ -503,13 +503,13 @@ public partial class Core
     private void WallHackSettingsTab()
     {
         GUILayout.BeginVertical(windowStyle, GUILayout.Width(325));
-        if (GUILayout.Button("<b>WALLHACK</b>", buttonStyle)) WallHackTab = !WallHackTab;
+        if (GUILayout.Button(UiBold("WALLHACK"), buttonStyle)) WallHackTab = !WallHackTab;
 
         if (BeginAnimatedFoldout("menu.wallhack", WallHackTab))
         {
             GUILayout.BeginVertical(windowStyle);
             
-            if (GUILayout.Button("<b>RENDER SETTINGS</b>", buttonStyle)) isRenderSettingsOpened = !isRenderSettingsOpened;
+            if (GUILayout.Button(UiBold("RENDER SETTINGS"), buttonStyle)) isRenderSettingsOpened = !isRenderSettingsOpened;
             if (BeginAnimatedFoldout("wh.rendersettings.enabled", isRenderSettingsOpened, -10f))
             {
                 GUILayout.BeginVertical(windowStyle);
@@ -528,7 +528,7 @@ public partial class Core
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
                 
-                if (GUILayout.Button("<b>ITEM GLOW COLOR</b>", buttonStyle)) item_glow_color = !item_glow_color;
+                if (GUILayout.Button(UiBold("ITEM GLOW COLOR"), buttonStyle)) item_glow_color = !item_glow_color;
                 if (BeginAnimatedFoldout("wh.item.glow", item_glow_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
@@ -543,7 +543,7 @@ public partial class Core
                     EndAnimatedFoldout();
                 }
                 
-                if (GUILayout.Button("<b>ITEM TEXT COLOR</b>", buttonStyle)) item_text_color = !item_text_color;
+                if (GUILayout.Button(UiBold("ITEM TEXT COLOR"), buttonStyle)) item_text_color = !item_text_color;
                 if (BeginAnimatedFoldout("wh.item.text", item_text_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
@@ -569,7 +569,7 @@ public partial class Core
                 DrawToggle("Show money bags", ref showSurplusValuable, Color.green, Get("showMoneyBagsWH"));
                 GUILayout.Space(5);
                 
-                if (GUILayout.Button("<b>MONEY BAGS COLOR</b>", buttonStyle)) moneyBagsColor = !moneyBagsColor;
+                if (GUILayout.Button(UiBold("MONEY BAGS COLOR"), buttonStyle)) moneyBagsColor = !moneyBagsColor;
                 if (BeginAnimatedFoldout("wh.money.color", moneyBagsColor))
                 {
                     GUILayout.BeginVertical(windowStyle);
@@ -592,7 +592,7 @@ public partial class Core
                 
                 GUILayout.Space(5);
                 
-                if (GUILayout.Button("<b>EXTRACTION POINTS COLOR</b>", buttonStyle)) extractionPointsColor = !extractionPointsColor;
+                if (GUILayout.Button(UiBold("EXTRACTION POINTS COLOR"), buttonStyle)) extractionPointsColor = !extractionPointsColor;
                 
                 if (BeginAnimatedFoldout("wh.extraction.color", extractionPointsColor))
                 {
@@ -632,7 +632,7 @@ public partial class Core
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
 
-                if (GUILayout.Button("<b>COSMETIC BOX GLOW COLOR</b>", buttonStyle))
+                if (GUILayout.Button(UiBold("COSMETIC BOX GLOW COLOR"), buttonStyle))
                     cosmetic_box_glow_color = !cosmetic_box_glow_color;
                 if (BeginAnimatedFoldout("wh.cosmetic.glow", cosmetic_box_glow_color))
                 {
@@ -648,7 +648,7 @@ public partial class Core
                     EndAnimatedFoldout();
                 }
 
-                if (GUILayout.Button("<b>COSMETIC BOX TEXT COLOR</b>", buttonStyle))
+                if (GUILayout.Button(UiBold("COSMETIC BOX TEXT COLOR"), buttonStyle))
                     cosmetic_box_text_color = !cosmetic_box_text_color;
                 if (BeginAnimatedFoldout("wh.cosmetic.text", cosmetic_box_text_color))
                 {
@@ -678,7 +678,7 @@ public partial class Core
                     if (BeginAnimatedFoldout("wh.cosmetic.rarity.enabled", showCosmeticBoxRarity, -8f))
                     {
                         GUILayout.Space(5);
-                        if (GUILayout.Button("<b>RARITY TEXT COLOR</b>", buttonStyle))
+                        if (GUILayout.Button(UiBold("RARITY TEXT COLOR"), buttonStyle))
                             cosmetic_box_rarity_text_color = !cosmetic_box_rarity_text_color;
 
                         if (BeginAnimatedFoldout("wh.cosmetic.rarity", cosmetic_box_rarity_text_color))
@@ -714,7 +714,7 @@ public partial class Core
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
 
-                if (GUILayout.Button("<b>ENEMY GLOW COLOR</b>", buttonStyle))
+                if (GUILayout.Button(UiBold("ENEMY GLOW COLOR"), buttonStyle))
                     enemy_glow_color = !enemy_glow_color;
                 if (BeginAnimatedFoldout("wh.enemy.glow", enemy_glow_color))
                 {
@@ -728,7 +728,7 @@ public partial class Core
                     EndAnimatedFoldout();
                 }
 
-                if (GUILayout.Button("<b>ENEMY TEXT COLOR</b>", buttonStyle))
+                if (GUILayout.Button(UiBold("ENEMY TEXT COLOR"), buttonStyle))
                     enemy_text_color = !enemy_text_color;
                 if (BeginAnimatedFoldout("wh.enemy.text", enemy_text_color))
                 {
@@ -763,7 +763,7 @@ public partial class Core
 
                 GUILayout.BeginVertical(windowStyle);
                 
-                if (GUILayout.Button("<b>PLAYER GLOW COLOR</b>", buttonStyle)) player_glow_color = !player_glow_color;
+                if (GUILayout.Button(UiBold("PLAYER GLOW COLOR"), buttonStyle)) player_glow_color = !player_glow_color;
                 if (BeginAnimatedFoldout("wh.player.glow", player_glow_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
@@ -778,7 +778,7 @@ public partial class Core
                     EndAnimatedFoldout();
                 }
                 
-                if (GUILayout.Button("<b>PLAYER TEXT COLOR</b>", buttonStyle)) player_text_color = !player_text_color;
+                if (GUILayout.Button(UiBold("PLAYER TEXT COLOR"), buttonStyle)) player_text_color = !player_text_color;
                 if (BeginAnimatedFoldout("wh.player.text", player_text_color))
                 {
                     GUILayout.BeginVertical(windowStyle);
@@ -807,7 +807,7 @@ public partial class Core
                 
                 GUILayout.Space(5);
                 
-                if (GUILayout.Button("<b>DEAD HEADS COLOR</b>", buttonStyle)) player_deadHead_color = !player_deadHead_color;
+                if (GUILayout.Button(UiBold("DEAD HEADS COLOR"), buttonStyle)) player_deadHead_color = !player_deadHead_color;
 
                 if (BeginAnimatedFoldout("wh.player.deadhead", player_deadHead_color))
                 {
@@ -833,7 +833,7 @@ public partial class Core
     private void MiscSettingsTab()
     {
         GUILayout.BeginVertical(windowStyle, GUILayout.Width(300));
-        if (GUILayout.Button("<b>MISC</b>", buttonStyle)) MiscTab = !MiscTab;
+        if (GUILayout.Button(UiBold("MISC"), buttonStyle)) MiscTab = !MiscTab;
         
         if (BeginAnimatedFoldout("menu.misc", MiscTab))
         {
@@ -887,7 +887,7 @@ public partial class Core
             DrawToggle("No Token HUD", ref isNoTokenHudEnabled, Color.green, Get("noTokenHud"));
 
             GUILayout.Space(8);
-            if (GUILayout.Button("<b>UNLOAD CHEAT</b>", buttonStyle, GUILayout.Height(32)))
+            if (GUILayout.Button(UiBold("UNLOAD CHEAT"), buttonStyle, GUILayout.Height(32)))
                 OpenUnloadConfirmation();
 
             Rect unloadRect = GUILayoutUtility.GetLastRect();
@@ -905,7 +905,7 @@ public partial class Core
     {
         GUILayout.BeginVertical(windowStyle, GUILayout.Width(235));
         
-        if (GUILayout.Button("<b>HOST ONLY FUNCTIONS</b>", buttonStyle)) 
+        if (GUILayout.Button(UiBold("HOST ONLY FUNCTIONS"), buttonStyle)) 
             HostFunctsTab = !HostFunctsTab;
         
         if (BeginAnimatedFoldout("menu.host", HostFunctsTab))
@@ -929,7 +929,7 @@ public partial class Core
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
-                if (GUILayout.Button("Teleport", buttonStyle))
+                if (GUILayout.Button(Ui("Teleport"), buttonStyle))
                 {
                     if (HostOnlyGuard.CanUseHostOnly(true, "Valuables teleporter"))
                         MiscFunctions.Instance.TeleportValuables(vt_state, vtm_one_any, vtm_kinematic);
@@ -983,7 +983,7 @@ public partial class Core
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
-                if (GUILayout.Button("Teleport", buttonStyle))
+                if (GUILayout.Button(Ui("Teleport"), buttonStyle))
                 {
                     if (HostOnlyGuard.CanUseHostOnly(true, "Enemies teleporter"))
                         MiscFunctions.Instance.TeleportEnemies(em_state, em_one_any, em_kinematic);
@@ -1040,7 +1040,7 @@ public partial class Core
 
             GUILayout.Space(5);
 
-            if (GUILayout.Button("<b>KILL ENEMIES</b>", buttonStyle))
+            if (GUILayout.Button(UiBold("KILL ENEMIES"), buttonStyle))
             {
                 if (HostOnlyGuard.CanUseHostOnly(true, "Kill enemies"))
                 {
@@ -1056,12 +1056,12 @@ public partial class Core
                 } 
             }
             
-            if (GUILayout.Button("<b>OBJECT SPAWNER</b>", buttonStyle))
+            if (GUILayout.Button(UiBold("OBJECT SPAWNER"), buttonStyle))
             {
                 objectSpawnerWindowOpen = !objectSpawnerWindowOpen;
             }
 
-            if (GUILayout.Button("<b>GAME CONTROLLER</b>", buttonStyle))
+            if (GUILayout.Button(UiBold("GAME CONTROLLER"), buttonStyle))
             {
                 gameControllerWindowOpen = !gameControllerWindowOpen;
             }
@@ -1093,20 +1093,20 @@ public partial class Core
     {
         GUILayout.BeginVertical(windowStyle, GUILayout.Width(150));
         
-        if (GUILayout.Button("Configs", buttonStyle)) 
+        if (GUILayout.Button(Ui("Configs"), buttonStyle)) 
             ConfigTab = !ConfigTab;
         
         if (BeginAnimatedFoldout("menu.config", ConfigTab))
         {
             GUILayout.BeginVertical(windowStyle);
             
-            if (GUILayout.Button("Save config", buttonStyle))
+            if (GUILayout.Button(Ui("Save config"), buttonStyle))
                 SaveConfig();
             
-            if (GUILayout.Button("Load config", buttonStyle))
+            if (GUILayout.Button(Ui("Load config"), buttonStyle))
                 LoadConfig();
 
-            if (GUILayout.Button("Reset config", buttonStyle))
+            if (GUILayout.Button(Ui("Reset config"), buttonStyle))
                 ResetConfig();
             
             GUILayout.EndVertical();

@@ -35,6 +35,8 @@
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="AssemblyLoader.cs" />
+        <Compile Include="AdditionalLocalizations.cs" />
+        <Compile Include="AdditionalTooltipPacks.cs" />
         <Compile Include="Core.cs" />
         <Compile Include="DiedCockroach.cs" />
         <Compile Include="Freecam.cs" />
@@ -75,6 +77,7 @@
         <Compile Include="Patches\WallHackSceneTransitionPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="TooltipsLanguages.cs" />
+        <Compile Include="UnifromGuiLocalizations.cs" />
         <Compile Include="UnloadCheat.cs" />
         <Compile Include="UnifromGUI.cs" />
         <Compile Include="Utils\AudioLowPassLogicRefs.cs" />
@@ -88,6 +91,7 @@
         <Compile Include="Utils\HintsController.cs" />
         <Compile Include="Header.cs" />
         <Compile Include="Utils\HostOnlyGuard.cs" />
+        <Compile Include="Utils\AdditionalLocalizedMessages.cs" />
         <Compile Include="Utils\LocalizedMessages.cs" />
         <Compile Include="Utils\NoPostProcessingManager.cs" />
         <Compile Include="Utils\PhysGrabberRefs.cs" />

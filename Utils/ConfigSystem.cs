@@ -15,6 +15,7 @@ namespace UnifromCheat_REPO.Utils
         public bool HideAllTooltips;
         public float menuOpacity;
         public bool tooltipsLanguage;
+        public bool translateMenu;
         public int lg_state;
         public bool dragWindow;
 
@@ -200,6 +201,7 @@ namespace UnifromCheat_REPO
                 HideAllHints = HideAllHints,
                 HideAllTooltips = HideAllTooltips,
                 tooltipsLanguage = tooltipsLanguage,
+                translateMenu = translateMenu,
                 lg_state = lg_state,
                 dragWindow = dragWindow,
 
@@ -389,6 +391,7 @@ namespace UnifromCheat_REPO
             HideAllHints = cfg.HideAllHints;
             HideAllTooltips = cfg.HideAllTooltips;
             tooltipsLanguage = cfg.tooltipsLanguage;
+            translateMenu = cfg.translateMenu;
             lg_state = cfg.lg_state;
             dragWindow = cfg.dragWindow;
 
@@ -581,6 +584,7 @@ namespace UnifromCheat_REPO
             HideAllHints = false;
             HideAllTooltips = false;
             tooltipsLanguage = true;
+            translateMenu = false;
             lg_state = 1;
             dragWindow = false;
 

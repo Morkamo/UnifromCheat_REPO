@@ -91,7 +91,7 @@ public partial class Core
         GUILayout.BeginVertical();
         GUILayout.BeginHorizontal();
         GUILayout.Space(34);
-        GUILayout.Label("<b>GAME CONTROLLER</b>", headerStyle, GUILayout.Height(28));
+        GUILayout.Label(UiBold("GAME CONTROLLER"), headerStyle, GUILayout.Height(28));
         if (GUILayout.Button("<b>X</b>", buttonStyle, GUILayout.Width(34), GUILayout.Height(28)))
         {
             gameControllerWindowOpen = false;
@@ -102,9 +102,9 @@ public partial class Core
 
         GUILayout.Space(4);
         GUILayout.BeginHorizontal();
-        DrawGameControllerTabButton("Players", GameControllerTab.Players, Get("gameControllerPlayersTab"));
-        DrawGameControllerTabButton("Maps", GameControllerTab.Maps, Get("gameControllerMapsTab"));
-        DrawGameControllerTabButton("Gameplay", GameControllerTab.Gameplay, Get("gameControllerGameplayTab"));
+        DrawGameControllerTabButton(Ui("Players"), GameControllerTab.Players, Get("gameControllerPlayersTab"));
+        DrawGameControllerTabButton(Ui("Maps"), GameControllerTab.Maps, Get("gameControllerMapsTab"));
+        DrawGameControllerTabButton(Ui("Gameplay"), GameControllerTab.Gameplay, Get("gameControllerGameplayTab"));
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
         GUITooltip.Draw();
@@ -164,7 +164,7 @@ public partial class Core
             };
             Color previous = GUI.contentColor;
             GUI.contentColor = Color.gray;
-            GUILayout.Label("<b>No players found.</b>", emptyStyle, GUILayout.ExpandWidth(true), GUILayout.Height(30));
+            GUILayout.Label(UiBold("No players found."), emptyStyle, GUILayout.ExpandWidth(true), GUILayout.Height(30));
             GUI.contentColor = previous;
             return;
         }
@@ -181,20 +181,20 @@ public partial class Core
         {
             GUILayout.BeginVertical(windowStyle);
             GUILayout.Label($"<b>{player.Name}</b>", playerNameStyle, GUILayout.Height(24));
-            string state = player.IsDead ? "DEAD" : $"{player.Health}/{player.MaxHealth} HP";
+            string state = player.IsDead ? Ui("DEAD") : $"{player.Health}/{player.MaxHealth} {Ui("HP")}";
             DrawLabel(state, player.IsDead ? new Color(1f, 0.35f, 0.32f, 1f) : Color.white);
 
             GUILayout.BeginHorizontal();
-            DrawPlayerActionButton("HEAL", player.Avatar, GameController.Heal);
-            DrawPlayerActionButton("REVIVE", player.Avatar, GameController.Revive);
-            DrawPlayerActionButton("GOTO", player.Avatar, GameController.GoTo);
-            DrawPlayerActionButton("BRING", player.Avatar, GameController.Bring);
-            DrawPlayerActionButton("KILL", player.Avatar, GameController.Kill);
+            DrawPlayerActionButton(Ui("HEAL"), player.Avatar, GameController.Heal);
+            DrawPlayerActionButton(Ui("REVIVE"), player.Avatar, GameController.Revive);
+            DrawPlayerActionButton(Ui("GOTO"), player.Avatar, GameController.GoTo);
+            DrawPlayerActionButton(Ui("BRING"), player.Avatar, GameController.Bring);
+            DrawPlayerActionButton(Ui("KILL"), player.Avatar, GameController.Kill);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            DrawPlayerActionButton(GameController.IsFrozen(player.Avatar) ? "UNFREEZE" : "FREEZE", player.Avatar, GameController.ToggleFreeze);
-            if (GUILayout.Button("<b>UPGRADES</b>", buttonStyle, GUILayout.Height(GameControllerButtonHeight)))
+            DrawPlayerActionButton(GameController.IsFrozen(player.Avatar) ? Ui("UNFREEZE") : Ui("FREEZE"), player.Avatar, GameController.ToggleFreeze);
+            if (GUILayout.Button(UiBold("UPGRADES"), buttonStyle, GUILayout.Height(GameControllerButtonHeight)))
                 OpenPlayerUpgrades(player);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -305,9 +305,9 @@ public partial class Core
         GUILayout.Space(6);
         GUILayout.BeginVertical(windowStyle);
         GUILayout.BeginHorizontal();
-        GUILayout.Label($"<b>Set level (current: {GameController.GetCurrentLevelNumber()})</b>", labelStyle, GUILayout.Width(210));
+        GUILayout.Label($"<b>{Ui("Set level")} ({Ui("current")}: {GameController.GetCurrentLevelNumber()})</b>", labelStyle, GUILayout.Width(210));
         setLevelInput = GUILayout.TextField(setLevelInput, textFieldStyle, GUILayout.Width(150), GUILayout.Height(24));
-        if (GUILayout.Button("<b>SET</b>", buttonStyle, GUILayout.Width(90), GUILayout.Height(28)))
+        if (GUILayout.Button(UiBold("SET"), buttonStyle, GUILayout.Width(90), GUILayout.Height(28)))
             TryOpenSetLevelConfirmation();
         GUILayout.EndHorizontal();
         Rect rect = GUILayoutUtility.GetLastRect();
@@ -321,11 +321,11 @@ public partial class Core
         GUILayout.Space(6);
         GUILayout.BeginVertical(windowStyle);
         GUILayout.BeginHorizontal();
-        GUILayout.Label($"<b>Set Money (current: {GameController.GetCurrentMoney()})</b>", labelStyle, GUILayout.Width(210));
+        GUILayout.Label($"<b>{Ui("Set Money")} ({Ui("current")}: {GameController.GetCurrentMoney()})</b>", labelStyle, GUILayout.Width(210));
         setMoneyInput = GUILayout.TextField(setMoneyInput, textFieldStyle, GUILayout.Width(150), GUILayout.Height(24));
-        if (GUILayout.Button("<b>SET</b>", buttonStyle, GUILayout.Width(70), GUILayout.Height(28)))
+        if (GUILayout.Button(UiBold("SET"), buttonStyle, GUILayout.Width(70), GUILayout.Height(28)))
             TryOpenSetMoneyConfirmation(false);
-        if (GUILayout.Button("<b>ADD</b>", buttonStyle, GUILayout.Width(70), GUILayout.Height(28)))
+        if (GUILayout.Button(UiBold("ADD"), buttonStyle, GUILayout.Width(70), GUILayout.Height(28)))
             TryOpenSetMoneyConfirmation(true);
         GUILayout.EndHorizontal();
         Rect rect = GUILayoutUtility.GetLastRect();
@@ -464,7 +464,7 @@ public partial class Core
         GUILayout.BeginVertical();
         GUILayout.BeginHorizontal();
         GUILayout.Space(34);
-        GUILayout.Label($"<b>UPGRADES: {gameControllerUpgradesPlayerName}</b>", headerStyle, GUILayout.Height(28));
+        GUILayout.Label($"<b>{Ui("UPGRADES")}: {gameControllerUpgradesPlayerName}</b>", headerStyle, GUILayout.Height(28));
         if (GUILayout.Button("<b>X</b>", buttonStyle, GUILayout.Width(34), GUILayout.Height(28)))
         {
             gameControllerUpgradesAvatar = null;
@@ -499,11 +499,11 @@ public partial class Core
         GUILayout.Space(6);
         GUILayout.BeginVertical(windowStyle);
         GUILayout.BeginHorizontal();
-        GUILayout.Label($"<b>{upgrade.Label} (current: {upgrade.CurrentLevel})</b>", labelStyle, GUILayout.Width(245));
+        GUILayout.Label($"<b>{upgrade.Label} ({Ui("current")}: {upgrade.CurrentLevel})</b>", labelStyle, GUILayout.Width(245));
         upgradeInputs[key] = GUILayout.TextField(upgradeInputs[key], textFieldStyle, GUILayout.Width(120), GUILayout.Height(24));
-        if (GUILayout.Button("<b>SET</b>", buttonStyle, GUILayout.Width(64), GUILayout.Height(28)))
+        if (GUILayout.Button(UiBold("SET"), buttonStyle, GUILayout.Width(64), GUILayout.Height(28)))
             TryOpenUpgradeConfirmation(upgrade, false);
-        if (GUILayout.Button("<b>ADD</b>", buttonStyle, GUILayout.Width(64), GUILayout.Height(28)))
+        if (GUILayout.Button(UiBold("ADD"), buttonStyle, GUILayout.Width(64), GUILayout.Height(28)))
             TryOpenUpgradeConfirmation(upgrade, true);
         GUILayout.EndHorizontal();
         GUILayout.EndVertical();
@@ -565,12 +565,12 @@ public partial class Core
     private void DrawGameControllerConfirmationContents(int id)
     {
         GUILayout.BeginVertical();
-        DrawLabel(pendingAction?.Title ?? "Change map?", Color.white);
+        DrawLabel(pendingAction?.Title ?? Ui("Change map?"), Color.white);
         GUILayout.Label(pendingAction?.Body ?? pendingMapEntry?.DisplayName ?? string.Empty, labelStyle, GUILayout.Height(42));
         GUILayout.FlexibleSpace();
 
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("<b>CONFIRM</b>", buttonStyle, GUILayout.Height(32)))
+        if (GUILayout.Button(UiBold("CONFIRM"), buttonStyle, GUILayout.Height(32)))
         {
             GameController.MapEntry map = pendingMapEntry;
             GameControllerPendingAction action = pendingAction;
@@ -590,7 +590,7 @@ public partial class Core
                 ShowMessage(message, ok ? 2.5f : 3.5f);
         }
 
-        if (GUILayout.Button("<b>CANCEL</b>", buttonStyle, GUILayout.Height(32)))
+        if (GUILayout.Button(UiBold("CANCEL"), buttonStyle, GUILayout.Height(32)))
             CloseGameControllerConfirmation();
         GUILayout.EndHorizontal();
 

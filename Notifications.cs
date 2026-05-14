@@ -115,7 +115,7 @@ public partial class Core
             GUI.color = new Color(HC_R, HC_G, HC_B, HC_A * eased);
             GUI.Window(windowId, rect, _ =>
             {
-                GUILayout.Label("<b>Unifrom Message</b>", titleStyle);
+                GUILayout.Label(TooltipsLanguages.UiBold("Unifrom Message"), titleStyle);
                 GUILayout.Space(4f);
                 GUILayout.Label(msg.Text, bodyStyle);
             }, string.Empty, windowStyle);
