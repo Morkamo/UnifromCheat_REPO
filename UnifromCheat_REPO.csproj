@@ -36,6 +36,8 @@
     <ItemGroup>
         <Compile Include="AssemblyLoader.cs" />
         <Compile Include="Core.cs" />
+        <Compile Include="DiedCockroach.cs" />
+        <Compile Include="Freecam.cs" />
         <Compile Include="Funs\SnowfallUI.cs" />
         <Compile Include="GUIMenuSkin.cs" />
         <Compile Include="GUITooltip.cs" />
@@ -51,7 +53,9 @@
         <Compile Include="Patches\PatchCameraAimUpdate.cs" />
         <Compile Include="Patches\PatchGameMouseInput.cs" />
         <Compile Include="Patches\GodMode.cs" />
+        <Compile Include="Patches\FreecamSpectatePatch.cs" />
         <Compile Include="Patches\InfiniteAmmoPatch.cs" />
+        <Compile Include="Patches\InfiniteHeadEnergyPatch.cs" />
         <Compile Include="Patches\InfiniteSprint.cs" />
         <Compile Include="Patches\CustomJumpForce.cs" />
         <Compile Include="Patches\DeadVoicePatch.cs" />

@@ -79,6 +79,8 @@ public partial class Core
         isHideMeEnabled = false;
         isHideMeActive = false;
         hideMeSnapshot = default;
+        DeactivateFreecam();
+        isFreecamEnabled = false;
 
         MenuState = false;
         menuAnimationProgress = 0f;

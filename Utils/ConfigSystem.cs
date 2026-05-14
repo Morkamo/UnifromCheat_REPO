@@ -21,7 +21,12 @@ namespace UnifromCheat_REPO.Utils
         // ===== Player =====
         public bool isGodModeEnabled;
         public bool isInfiniteSprint;
+        public bool isInfiniteHeadEnergy;
         public bool isInfiniteAmmo;
+        public bool isDiedCockroachEnabled;
+        public float diedCockroachForce;
+        public bool isFreecamEnabled;
+        public string freecamBind;
         public bool isSpeedHackEnabled;
         public float walkSpeed;
         public float sprintSpeed;
@@ -201,7 +206,12 @@ namespace UnifromCheat_REPO
                 // ===== Player =====
                 isGodModeEnabled = isGodModeEnabled,
                 isInfiniteSprint = isInfiniteSprint,
+                isInfiniteHeadEnergy = isInfiniteHeadEnergy,
                 isInfiniteAmmo = isInfiniteAmmo,
+                isDiedCockroachEnabled = isDiedCockroachEnabled,
+                diedCockroachForce = diedCockroachForce,
+                isFreecamEnabled = isFreecamEnabled,
+                freecamBind = freecamBind,
                 isSpeedHackEnabled = isSpeedHackEnabled,
                 walkSpeed = walkSpeed,
                 sprintSpeed = sprintSpeed,
@@ -385,7 +395,13 @@ namespace UnifromCheat_REPO
             // ===== Player =====
             isGodModeEnabled = cfg.isGodModeEnabled;
             isInfiniteSprint = cfg.isInfiniteSprint;
+            isInfiniteHeadEnergy = cfg.isInfiniteHeadEnergy;
             isInfiniteAmmo = cfg.isInfiniteAmmo;
+            isDiedCockroachEnabled = cfg.isDiedCockroachEnabled;
+            diedCockroachForce = cfg.diedCockroachForce <= 0f ? 3f : cfg.diedCockroachForce;
+            isFreecamEnabled = cfg.isFreecamEnabled;
+            freecamBind = string.IsNullOrWhiteSpace(cfg.freecamBind) ? "F6" : cfg.freecamBind;
+            isFreecamActive = false;
             isSpeedHackEnabled = cfg.isSpeedHackEnabled;
             walkSpeed = cfg.walkSpeed;
             sprintSpeed = cfg.sprintSpeed;
@@ -571,7 +587,13 @@ namespace UnifromCheat_REPO
             // ===== Player =====
             isGodModeEnabled = false;
             isInfiniteSprint = false;
+            isInfiniteHeadEnergy = false;
             isInfiniteAmmo = false;
+            isDiedCockroachEnabled = false;
+            diedCockroachForce = 3f;
+            isFreecamEnabled = false;
+            isFreecamActive = false;
+            freecamBind = "F6";
             isSpeedHackEnabled = true;
             walkSpeed = 2f; sprintSpeed = 5f; crouchSpeed = 1f;
             isCustomJumpForceEnabled = true;

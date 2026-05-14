@@ -11,6 +11,7 @@ public partial class Core
 {
     internal static string noclipBind = "LeftAlt";
     internal static string hideMeBind = "F9";
+    internal static string freecamBind = "F6";
 
     private string activeKeybindCaptureId;
     private string keybindCaptureError;
@@ -25,6 +26,11 @@ public partial class Core
     internal static bool WasHideMeHotkeyPressed()
     {
         return WasKeybindPressed(hideMeBind);
+    }
+
+    internal static bool WasFreecamHotkeyPressed()
+    {
+        return WasKeybindPressed(freecamBind);
     }
 
     private void UpdateKeybindCapture()
@@ -124,6 +130,8 @@ public partial class Core
             noclipBind = serialized;
         else if (activeKeybindCaptureId == "hideMe")
             hideMeBind = serialized;
+        else if (activeKeybindCaptureId == "freecam")
+            freecamBind = serialized;
 
         activeKeybindCaptureId = null;
         keybindCaptureError = null;

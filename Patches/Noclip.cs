@@ -37,6 +37,9 @@ namespace UnifromCheat_REPO.Patches
                 isActive = !isActive;
                 UpdateNoclipState();
             }
+
+            if (isActive)
+                Core.Instance?.UpdateHeadNoclip();
         }
 
         public void ForceDisable()
@@ -50,6 +53,9 @@ namespace UnifromCheat_REPO.Patches
             {
                 if (noclipText != null)
                     noclipText.SetText("<b>Noclip = ON</b>");
+
+                if (Core.Instance != null && Core.Instance.IsNoclipControllingHead())
+                    return;
 
                 if (noclipComponent == null && PlayerController.instance != null)
                     noclipComponent = PlayerController.instance.gameObject.AddComponent<NoclipComponent>();
@@ -69,6 +75,7 @@ namespace UnifromCheat_REPO.Patches
         private void ResetNoclip()
         {
             isActive = false;
+            Core.Instance?.ResetHeadNoclipState();
 
             if (noclipText != null)
                 noclipText.SetText("<b>Noclip = OFF</b>");
@@ -105,6 +112,7 @@ namespace UnifromCheat_REPO.Patches
         private void Update()
         {
             if (!Noclip.isActive) return;
+            if (Core.Instance != null && Core.Instance.IsNoclipControllingHead()) return;
 
             Vector3 input = Vector3.zero;
 

@@ -7,7 +7,7 @@ namespace UnifromCheat_REPO;
 
 public partial class Core
 {
-    internal string cheatVersion = "4.3.0";
+    internal string cheatVersion = "4.4.0";
 
     private Rect RectMenu;
     private float dpiScaling => Mathf.Min(Screen.width / 1920f, Screen.height / 1080f);
@@ -66,7 +66,11 @@ public partial class Core
 
     internal static bool isGodModeEnabled;
     internal static bool isInfiniteSprint;
+    internal static bool isInfiniteHeadEnergy;
     internal static bool isInfiniteAmmo;
+    internal static bool isFreecamEnabled;
+    internal static bool isFreecamActive;
+    internal static bool isDiedCockroachEnabled;
     /*internal static bool isInfiniteEnergy;*/
 
     internal static bool _isFullbrightEnabled;
@@ -238,6 +242,7 @@ public partial class Core
 
     internal static bool isNoclipEnabled;
     internal static float noclipSpeed = 5f;
+    internal static float diedCockroachForce = 3f;
     internal static bool isHideMeEnabled;
     internal static bool isHideMeActive;
     

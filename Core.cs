@@ -17,7 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace UnifromCheat_REPO
 {
-    [BepInPlugin("ru.morkamo.unifrom", "Unifrom", "4.3.0")]
+    [BepInPlugin("ru.morkamo.unifrom", "Unifrom", "4.4.0")]
     public partial class Core : BaseUnityPlugin
     {
         public static Core Instance;
@@ -89,6 +89,7 @@ namespace UnifromCheat_REPO
         {
             UpdateKeybindCapture();
             UpdateHideMe();
+            UpdateFreecamHotkey();
             UpdateMenuAnimation();
             GameController.UpdateGameplay();
             
@@ -99,6 +100,11 @@ namespace UnifromCheat_REPO
             if (keyboard != null && (keyboard.insertKey.wasPressedThisFrame || keyboard.rightAltKey.wasPressedThisFrame
                 || keyboard.f11Key.wasPressedThisFrame))
                 ToggleMenu();
+        }
+
+        private void FixedUpdate()
+        {
+            FixedUpdateDiedCockroach();
         }
 
         private void LateUpdate()

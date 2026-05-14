@@ -375,6 +375,16 @@ public partial class Core
             
             DrawToggle("God mode", ref isGodModeEnabled, Color.green, Get("godMode"));
             DrawToggle("Infinite sprint", ref isInfiniteSprint, Color.green, Get("infSprint"));
+            DrawToggle("Infinite head energy", ref isInfiniteHeadEnergy, Color.green, Get("infHeadEnergy"));
+            DrawToggle("Freecam", ref isFreecamEnabled, Color.green, Get("freecam"));
+            if (BeginAnimatedFoldout("menu.player.freecam", isFreecamEnabled, -10f))
+            {
+                GUILayout.Space(5);
+                GUILayout.BeginVertical(windowStyle);
+                DrawKeybindField("Bind", ref freecamBind, "F6", "freecam");
+                GUILayout.EndVertical();
+                EndAnimatedFoldout();
+            }
             DrawToggle("Speed hack", ref isSpeedHackEnabled, Color.green, Get("speedHack"));
 
             if (BeginAnimatedFoldout("menu.player.speed", isSpeedHackEnabled, -10f))
@@ -904,6 +914,15 @@ public partial class Core
             
             DrawHostOnlyToggle("Protected session", ref isProtectedSession, Color.green, Get("protectedSession"));
             DrawHostOnlyToggle("Infinity ammo", ref isInfiniteAmmo, Color.green, Get("infAmmo"));
+            DrawHostOnlyToggle("Died cockroach", ref isDiedCockroachEnabled, Color.green, Get("diedCockroach"));
+            if (BeginAnimatedFoldout("menu.host.diedCockroach", isDiedCockroachEnabled, -10f))
+            {
+                GUILayout.Space(5);
+                GUILayout.BeginVertical(windowStyle);
+                DrawSlider("Force", ref diedCockroachForce, 0.25f, 12f, 3f, Get("diedCockroachForce"));
+                GUILayout.EndVertical();
+                EndAnimatedFoldout();
+            }
             
             DrawHostOnlyToggle("Valuables teleporter", ref valuablesTeleporter, Color.green, Get("valuablesTp"));
             if (BeginAnimatedFoldout("menu.host.valuables", valuablesTeleporter, -10f))
