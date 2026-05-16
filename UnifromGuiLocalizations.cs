@@ -39,6 +39,7 @@ namespace UnifromCheat_REPO
             AddGuiLabel("Crouch speed", "しゃがみ速度", "앉기 속도", "Prędkość kucania", "Velocidad agachado", "Vitesse accroupi", "سرعة القرفصة", "Брзина чучња", "Хуткасць у прысядзе", "Çömelme hızı");
             AddGuiLabel("Update interval", "更新間隔", "업데이트 간격", "Interwał aktualizacji", "Intervalo de actualización", "Intervalle de mise à jour", "فاصل التحديث", "Интервал ажурирања", "Інтэрвал абнаўлення", "Güncelleme aralığı");
             AddGuiLabel("Shadows", "影", "그림자", "Cienie", "Sombras", "Ombres", "الظلال", "Сенке", "Цені", "Gölgeler");
+            AddGuiLabel("Permanent Flashlight", "常時ライト", "상시 손전등", "Stała latarka", "Linterna permanente", "Lampe torche permanente", "مصباح دائم", "Стална лампа", "Пастаянны ліхтарык", "Kalıcı fener");
             AddGuiLabel("Range", "範囲", "범위", "Zasięg", "Rango", "Portée", "النطاق", "Домет", "Дыяпазон", "Menzil");
             AddGuiLabel("Intensity", "強度", "강도", "Intensywność", "Intensidad", "Intensité", "الشدة", "Интензитет", "Інтэнсіўнасць", "Yoğunluk");
             AddGuiLabel("Render distance:", "描画距離:", "렌더 거리:", "Odległość renderowania:", "Distancia de renderizado:", "Distance de rendu :", "مسافة الرسم:", "Дистанца рендеровања:", "Дыстанцыя рэндару:", "Render mesafesi:");

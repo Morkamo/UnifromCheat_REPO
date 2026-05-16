@@ -43,6 +43,7 @@ namespace UnifromCheat_REPO
         private void LateUpdate()
         {
             NoPostProcessingManager.Update(Core.isNoPostProcessingEnabled);
+            UpdateConfiguredFlashlightSettingsRuntime();
         }
 
         private void Fullbright(Camera cam)
@@ -116,6 +117,14 @@ namespace UnifromCheat_REPO
             if (flashlight == null)
                 return;
 
+            ApplyConfiguredFlashlightSettings(flashlight);
+        }
+
+        private static void ApplyConfiguredFlashlightSettings(Light flashlight)
+        {
+            if (flashlight == null)
+                return;
+
             flashlight.shadows = Core.isFlashlightShadowsEnabled ? LightShadows.Hard : LightShadows.None;
             flashlight.spotAngle = Core.flashlightSpotAngle;
             flashlight.range = Core.flashlightRange;
@@ -134,7 +143,19 @@ namespace UnifromCheat_REPO
             flashlight.color = new Color(1f, 0.674f, 0.382f, 1f);
         }
 
-        private static Light GetPlayerFlashlight()
+        private static void UpdateConfiguredFlashlightSettingsRuntime()
+        {
+            if (Core.isHideMeActive || !Core.isFlashlightSettingsEnabled)
+                return;
+
+            var flashlight = GetPlayerFlashlight();
+            if (flashlight == null)
+                return;
+
+            ApplyConfiguredFlashlightSettings(flashlight);
+        }
+
+        public static Light GetPlayerFlashlight()
         {
             try
             {

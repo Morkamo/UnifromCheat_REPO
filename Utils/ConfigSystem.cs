@@ -46,6 +46,7 @@ namespace UnifromCheat_REPO.Utils
 
         // ===== Flashlight =====
         public bool isFlashlightSettingsEnabled;
+        public bool isPermanentFlashlightEnabled;
         public bool isFlashlightShadowsEnabled;
         public float flashlightRange;
         public float flashlightSpotAngle;
@@ -231,6 +232,7 @@ namespace UnifromCheat_REPO
 
                 // ===== Flashlight =====
                 isFlashlightSettingsEnabled = isFlashlightSettingsEnabled,
+                isPermanentFlashlightEnabled = isPermanentFlashlightEnabled,
                 isFlashlightShadowsEnabled = isFlashlightShadowsEnabled,
                 flashlightRange = flashlightRange,
                 flashlightSpotAngle = flashlightSpotAngle,
@@ -406,9 +408,9 @@ namespace UnifromCheat_REPO
             freecamBind = string.IsNullOrWhiteSpace(cfg.freecamBind) ? "F6" : cfg.freecamBind;
             isFreecamActive = false;
             isSpeedHackEnabled = cfg.isSpeedHackEnabled;
-            walkSpeed = cfg.walkSpeed;
-            sprintSpeed = cfg.sprintSpeed;
-            crouchSpeed = cfg.crouchSpeed;
+            walkSpeed = ValidateMovementSpeed(cfg.walkSpeed, 2f);
+            sprintSpeed = ValidateMovementSpeed(cfg.sprintSpeed, 5f);
+            crouchSpeed = ValidateMovementSpeed(cfg.crouchSpeed, 1f);
             isCustomJumpForceEnabled = cfg.isCustomJumpForceEnabled;
             jumpForce = cfg.jumpForce;
 
@@ -423,6 +425,7 @@ namespace UnifromCheat_REPO
 
             // ===== Flashlight =====
             isFlashlightSettingsEnabled = cfg.isFlashlightSettingsEnabled;
+            isPermanentFlashlightEnabled = cfg.isPermanentFlashlightEnabled;
             isFlashlightShadowsEnabled = cfg.isFlashlightShadowsEnabled;
             flashlightRange = cfg.flashlightRange;
             flashlightSpotAngle = cfg.flashlightSpotAngle;
@@ -531,6 +534,7 @@ namespace UnifromCheat_REPO
             isNoclipEnabled = cfg.isNoclipEnabled;
             noclipSpeed = cfg.noclipSpeed;
             noclipBind = string.IsNullOrWhiteSpace(cfg.noclipBind) ? "LeftAlt" : cfg.noclipBind;
+            Core.Instance?.Noclip?.ForceDisable();
             isHideMeEnabled = cfg.isHideMeEnabled;
             hideMeBind = string.IsNullOrWhiteSpace(cfg.hideMeBind) ? "F9" : cfg.hideMeBind;
             isHideMeActive = false;
@@ -577,6 +581,14 @@ namespace UnifromCheat_REPO
             FireboxConsole.FireLog("[CFG] Config loaded!");
         }
 
+        private static float ValidateMovementSpeed(float value, float fallback)
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value) || value <= 0f)
+                return fallback;
+
+            return value;
+        }
+
         public void ResetConfig()
         {
             // ===== Menu =====
@@ -614,6 +626,7 @@ namespace UnifromCheat_REPO
 
             // ===== Flashlight =====
             isFlashlightSettingsEnabled = false;
+            isPermanentFlashlightEnabled = false;
             isFlashlightShadowsEnabled = true;
             flashlightRange = 25f;
             flashlightSpotAngle = 60f;

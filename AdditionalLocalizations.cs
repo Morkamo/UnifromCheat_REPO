@@ -22,20 +22,28 @@ namespace UnifromCheat_REPO
 
         private static readonly Dictionary<int, Dictionary<string, string>> AdditionalTooltips = new()
         {
+            [0] = new Dictionary<string, string>
+            {
+                ["permanentFlashlight"] = "Flashlight never turns off"
+            },
             [1] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "Фонарик никогда не отключается",
                 ["translateMenu"] = "Переводит весь интерфейс меню."
             },
             [2] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "Ліхтарик ніколи не вимикається",
                 ["translateMenu"] = "Перекладає весь інтерфейс меню."
             },
             [3] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "手电筒永远不会关闭",
                 ["translateMenu"] = "翻译整个菜单界面。"
             },
             [4] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "ライトが決して消えません",
                 ["translateMenu"] = "メニュー全体のインターフェースを翻訳します。",
                 ["hideAllHints"] = "画面上の固定ヒントをすべて非表示にします",
                 ["hideAllTooltips"] = "ポップアップヒントをすべて非表示にします",
@@ -50,6 +58,7 @@ namespace UnifromCheat_REPO
             },
             [5] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "손전등이 절대 꺼지지 않습니다",
                 ["translateMenu"] = "메뉴 인터페이스 전체를 번역합니다.",
                 ["hideAllHints"] = "화면의 고정 힌트를 모두 숨깁니다",
                 ["hideAllTooltips"] = "팝업 툴팁을 모두 숨깁니다",
@@ -64,6 +73,7 @@ namespace UnifromCheat_REPO
             },
             [6] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "Latarka nigdy się nie wyłącza",
                 ["translateMenu"] = "Tłumaczy cały interfejs menu.",
                 ["hideAllHints"] = "Ukrywa wszystkie stałe podpowiedzi",
                 ["hideAllTooltips"] = "Ukrywa wszystkie wyskakujące podpowiedzi",
@@ -78,6 +88,7 @@ namespace UnifromCheat_REPO
             },
             [7] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "La linterna nunca se apaga",
                 ["translateMenu"] = "Traduce toda la interfaz del menú.",
                 ["hideAllHints"] = "Oculta todas las pistas fijas",
                 ["hideAllTooltips"] = "Oculta todas las ayudas emergentes",
@@ -92,6 +103,7 @@ namespace UnifromCheat_REPO
             },
             [8] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "La lampe torche ne s'éteint jamais",
                 ["translateMenu"] = "Traduit toute l'interface du menu.",
                 ["hideAllHints"] = "Masque toutes les indications fixes",
                 ["hideAllTooltips"] = "Masque toutes les infobulles",
@@ -106,6 +118,7 @@ namespace UnifromCheat_REPO
             },
             [9] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "لا ينطفئ المصباح أبدا",
                 ["translateMenu"] = "يترجم واجهة القائمة بالكامل.",
                 ["hideAllHints"] = "يخفي كل التلميحات الثابتة",
                 ["hideAllTooltips"] = "يخفي كل التلميحات المنبثقة",
@@ -120,6 +133,7 @@ namespace UnifromCheat_REPO
             },
             [10] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "Лампа се никада не искључује",
                 ["translateMenu"] = "Преводи цео интерфејс менија.",
                 ["hideAllHints"] = "Сакрива све сталне савете",
                 ["hideAllTooltips"] = "Сакрива све искачуће описе",
@@ -134,6 +148,7 @@ namespace UnifromCheat_REPO
             },
             [11] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "Ліхтарык ніколі не адключаецца",
                 ["translateMenu"] = "Перакладае ўвесь інтэрфейс меню.",
                 ["hideAllHints"] = "Хавае ўсе статычныя падказкі",
                 ["hideAllTooltips"] = "Хавае ўсе ўсплывальныя падказкі",
@@ -148,6 +163,7 @@ namespace UnifromCheat_REPO
             },
             [12] = new Dictionary<string, string>
             {
+                ["permanentFlashlight"] = "Fener asla kapanmaz",
                 ["translateMenu"] = "Tüm menü arayüzünü çevirir.",
                 ["hideAllHints"] = "Tüm sabit ipuçlarını gizler",
                 ["hideAllTooltips"] = "Tüm açılır ipuçlarını gizler",
@@ -176,7 +192,8 @@ namespace UnifromCheat_REPO
                 ["Configs"] = "Конфиги",
                 ["Save config"] = "Сохранить конфиг",
                 ["Load config"] = "Загрузить конфиг",
-                ["Reset config"] = "Сбросить конфиг"
+                ["Reset config"] = "Сбросить конфиг",
+                ["Permanent Flashlight"] = "Постоянный фонарик"
             },
             [2] = new Dictionary<string, string>
             {
@@ -190,7 +207,8 @@ namespace UnifromCheat_REPO
                 ["Configs"] = "Конфіги",
                 ["Save config"] = "Зберегти конфіг",
                 ["Load config"] = "Завантажити конфіг",
-                ["Reset config"] = "Скинути конфіг"
+                ["Reset config"] = "Скинути конфіг",
+                ["Permanent Flashlight"] = "Постійний ліхтарик"
             },
             [3] = new Dictionary<string, string>
             {
@@ -204,7 +222,8 @@ namespace UnifromCheat_REPO
                 ["Configs"] = "配置",
                 ["Save config"] = "保存配置",
                 ["Load config"] = "加载配置",
-                ["Reset config"] = "重置配置"
+                ["Reset config"] = "重置配置",
+                ["Permanent Flashlight"] = "常亮手电筒"
             },
             [4] = MakeUi("言語", "メニューを翻訳", "メニュー設定", "プレイヤー", "ウォールハック", "その他", "ホスト専用機能", "設定", "設定を保存", "設定を読み込む", "設定をリセット"),
             [5] = MakeUi("언어", "메뉴 번역", "메뉴 설정", "플레이어", "월핵", "기타", "호스트 전용 기능", "설정", "설정 저장", "설정 불러오기", "설정 초기화"),
@@ -672,6 +691,7 @@ namespace UnifromCheat_REPO
             ["Dead voice"] = L("死者の声", "죽은 자 음성", "Głos martwych", "Voz de muertos", "Voix des morts", "صوت الموتى", "Глас мртвих", "Голас мёртвых", "Ölü sesi"),
             ["Tumble Bypass"] = L("転倒制限回避", "텀블 우회", "Ominięcie tumble", "Saltar tumble", "Contournement tumble", "تجاوز التعثر", "Заобилажење tumble", "Абыход tumble", "Tumble atlatma"),
             ["Flashlight settings"] = L("ライト設定", "손전등 설정", "Latarka", "Linterna", "Lampe torche", "إعدادات المصباح", "Подешавања лампе", "Налады ліхтарыка", "Fener ayarları"),
+            ["Permanent Flashlight"] = L("常時ライト", "상시 손전등", "Stała latarka", "Linterna permanente", "Lampe torche permanente", "مصباح دائم", "Стална лампа", "Пастаянны ліхтарык", "Kalıcı fener"),
             ["Show items"] = L("アイテム表示", "아이템 표시", "Pokaż przedmioty", "Mostrar objetos", "Afficher objets", "إظهار العناصر", "Прикажи предмете", "Паказваць прадметы", "Eşyaları göster"),
             ["Show enemies"] = L("敵を表示", "적 표시", "Pokaż wrogów", "Mostrar enemigos", "Afficher ennemis", "إظهار الأعداء", "Прикажи непријатеље", "Паказваць ворагаў", "Düşmanları göster"),
             ["Show player"] = L("プレイヤー表示", "플레이어 표시", "Pokaż gracza", "Mostrar jugador", "Afficher joueur", "إظهار اللاعب", "Прикажи играча", "Паказваць гульца", "Oyuncuyu göster"),

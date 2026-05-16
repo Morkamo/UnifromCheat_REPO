@@ -97,6 +97,7 @@ public partial class Core
         isNoPostProcessingEnabled = false;
         isNoTokenHudEnabled = false;
         isFlashlightSettingsEnabled = false;
+        isPermanentFlashlightEnabled = false;
         isFullbrightEnabled = false;
 
         RGBPlayer.StopCycle();

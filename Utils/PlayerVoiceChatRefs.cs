@@ -29,4 +29,7 @@ internal static class PlayerVoiceChatRefs
 
     public static readonly AccessTools.FieldRef<PlayerVoiceChat, bool> inLobbyMixer =
         AccessTools.FieldRefAccess<PlayerVoiceChat, bool>("inLobbyMixer");
+
+    public static readonly AccessTools.FieldRef<PlayerVoiceChat, bool> isTalking =
+        AccessTools.FieldRefAccess<PlayerVoiceChat, bool>("isTalking");
 }

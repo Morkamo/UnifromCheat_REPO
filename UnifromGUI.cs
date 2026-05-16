@@ -453,22 +453,29 @@ public partial class Core
             DrawToggle("Dead voice", ref isDeadVoiceEnabled, Color.green, Get("deadVoice"));
             DrawToggle("Tumble Bypass", ref isTumbleBypassEnabled, Color.green, Get("tumbleBypass"));
             
+            bool oldFlashlightSettings = isFlashlightSettingsEnabled;
             DrawToggle("Flashlight settings", ref isFlashlightSettingsEnabled, Color.green, Get("flashlightSettings"));
-            var flashlight = PlayerController.instance.playerAvatarScript.flashlightController.spotlight;
+            if (oldFlashlightSettings != isFlashlightSettingsEnabled)
+            {
+                if (isFlashlightSettingsEnabled)
+                    MiscFunctions.ApplyConfiguredFlashlightSettings();
+                else
+                    MiscFunctions.RestoreDefaultFlashlightSettings();
+            }
+
+            var flashlight = MiscFunctions.GetPlayerFlashlight();
             if (BeginAnimatedFoldout("menu.player.flashlight", isFlashlightSettingsEnabled, -10f))
             {
                 GUILayout.Space(5);
                 GUILayout.BeginVertical(windowStyle);
 
+                DrawToggle("Permanent Flashlight", ref isPermanentFlashlightEnabled, Color.green, Get("permanentFlashlight"));
                 DrawToggle("Shadows", ref isFlashlightShadowsEnabled, Color.green);
-                flashlight.shadows = isFlashlightShadowsEnabled ? LightShadows.Hard : LightShadows.None;
                 GUILayout.Space(5);
 
                 DrawSlider("Range", ref flashlightSpotAngle, 0, 360, 60);
-                flashlight.spotAngle = flashlightSpotAngle;
 
                 DrawSlider("Intensity", ref flashlightRange, 0, 100, 25);
-                flashlight.range = flashlightRange;
 
                 GUILayout.BeginVertical(windowStyle);
 
@@ -476,22 +483,14 @@ public partial class Core
                 DrawSlider("G", ref FLC_G, 0f, 1f, 0.674f);
                 DrawSlider("B", ref FLC_B, 0f, 1f, 0.382f);
 
-                flashlight.color = new Color(FLC_R, FLC_G, FLC_B);
+                if (flashlight != null && isFlashlightSettingsEnabled)
+                    MiscFunctions.ApplyConfiguredFlashlightSettings();
+
                 GUILayout.EndVertical();
                 
                 GUILayout.EndVertical();
                 EndAnimatedFoldout();
             }
-            else if (prevFlashlightState)
-            {
-                flashlight.shadows = LightShadows.Hard;
-                flashlight.spotAngle = 60f;
-                flashlight.range = 25f;
-                flashlight.color = new Color(1f, 0.674f, 0.382f, 1f);
-            }
-            
-            prevFlashlightState = isFlashlightSettingsEnabled;
-            
             GUILayout.Space(5);
             GUILayout.EndVertical();
             EndAnimatedFoldout();

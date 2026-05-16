@@ -7,7 +7,7 @@ namespace UnifromCheat_REPO;
 
 public partial class Core
 {
-    internal string cheatVersion = "4.4.1";
+    internal string cheatVersion = "4.5.0";
 
     private Rect RectMenu;
     private float dpiScaling => Mathf.Min(Screen.width / 1920f, Screen.height / 1080f);
@@ -261,13 +261,13 @@ public partial class Core
     internal static bool isNoTokenHudEnabled = false;
 
     internal static bool isFlashlightSettingsEnabled = false;
+    internal static bool isPermanentFlashlightEnabled = false;
     internal static bool isFlashlightShadowsEnabled = true;
     internal static float flashlightRange = 25f;
     internal static float flashlightSpotAngle = 60f;
     internal static float FLC_R = 1f;
     internal static float FLC_G = 0.674f;
     internal static float FLC_B = 0.382f;
-    internal static bool prevFlashlightState = false;
     
     internal static bool showSurplusValuable = true;
     internal static bool moneyBagsColor = false;

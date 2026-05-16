@@ -65,6 +65,7 @@
         <Compile Include="Patches\Noclip.cs" />
         <Compile Include="Patches\NoTokenHudPatch.cs" />
         <Compile Include="Patches\OneTapMode.cs" />
+        <Compile Include="Patches\PermanentFlashlightPatch.cs" />
         <Compile Include="Patches\PeacefulEnemies.cs" />
         <Compile Include="Patches\PatchGameCursorVisible.cs" />
         <Compile Include="Patches\PatchUnityCursorVisible.cs" />
